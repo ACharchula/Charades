@@ -12,6 +12,8 @@
 #include <stdexcept>
 
 #include <iostream>
+#include <list>
+#include <string>
 
 #include "Command.h"
 
@@ -30,10 +32,12 @@ class Server {
   socklen_t length;
   struct sockaddr_in address;
 
-  int sockets[MAX_CONNECTIONS + 1];
+  std::list<int> sockets;
   fd_set ready_sockets;
 
   timeval select_timeout = {5, 0};
+
+  void log(const std::string &msg, int sock = -1);
 };
 
 #endif  // SRC_SERVER_SERVER_H_
