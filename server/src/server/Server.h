@@ -15,7 +15,8 @@
 #include <list>
 #include <string>
 
-#include "Command.h"
+#include "Interpreter.h"
+#include "GlobalData.h"
 
 class Server {
  public:
@@ -25,6 +26,7 @@ class Server {
   unsigned int getPort();
 
   static const int MAX_CONNECTIONS = 100;
+  static const int BUFFER_SIZE = 1024;
 
  private:
   int sockid = -1;  // TODO(kamman): rename to server_socket
