@@ -13,6 +13,7 @@
 
 #include <iostream>
 #include <list>
+#include <map>
 #include <string>
 
 #include "Interpreter.h"
@@ -35,6 +36,7 @@ class Server {
   struct sockaddr_in address;
 
   std::list<int> sockets;
+  std::map<int, Interpreter> interpreters;
   fd_set ready_sockets;
 
   timeval select_timeout = {5, 0};

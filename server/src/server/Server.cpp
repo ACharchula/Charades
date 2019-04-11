@@ -51,8 +51,7 @@ void Server::run() {
       } else if (msgsock > 0) {
         nfds = std::max(nfds, msgsock + 1);
         sockets.push_back(msgsock);
-        gdata.interpreters.insert(
-            std::make_pair(msgsock, Interpreter(msgsock)));
+        interpreters.insert(std::make_pair(msgsock, Interpreter(msgsock)));
         log("Accepted connection", msgsock);
       }
     }
@@ -67,12 +66,12 @@ void Server::run() {
         } else if (recived == 0) {
           close(msgsock);
           sock_it = sockets.erase(sock_it);
-          gdata.interpreters.erase(msgsock);
+          interpreters.erase(msgsock);
           log("Close connection", msgsock);
           continue;
         } else {
           for (int i = 0; i < recived; ++i)
-            gdata.interpreters[msgsock].interpretChar(buff[i]);
+            interpreters[msgsock].interpretChar(buff[i], gdata);
         }
       }
       ++sock_it;

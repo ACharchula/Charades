@@ -4,19 +4,24 @@
 #ifndef SRC_SERVER_GLOBALDATA_H_
 #define SRC_SERVER_GLOBALDATA_H_
 
+#include <list>
 #include <map>
-
-#include "Interpreter.h"
-#include "Server.h"
+#include <queue>
+#include <string>
 
 class GlobalData {
  public:
-  // send to users
-  // get all users ids
- private:
-  std::map<int, Interpreter> interpreters;
+  std::list<int> getAllUsers();
+  void addMessageToQueue(int userid, std::string msg) {
+    msgQueues[userid].push(msg);
+  }
+  std::string popMessage(int userid);
+  bool isMessageToSend(int userid) { return !msgQueues[userid].empty(); }
+  void addUser(int userid);
+  void removeUser(int userid);
 
-  friend class Server;
+ private:
+  std::map<int, std::queue<std::string>> msgQueues;
 };
 
 #endif  // SRC_SERVER_GLOBALDATA_H_
