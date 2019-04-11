@@ -11,7 +11,7 @@ class HelloCmd : public Command {
  public:
   explicit HelloCmd(int userid) : Command(userid) {}
   ReturnState pushInput(std::string input, int *outWaitBytes,
-                        const GlobalData &gdata) override;
+                        GlobalData *gdata) override;
 
  private:
   enum State { Start, WaitForName } state = State::Start;

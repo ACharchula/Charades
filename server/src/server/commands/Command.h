@@ -14,7 +14,7 @@ class Command {
   Command() {}
   explicit Command(int userid) : userid(userid) {}
   virtual ReturnState pushInput(std::string input, int *outWaitBytes,
-                                const GlobalData &gdata) {}
+                                GlobalData *gdata) {}
 
  protected:
   int userid = -1;

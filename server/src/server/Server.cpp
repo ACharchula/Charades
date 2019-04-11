@@ -71,10 +71,18 @@ void Server::run() {
           continue;
         } else {
           for (int i = 0; i < recived; ++i)
-            interpreters[msgsock].interpretChar(buff[i], gdata);
+            interpreters[msgsock].interpretChar(buff[i], &gdata);
         }
       }
       ++sock_it;
+    }
+
+    for (auto msgsock : sockets) {
+      while (gdata.isMessageToSend(msgsock)) {
+        std::string msg = gdata.popMessage(msgsock);
+        if (write(msgsock, msg.c_str(), msg.size() + 1) == -1)
+          log("Sending error", msgsock);
+      }
     }
   }
 }

@@ -4,7 +4,7 @@
 
 #include "Interpreter.h"
 
-void Interpreter::interpretChar(char c, const GlobalData &gdata) {
+void Interpreter::interpretChar(char c, GlobalData *gdata) {
   if (inState == InputState::UntilNewLine && c == '\n') {
     proceedInput(gdata);
   } else {
@@ -15,7 +15,7 @@ void Interpreter::interpretChar(char c, const GlobalData &gdata) {
   }
 }
 
-void Interpreter::proceedInput(const GlobalData &gdata) {
+void Interpreter::proceedInput(GlobalData *gdata) {
   if (actionState == ActionState::SelectCommand) {
     if (tmp.compare("HELLO") == 0)
       currentCommand = new HelloCmd(userid);

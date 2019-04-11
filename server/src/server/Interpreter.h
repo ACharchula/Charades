@@ -12,7 +12,7 @@ class Interpreter {
   Interpreter() {}
   explicit Interpreter(int userid) : userid(userid) {}
 
-  void interpretChar(char c, const GlobalData &gdata);
+  void interpretChar(char c, GlobalData *gdata);
 
  private:
   int userid = -1;
@@ -29,7 +29,7 @@ class Interpreter {
   } actionState = ActionState::SelectCommand;
   Command *currentCommand;
 
-  void proceedInput(const GlobalData &gdata);
+  void proceedInput(GlobalData *gdata);
   void setStates(Command::ReturnState rstate);
 };
 

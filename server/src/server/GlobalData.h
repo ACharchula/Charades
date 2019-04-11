@@ -12,9 +12,7 @@
 class GlobalData {
  public:
   std::list<int> getAllUsers();
-  void addMessageToQueue(int userid, std::string msg) {
-    msgQueues[userid].push(msg);
-  }
+  void addMessageToQueue(int userid, std::string msg);
   std::string popMessage(int userid);
   bool isMessageToSend(int userid) { return !msgQueues[userid].empty(); }
   void addUser(int userid);

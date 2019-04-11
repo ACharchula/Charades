@@ -5,12 +5,13 @@
 #include "HelloCmd.h"
 
 Command::ReturnState HelloCmd::pushInput(std::string input, int *outWaitBytes,
-                                           const GlobalData &gdata) {
+                                         GlobalData *gdata) {
   if (state == State::Start) {
     state = State::WaitForName;
     return ReturnState::ReadLine;
   } else {
-    std::cout << input << std::endl;
+    std::cout << "Welcome user: " << input << std::endl;
+    gdata->addMessageToQueue(userid, "WELCOME\n");
     return ReturnState::CommandEnded;
   }
 }
