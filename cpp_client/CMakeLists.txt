@@ -3,4 +3,4 @@ project(cpp_client)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(cpp_client main.cpp)
+add_executable(cpp_client src/main.cpp src/client/client.cpp src/client/client.h)

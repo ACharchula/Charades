@@ -1,2 +1,2 @@
 all:
-	g++ -std=c++11 -Wall -pedantic -o exe *.cpp
+	g++ -std=c++11 -Wall -pedantic -o exe src/*.cpp src/*/*.cpp
