@@ -18,7 +18,7 @@ Command::ReturnState SendMessageCmd::pushInput(std::string input,
         gdata->addMessageToQueue(id, "CHAT_MESSAGE\n");
         gdata->addMessageToQueue(id, "User: " + std::to_string(userid) + "\n");
         gdata->addMessageToQueue(id, std::to_string(input.size()) + "\n");
-        gdata->addMessageToQueue(id, input + "\n");
+        gdata->addMessageToQueue(id, input);
       }
     }
     return ReturnState::CommandEnded;
