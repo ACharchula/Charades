@@ -11,8 +11,6 @@ int main(int argc, char** argv) {
     Client* client = new Client();
     client->run("localhost", 44444);
 
-    std::string trash;
-    std::cin >> trash;
     const char* result = client->receive();
     std::cout<<result;
     return 0;

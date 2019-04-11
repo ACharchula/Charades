@@ -42,10 +42,11 @@ void Client::_send(const char* message) {
 }
 
 char* Client::_receive() {
-    char* message = nullptr;
-    if(read(sock, message, MAXMESSAGESIZE) < 0)
+    char* buffer = new char [MAXMESSAGESIZE];
+
+    if(read(sock, buffer, MAXMESSAGESIZE) < 0)
         throw std::runtime_error("Error reading from socket.");
-    return message;
+    return buffer;
 }
 
 void Client::run(const char* serverName, unsigned port) {
