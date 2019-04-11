@@ -4,6 +4,7 @@
 #ifndef SRC_SERVER_GLOBALDATA_H_
 #define SRC_SERVER_GLOBALDATA_H_
 
+#include <algorithm>
 #include <list>
 #include <map>
 #include <queue>
@@ -11,7 +12,7 @@
 
 class GlobalData {
  public:
-  std::list<int> getAllUsers();
+  const std::list<int>& getAllUsers() { return userids; }
   void addMessageToQueue(int userid, std::string msg);
   std::string popMessage(int userid);
   bool isMessageToSend(int userid) { return !msgQueues[userid].empty(); }
@@ -20,6 +21,7 @@ class GlobalData {
 
  private:
   std::map<int, std::queue<std::string>> msgQueues;
+  std::list<int> userids;
 };
 
 #endif  // SRC_SERVER_GLOBALDATA_H_

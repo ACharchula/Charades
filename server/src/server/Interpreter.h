@@ -6,6 +6,7 @@
 #include <string>
 #include "commands/Command.h"
 #include "commands/HelloCmd.h"
+#include "commands/SendMessageCmd.h"
 
 class Interpreter {
  public:

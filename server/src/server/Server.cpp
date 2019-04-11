@@ -52,6 +52,7 @@ void Server::run() {
         nfds = std::max(nfds, msgsock + 1);
         sockets.push_back(msgsock);
         interpreters.insert(std::make_pair(msgsock, Interpreter(msgsock)));
+        gdata.addUser(msgsock);
         log("Accepted connection", msgsock);
       }
     }
@@ -67,6 +68,7 @@ void Server::run() {
           close(msgsock);
           sock_it = sockets.erase(sock_it);
           interpreters.erase(msgsock);
+          gdata.removeUser(msgsock);
           log("Close connection", msgsock);
           continue;
         } else {
@@ -80,7 +82,7 @@ void Server::run() {
     for (auto msgsock : sockets) {
       while (gdata.isMessageToSend(msgsock)) {
         std::string msg = gdata.popMessage(msgsock);
-        if (write(msgsock, msg.c_str(), msg.size() + 1) == -1)
+        if (write(msgsock, msg.c_str(), msg.size()) == -1)
           log("Sending error", msgsock);
       }
     }

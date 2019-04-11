@@ -17,10 +17,12 @@ void Interpreter::interpretChar(char c, GlobalData *gdata) {
 
 void Interpreter::proceedInput(GlobalData *gdata) {
   if (actionState == ActionState::SelectCommand) {
-    if (tmp.compare("HELLO") == 0)
+    if (tmp.compare("HELLO") == 0) {
       currentCommand = new HelloCmd(userid);
-    else {
-      tmp = "";  // TODO: handle invalid command
+    } else if (tmp.compare("SEND_MESSAGE") == 0) {
+      currentCommand = new SendMessageCmd(userid);
+    } else {
+      tmp = "";  // TO DO: handle invalid command
       return;
     }
   }
