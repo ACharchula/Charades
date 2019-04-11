@@ -6,6 +6,8 @@ Server::Server() {
   address.sin_family = AF_INET;
   address.sin_addr.s_addr = INADDR_ANY;
   address.sin_port = 0;
+
+  for (auto &sock : sockets) sock = 0;
 }
 
 void Server::prepare() {
@@ -26,21 +28,45 @@ unsigned int Server::getPort() {
 }
 
 void Server::run() {
-  int recivedSize, msgsock;
+  int recived, msgsock = -1, actives;
   Command comm;
   char nextChar;
   if (sockid < 0) return;
 
-  listen(sockid, 5);  // TODO(kmankow): move as const
+  listen(sockid, MAX_CONNECTIONS);  // TODO(kmankow): move as const
   while (true) {
-    msgsock = accept(sockid, reinterpret_cast<sockaddr *>(0), 0);
-    if (msgsock < 0) continue;  // TODO(kmankow): log
-    do {
-      recivedSize = read(msgsock, &nextChar, 1);
-      if (recivedSize > 0) {
-        comm.addChar(nextChar);
+    FD_ZERO(&ready_sockets);
+    FD_SET(sockid, &ready_sockets);
+    for (auto &sock : sockets)
+      if (sock > 0) FD_SET(sock, &ready_sockets);
+
+    if ((actives = select(nfds, &ready_sockets, 0, 0, &select_timeout)) == -1)
+      continue;  // TODO(kamman): log
+
+    if (FD_ISSET(sockid, &ready_sockets) && nfds < MAX_CONNECTIONS) {
+      msgsock = accept(sockid, reinterpret_cast<sockaddr *>(0), 0);
+      // if (msgsock < 0) continue;  // TODO(kmankow): log
+      if (msgsock > 0) {
+        nfds = std::max(nfds, msgsock + 1);
+        sockets[msgsock] = msgsock;
+        std::cout << "Accepted connection, descriptor: " << msgsock
+                  << std::endl;
       }
-    } while (recivedSize > 0);
-    close(msgsock);
+    }
+
+    for (auto &sock : sockets)
+      if (sock > 0 && FD_ISSET(sock, &ready_sockets)) {
+          recived = read(sock, &nextChar, 1);
+          if (recived == -1) {
+            std::cout << "Error on readind, descriptor " << sock << std::endl;
+          } else if (recived == 0) {
+            std::cout << "Close connection, descriptor " << sock << std::endl;
+            close(sock);
+            sock = -1;
+          } else {
+            // comm.addChar(nextChar);
+            std::cout << "[" << sock << "] " << nextChar << std::endl;
+          }
+      }
   }
 }

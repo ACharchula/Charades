@@ -22,10 +22,18 @@ class Server {
   void prepare();
   unsigned int getPort();
 
+  static const int MAX_CONNECTIONS = 100;
+
  private:
-  int sockid = -1;
+  int sockid = -1;  // TODO(kamman): rename to server_socket
+  int nfds = 0;
   socklen_t length;
   struct sockaddr_in address;
+
+  int sockets[MAX_CONNECTIONS + 1];
+  fd_set ready_sockets;
+
+  timeval select_timeout = {5, 0};
 };
 
 #endif  // SRC_SERVER_SERVER_H_

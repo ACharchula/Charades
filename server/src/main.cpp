@@ -7,6 +7,6 @@ int main(int argc, char **argv) {
     Server srv;
 
     srv.prepare();
-    std::cout << "Server run on localhost:" << srv.getPort() << std::endl;
+    std::cout << "Server runs on localhost:" << srv.getPort() << std::endl;
     srv.run();
 }
