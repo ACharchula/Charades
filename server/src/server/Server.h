@@ -21,7 +21,7 @@
 
 class Server {
  public:
-  Server();
+  explicit Server(int port = 0);
   void run();
   void prepare();
   unsigned int getPort();

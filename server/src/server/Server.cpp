@@ -2,10 +2,10 @@
 
 #include "Server.h"
 
-Server::Server() {
+Server::Server(int port) {
   address.sin_family = AF_INET;
   address.sin_addr.s_addr = INADDR_ANY;
-  address.sin_port = 0;
+  address.sin_port = port;
 
   for (auto &sock : sockets) sock = 0;
 }
