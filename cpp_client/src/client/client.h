@@ -16,11 +16,14 @@ const size_t MAXMESSAGESIZE = 255;
 class Client {
     int sock;
     struct sockaddr_in server;
-    struct hostent *hp;
+    struct hostent* hp;
 
     void _createSocket();
+
     void _connect(const char* serverName, unsigned port);
+
     void _send(const char* message);
+
     char* _receive();
 
 public:

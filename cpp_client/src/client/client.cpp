@@ -4,16 +4,15 @@
 
 #include <exception>
 #include <stdexcept>
-#include <cstring>
-#include <cstdlib>
 #include <iostream>
 #include <zconf.h>
+#include <cstring>
 #include "client.h"
 
 Client::Client() {}
 
 Client::~Client() {
-    if(sock >= 0)
+    if (sock >= 0)
         close(sock);
 }
 
@@ -26,34 +25,34 @@ void Client::_createSocket() {
 void Client::_connect(const char* serverName, unsigned port) {
     server.sin_family = AF_INET;
     hp = gethostbyname(serverName);
-    if(hp == (struct hostent*) 0)
+    if (hp == (struct hostent*) 0)
         throw std::runtime_error("Uknown server.");
 
-    memcpy((char*) &server.sin_addr, hp->h_addr,(size_t) hp->h_length);
-    server.sin_port = htons (port);
+    memcpy((char*) &server.sin_addr, hp->h_addr, (size_t) hp->h_length);
+    server.sin_port = htons(port);
 
     if (connect(sock, (struct sockaddr*) &server, sizeof server) < 0)
         throw std::runtime_error("Connection failed.");
 }
 
 void Client::_send(const char* message) {
-    if(write(sock, message, strlen(message)) < 0)
+    if (write(sock, message, strlen(message)) < 0)
         throw std::runtime_error("Error writing to socket.");
 }
 
 char* Client::_receive() {
-    char* buffer = new char [MAXMESSAGESIZE];
+    char* buffer = new char[MAXMESSAGESIZE];
 
-    if(read(sock, buffer, MAXMESSAGESIZE) < 0)
+    if (read(sock, buffer, MAXMESSAGESIZE) < 0)
         throw std::runtime_error("Error reading from socket.");
     return buffer;
 }
 
 void Client::run(const char* serverName, unsigned port) {
-    try{
+    try {
         _createSocket();
         _connect(serverName, port);
-    } catch (const std::runtime_error& error){
+    } catch (const std::runtime_error& error) {
         std::cerr << error.what() << std::endl;
     }
 }
