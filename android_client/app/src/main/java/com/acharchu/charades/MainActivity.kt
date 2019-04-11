@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
 
             if(msg != "") {
                 app.sendMessage(msg)
-                updateMessageList(msg, "Me")
+                updateMessageList("Me: $msg")
                 clearTextInput()
             }
         }
@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity() {
             val msg : String? = app.getMessage()
 
             if (msg != null && msg != "") {
-                updateMessageList(msg, "Server")
+                updateMessageList(msg)
             }
         }
     }
@@ -78,9 +78,9 @@ class MainActivity : AppCompatActivity() {
         messagesListView.setSelection(adapter.count - 1)
     }
 
-    private fun updateMessageList(msg : String, sender : String) {
+    private fun updateMessageList(msg : String) {
         runOnUiThread {
-            app.messages.add("$sender: $msg")
+            app.messages.add(msg)
             printMessages()
         }
     }

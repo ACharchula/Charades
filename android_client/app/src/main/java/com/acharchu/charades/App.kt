@@ -14,24 +14,51 @@ class App {
     private var input: BufferedReader? = null
     var messages = arrayListOf<String>()
 
+    private val id : Int = (0..100).random()
+
     fun connectToServer() {
         try {
             socket = Socket(serverHost, serverPort)
+
             output = PrintWriter(socket!!.getOutputStream(), true)
             input = BufferedReader(InputStreamReader(socket?.getInputStream()))
 
-            output?.println("Android client connected!")
+            hello()
 
         } catch (exception: Exception) {
             throw exception
         }
     }
 
-    fun sendMessage(msg : String) {
+    private fun send(msg : String) {
         output?.println(msg)
     }
 
-    fun getMessage() : String? {
+    private fun get() : String? {
         return input?.readLine()
+    }
+
+    private fun hello() {
+        send("HELLO\nAndroidClient$id\n")
+
+        if (get() != "WELCOME")
+            throw java.lang.Exception()
+    }
+
+    fun sendMessage(msg : String) {
+        send("SEND_MESSAGE\n${msg.length}\n$msg\n")
+    }
+
+    fun getMessage() : String? {
+
+        if (get() == "CHAT_MESSAGE") {
+            val userId : String? = get()
+            val bytes : String? = get()
+            val msg : String? = get()
+
+            return "$userId: $msg"
+        }
+
+        return null
     }
 }
