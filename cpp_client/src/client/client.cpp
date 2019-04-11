@@ -6,9 +6,16 @@
 #include <stdexcept>
 #include <cstring>
 #include <cstdlib>
+#include <iostream>
+#include <zconf.h>
 #include "client.h"
 
 Client::Client() {}
+
+Client::~Client() {
+    if(sock >= 0)
+        close(sock);
+}
 
 void Client::_createSocket() {
     sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -29,4 +36,41 @@ void Client::_connect(const char* serverName, unsigned port) {
         throw std::runtime_error("Connection failed.");
 }
 
+void Client::_send(const char* message) {
+    if(write(sock, message, strlen(message)) < 0)
+        throw std::runtime_error("Error writing to socket.");
+}
 
+char* Client::_receive() {
+    char* message = nullptr;
+    if(read(sock, message, MAXMESSAGESIZE) < 0)
+        throw std::runtime_error("Error reading from socket.");
+    return message;
+}
+
+void Client::run(const char* serverName, unsigned port) {
+    try{
+        _createSocket();
+        _connect(serverName, port);
+    } catch (const std::runtime_error& error){
+        std::cerr << error.what() << std::endl;
+    }
+}
+
+void Client::send(const char* message) {
+    try {
+        _send(message);
+    } catch (const std::runtime_error& error) {
+        std::cerr << error.what() << std::endl;
+    }
+}
+
+char* Client::receive() {
+    char* message = nullptr;
+    try {
+        message = _receive();
+    } catch (const std::runtime_error& error) {
+        std::cerr << error.what() << std::endl;
+    }
+    return message;
+}

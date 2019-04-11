@@ -9,6 +9,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <iostream>
+
+const size_t MAXMESSAGESIZE = 255;
 
 class Client {
     int sock;
@@ -17,9 +20,19 @@ class Client {
 
     void _createSocket();
     void _connect(const char* serverName, unsigned port);
+    void _send(const char* message);
+    char* _receive();
 
 public:
     Client();
+
+    ~Client();
+
+    void run(const char* serverName, unsigned port);
+
+    void send(const char* message);
+
+    char* receive();
 };
 
 
