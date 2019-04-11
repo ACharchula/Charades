@@ -5,8 +5,8 @@
 #include <exception>
 #include <stdexcept>
 #include <iostream>
-#include <zconf.h>
 #include <cstring>
+#include <zconf.h>
 #include "client.h"
 
 Client::Client() {}
