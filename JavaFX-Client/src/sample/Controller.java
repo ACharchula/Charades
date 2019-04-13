@@ -1,21 +1,29 @@
 package sample;
 
 import javafx.application.Platform;
+import javafx.concurrent.Task;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.VBox;
 import sample.Model.Message;
 
 import java.io.*;
-import java.net.Socket;
-import java.util.ArrayList;
 
 public class Controller {
 
-    private PrintWriter out;
-    private BufferedReader in;
+    private ConnectionService connectionService;
+    private String IP = "127.0.0.1";
+    private int PORT = 44001;
+    private Button reconnectButton;
+    private Thread readingThread;
+    private Thread writingThread;
 
     @FXML
     private ListView messagesBox;
@@ -24,9 +32,11 @@ public class Controller {
     private TextField messageField;
 
     @FXML
+    private VBox chatBox;
+
+    @FXML
     public void initialize() {
-        startChatReceiverTask();
-        startChatWriterTask();
+
         messagesBox.setCellFactory(param -> new ListCell<String>() {
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -34,7 +44,6 @@ public class Controller {
                 if (empty || item == null) {
                     setGraphic(null);
                     setText(null);
-                    // other stuff to do...
                 } else {
                     setPrefWidth(messagesBox.getWidth());
                     setWrapText(true);
@@ -42,61 +51,50 @@ public class Controller {
                 }
             }
         });
-    }
 
-    public Controller() {
-        startConnection("127.0.0.1", 45655);
-    }
+        reconnectButton = new Button("reconnect");
+        reconnectButton.setOnMouseClicked(event -> {
+            connectionService = new ConnectionService(IP, PORT);
+            if (connectionService.isConnected()) {
+                showChatBox();
+            }
+        });
 
-    private void startConnection(String ip, int port) {
-        try {
-            Socket socket = new Socket(ip, port);
-            socket.setTcpNoDelay(true);
-            out = new PrintWriter(socket.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            sendWelcomePackage();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (connectionService.isConnected()) {
+            showChatBox();
+        } else {
+            showReconnectButton();
         }
     }
 
-    private void sendWelcomePackage() {
-        String welcomePackage = "HELLO\ntokarz";
-        out.println(welcomePackage);
+    public Controller() {
+        connectionService = new ConnectionService(IP, PORT);
     }
 
     private void startChatReceiverTask() {
+        System.out.println("starting reading thread");
         Runnable task = this::runChatReceiverTask;
 
-        Thread backgroundThread = new Thread(task);
-        backgroundThread.setDaemon(true);
-        backgroundThread.start();
+        readingThread = new Thread(task);
+        readingThread.setDaemon(true);
+        readingThread.start();
     }
 
     private void runChatReceiverTask() {
         try {
-            while (true) {
-                String messageType = in.readLine();
-                System.out.println(messageType);
-                if (!messageType.equals("WELCOME")) {
-                    String user = in.readLine();
-                    System.out.println(user);
-                    int length = Integer.parseInt(in.readLine());
-                    System.out.println(length);
-                    if (length > 0) {
-                        char[] message = new char[length];
-                        in.read(message, 0, length);
-                        System.out.println(new String(message));
-                        Message msg = new Message(user, new String(message));
-                        Platform.runLater(() -> {
-                            messagesBox.getItems().add(messagesBox.getItems().size(), formatMessageToShow(msg));
-                            messagesBox.scrollTo(messagesBox.getItems().size() - 1);
-                        });
-                    }
+            while (connectionService.isConnected()) {
+                String header = connectionService.read("CHAT_MESSAGE".length());
+                System.out.println(header);
+                if (header.equals("CHAT_MESSAGE")) {
+                    Message message = connectionService.getMessage();
+                    Platform.runLater(() -> {
+                        messagesBox.getItems().add(messagesBox.getItems().size(), formatMessageToShow(message));
+                        messageField.clear();
+                    });
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Platform.runLater(this::showReconnectButton);
         }
     }
 
@@ -106,41 +104,46 @@ public class Controller {
     }
 
     private void startChatWriterTask() {
+        System.out.println("starting writing thread");
         Runnable task = this::runChatWriterTask;
 
-        Thread backgroundThread = new Thread(task);
-        backgroundThread.setDaemon(true);
-        backgroundThread.start();
+        writingThread = new Thread(task);
+        writingThread.setDaemon(true);
+        writingThread.start();
+
     }
 
     private void runChatWriterTask() {
-
         messageField.setOnKeyPressed(keyEvent -> {
             if (keyEvent.getCode() == KeyCode.ENTER) {
                 addMessage();
             }
         });
-
     }
-
 
     private void addMessage() {
         String text = messageField.getText();
         if (text.length() > 0) {
             Message message = new Message("Ja", text);
-            sendMessage(message.getContent());
-            Platform.runLater( () -> {
+            connectionService.sendMessage(message.getContent());
+            Platform.runLater(() -> {
                 messagesBox.getItems().add(messagesBox.getItems().size(), formatMessageToShow(message));
                 messageField.clear();
-            } );
+            });
         }
     }
 
-    private void sendMessage(String message) {
-        out.println("SEND_MESSAGE");
-        out.println(message.length());
-        out.println(message);
+    private void showChatBox() {
+        startChatReceiverTask();
+        startChatWriterTask();
+        chatBox.getChildren().forEach(child -> child.setVisible(true));
+        chatBox.getChildren().remove(reconnectButton);
     }
 
+    private void showReconnectButton() {
+        chatBox.getChildren().forEach(child -> child.setVisible(false));
+        chatBox.setAlignment(Pos.TOP_CENTER);
+        chatBox.getChildren().add(reconnectButton);
+    }
 
 }
