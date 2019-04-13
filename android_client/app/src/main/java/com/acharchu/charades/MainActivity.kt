@@ -11,17 +11,15 @@ import android.widget.ArrayAdapter
 
 class MainActivity : AppCompatActivity() {
 
-    private val app : App = App()
+    private val connectionService : ConnectionService = ConnectionService()
 
     private val outputThread = Thread {
-        println("Output thread has started")
-
         sendButton.setOnClickListener {
 
             val msg : String = messageContent.text.toString()
 
             if(msg != "") {
-                app.sendMessage(msg)
+                connectionService.sendMessage(msg)
                 updateMessageList("Me: $msg")
                 clearTextInput()
             }
@@ -29,13 +27,28 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val inputThread = Thread {
-        println("Input thread has started")
 
-        while(true) {
-            val msg : String? = app.getMessage()
+        while(connectionService.status == State.CONNECTED) {
+            try{
+                val header : HeaderType? = connectionService.getHeader()
 
-            if (msg != null && msg != "") {
-                updateMessageList(msg)
+                if (header == HeaderType.CHAT_MESSAGE)
+                    updateMessageList(connectionService.getMessage())
+
+            } catch (e : Throwable) {
+                if (e.message == "CONNECTION CLOSED") {
+
+                    connectionService.status = State.DISCONNECTED
+
+                    runOnUiThread {
+                        connectionService.closeSocket()
+                        messagesListView.visibility = GONE
+                        sendButton.visibility = GONE
+                        messageContent.visibility = GONE
+                        reconnectButton.visibility = VISIBLE
+                    }
+                }
+
             }
         }
     }
@@ -61,9 +74,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun connectToServer() {
         try {
-            app.connectToServer()
-            inputThread.start()
-            outputThread.start()
+            connectionService.connectToServer()
+            if(!inputThread.isAlive)
+                inputThread.start()
+
+            if(!outputThread.isAlive)
+                outputThread.start()
+
+            connectionService.status = State.CONNECTED
         } catch (exception : java.lang.Exception) {
             messagesListView.visibility = GONE
             sendButton.visibility = GONE
@@ -73,14 +91,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun printMessages() {
-        val adapter = ArrayAdapter(this, R.layout.message, app.messages)
+        val adapter = ArrayAdapter(this, R.layout.message, connectionService.messages)
         messagesListView.adapter = adapter
         messagesListView.setSelection(adapter.count - 1)
     }
 
-    private fun updateMessageList(msg : String) {
+    private fun updateMessageList(msg : String?) {
         runOnUiThread {
-            app.messages.add(msg)
+            connectionService.messages.add(msg!!)
             printMessages()
         }
     }
@@ -90,6 +108,5 @@ class MainActivity : AppCompatActivity() {
             messageContent.setText("")
         }
     }
-
 
 }
