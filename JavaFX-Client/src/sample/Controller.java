@@ -10,7 +10,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import sample.Model.Message;
 
@@ -141,6 +140,13 @@ public class Controller {
     }
 
     private void showReconnectButton() {
+        try {
+            if(connectionService.isConnected()){
+                connectionService.closeSocket();
+            }
+        } catch (IOException e) {
+            connectionService = null;
+        }
         chatBox.getChildren().forEach(child -> child.setVisible(false));
         chatBox.setAlignment(Pos.TOP_CENTER);
         chatBox.getChildren().add(reconnectButton);

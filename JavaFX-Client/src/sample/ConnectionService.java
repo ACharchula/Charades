@@ -82,5 +82,10 @@ public class ConnectionService {
         return connected;
     }
 
+    public void closeSocket() throws IOException {
+        in.close();
+        out.close();
+        socket.close();
+    }
 
 }
