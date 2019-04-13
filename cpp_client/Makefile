@@ -69,8 +69,8 @@ rebuild_cache/fast: rebuild_cache
 
 # Special rule for the target edit_cache
 edit_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
-	/home/adam/clion-2018.2.6/bin/cmake/linux/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
+	/home/adam/clion-2018.2.6/bin/cmake/linux/bin/ccmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -122,6 +122,100 @@ cpp_client: cmake_check_build_system
 cpp_client/fast:
 	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/build
 .PHONY : cpp_client/fast
+
+#=============================================================================
+# Target rules for targets named cpp_client_autogen
+
+# Build rule for target.
+cpp_client_autogen: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 cpp_client_autogen
+.PHONY : cpp_client_autogen
+
+# fast build rule for target.
+cpp_client_autogen/fast:
+	$(MAKE) -f CMakeFiles/cpp_client_autogen.dir/build.make CMakeFiles/cpp_client_autogen.dir/build
+.PHONY : cpp_client_autogen/fast
+
+cpp_client_autogen/mocs_compilation.o: cpp_client_autogen/mocs_compilation.cpp.o
+
+.PHONY : cpp_client_autogen/mocs_compilation.o
+
+# target to build an object file
+cpp_client_autogen/mocs_compilation.cpp.o:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/cpp_client_autogen/mocs_compilation.cpp.o
+.PHONY : cpp_client_autogen/mocs_compilation.cpp.o
+
+cpp_client_autogen/mocs_compilation.i: cpp_client_autogen/mocs_compilation.cpp.i
+
+.PHONY : cpp_client_autogen/mocs_compilation.i
+
+# target to preprocess a source file
+cpp_client_autogen/mocs_compilation.cpp.i:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/cpp_client_autogen/mocs_compilation.cpp.i
+.PHONY : cpp_client_autogen/mocs_compilation.cpp.i
+
+cpp_client_autogen/mocs_compilation.s: cpp_client_autogen/mocs_compilation.cpp.s
+
+.PHONY : cpp_client_autogen/mocs_compilation.s
+
+# target to generate assembly for a file
+cpp_client_autogen/mocs_compilation.cpp.s:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/cpp_client_autogen/mocs_compilation.cpp.s
+.PHONY : cpp_client_autogen/mocs_compilation.cpp.s
+
+src/client/MainWindow.o: src/client/MainWindow.cpp.o
+
+.PHONY : src/client/MainWindow.o
+
+# target to build an object file
+src/client/MainWindow.cpp.o:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/MainWindow.cpp.o
+.PHONY : src/client/MainWindow.cpp.o
+
+src/client/MainWindow.i: src/client/MainWindow.cpp.i
+
+.PHONY : src/client/MainWindow.i
+
+# target to preprocess a source file
+src/client/MainWindow.cpp.i:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/MainWindow.cpp.i
+.PHONY : src/client/MainWindow.cpp.i
+
+src/client/MainWindow.s: src/client/MainWindow.cpp.s
+
+.PHONY : src/client/MainWindow.s
+
+# target to generate assembly for a file
+src/client/MainWindow.cpp.s:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/MainWindow.cpp.s
+.PHONY : src/client/MainWindow.cpp.s
+
+src/client/Worker.o: src/client/Worker.cpp.o
+
+.PHONY : src/client/Worker.o
+
+# target to build an object file
+src/client/Worker.cpp.o:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/Worker.cpp.o
+.PHONY : src/client/Worker.cpp.o
+
+src/client/Worker.i: src/client/Worker.cpp.i
+
+.PHONY : src/client/Worker.i
+
+# target to preprocess a source file
+src/client/Worker.cpp.i:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/Worker.cpp.i
+.PHONY : src/client/Worker.cpp.i
+
+src/client/Worker.s: src/client/Worker.cpp.s
+
+.PHONY : src/client/Worker.s
+
+# target to generate assembly for a file
+src/client/Worker.cpp.s:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/Worker.cpp.s
+.PHONY : src/client/Worker.cpp.s
 
 src/client/client.o: src/client/client.cpp.o
 
@@ -186,6 +280,16 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... cpp_client"
+	@echo "... cpp_client_autogen"
+	@echo "... cpp_client_autogen/mocs_compilation.o"
+	@echo "... cpp_client_autogen/mocs_compilation.i"
+	@echo "... cpp_client_autogen/mocs_compilation.s"
+	@echo "... src/client/MainWindow.o"
+	@echo "... src/client/MainWindow.i"
+	@echo "... src/client/MainWindow.s"
+	@echo "... src/client/Worker.o"
+	@echo "... src/client/Worker.i"
+	@echo "... src/client/Worker.s"
 	@echo "... src/client/client.o"
 	@echo "... src/client/client.i"
 	@echo "... src/client/client.s"
