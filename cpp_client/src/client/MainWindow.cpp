@@ -41,5 +41,5 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::method(const QString& value) {
-    qDebug() << "^^^^" << value;
+    qDebug() << value;
 }

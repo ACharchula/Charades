@@ -9,6 +9,7 @@
 #include <cstring>
 #include "client.h"
 
+const size_t HEADERSIZE = 16;
 
 Client::Client() {}
 
@@ -41,12 +42,29 @@ void Client::_send(const char* message) {
         throw std::runtime_error("Error writing to socket.");
 }
 
-char* Client::_receive() {
-    char* buffer = new char[MAXMESSAGESIZE];
+std::pair<char*, ssize_t> Client::_receive(size_t expectedDataSize) {
+    char* buffer = new char[expectedDataSize+1];
 
-    if (read(sock, buffer, MAXMESSAGESIZE) < 0)
+    ssize_t result;
+    if ((result = read(sock, buffer, expectedDataSize)) < 0)
         throw std::runtime_error("Error reading from socket.");
-    return buffer;
+
+    return std::make_pair(buffer, result);
+}
+
+Message* Client::_receiveMessage(size_t expectedDataSize) {
+    Message* message = new Message(expectedDataSize);
+    try {
+        do{
+            std::pair<char*, ssize_t> nextData = _receive(expectedDataSize);
+            expectedDataSize -= nextData.second;
+            message->append(nextData);
+        } while(expectedDataSize);
+    } catch (const std::runtime_error& error) {
+        std::cerr << error.what() << std::endl;
+    }
+
+    return message;
 }
 
 void Client::run(const char* serverName, unsigned port) {
@@ -66,12 +84,11 @@ void Client::send(const char* message) {
     }
 }
 
-char* Client::receive() {
-    char* message = nullptr;
-    try {
-        message = _receive();
-    } catch (const std::runtime_error& error) {
-        std::cerr << error.what() << std::endl;
-    }
-    return message;
+std::pair<Message*, Message*> Client::receive() {
+    Message* header = _receiveMessage(HEADERSIZE);
+    std::cout <<header->getValue() <<std::endl;
+    Message* body;
+
+    return std::make_pair(nullptr, nullptr);
 }
+

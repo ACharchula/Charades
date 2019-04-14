@@ -10,6 +10,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <iostream>
+#include "Message.h"
 
 const size_t MAXMESSAGESIZE = 255;
 
@@ -24,7 +25,9 @@ class Client {
 
     void _send(const char* message);
 
-    char* _receive();
+    std::pair<char*, ssize_t> _receive(size_t expectedDataSize); // first- header, second- body
+
+    Message* _receiveMessage(size_t expectedDataSize);
 
 public:
     Client();
@@ -35,7 +38,7 @@ public:
 
     void send(const char* message);
 
-    char* receive();
+    std::pair<Message*, Message*> receive();
 };
 
 

@@ -69,8 +69,8 @@ rebuild_cache/fast: rebuild_cache
 
 # Special rule for the target edit_cache
 edit_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
-	/home/adam/clion-2018.2.6/bin/cmake/linux/bin/ccmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
+	/home/adam/clion-2018.2.6/bin/cmake/linux/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -190,6 +190,33 @@ src/client/MainWindow.cpp.s:
 	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/MainWindow.cpp.s
 .PHONY : src/client/MainWindow.cpp.s
 
+src/client/Message.o: src/client/Message.cpp.o
+
+.PHONY : src/client/Message.o
+
+# target to build an object file
+src/client/Message.cpp.o:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/Message.cpp.o
+.PHONY : src/client/Message.cpp.o
+
+src/client/Message.i: src/client/Message.cpp.i
+
+.PHONY : src/client/Message.i
+
+# target to preprocess a source file
+src/client/Message.cpp.i:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/Message.cpp.i
+.PHONY : src/client/Message.cpp.i
+
+src/client/Message.s: src/client/Message.cpp.s
+
+.PHONY : src/client/Message.s
+
+# target to generate assembly for a file
+src/client/Message.cpp.s:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/Message.cpp.s
+.PHONY : src/client/Message.cpp.s
+
 src/client/Worker.o: src/client/Worker.cpp.o
 
 .PHONY : src/client/Worker.o
@@ -287,6 +314,9 @@ help:
 	@echo "... src/client/MainWindow.o"
 	@echo "... src/client/MainWindow.i"
 	@echo "... src/client/MainWindow.s"
+	@echo "... src/client/Message.o"
+	@echo "... src/client/Message.i"
+	@echo "... src/client/Message.s"
 	@echo "... src/client/Worker.o"
 	@echo "... src/client/Worker.i"
 	@echo "... src/client/Worker.s"
