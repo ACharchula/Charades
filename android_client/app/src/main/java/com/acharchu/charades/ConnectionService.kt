@@ -39,15 +39,6 @@ class ConnectionService {
         output?.println(msg)
     }
 
-    private fun get() : String? {
-
-        val content = input?.readLine()
-
-        if (content == "\n")
-            return get()
-        else
-            return content
-    }
 
     private fun hello() {
         send("HELLO\nAndroidClient$id\n")
@@ -94,6 +85,8 @@ class ConnectionService {
     }
 
     fun closeSocket() {
+        output?.close()
+        input?.close()
         socket?.close()
     }
 }
