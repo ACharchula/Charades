@@ -13,18 +13,21 @@
 
 #include <iostream>
 #include <list>
+#include <map>
 #include <string>
 
-#include "Command.h"
+#include "Interpreter.h"
+#include "GlobalData.h"
 
 class Server {
  public:
-  Server();
+  explicit Server(int port = 0);
   void run();
   void prepare();
   unsigned int getPort();
 
   static const int MAX_CONNECTIONS = 100;
+  static const int BUFFER_SIZE = 1024;
 
  private:
   int sockid = -1;  // TODO(kamman): rename to server_socket
@@ -33,6 +36,7 @@ class Server {
   struct sockaddr_in address;
 
   std::list<int> sockets;
+  std::map<int, Interpreter> interpreters;
   fd_set ready_sockets;
 
   timeval select_timeout = {5, 0};

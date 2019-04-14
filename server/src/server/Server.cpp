@@ -2,10 +2,10 @@
 
 #include "Server.h"
 
-Server::Server() {
+Server::Server(int port) {
   address.sin_family = AF_INET;
   address.sin_addr.s_addr = INADDR_ANY;
-  address.sin_port = 0;
+  address.sin_port = port;
 
   for (auto &sock : sockets) sock = 0;
 }
@@ -28,10 +28,11 @@ unsigned int Server::getPort() {
 }
 
 void Server::run() {
-  int recived, msgsock = -1, actives;
-  Command comm;
-  char nextChar;
   if (sockid < 0) return;
+
+  int recived, msgsock = -1, actives;
+  char buff[BUFFER_SIZE];
+  GlobalData gdata;
 
   listen(sockid, 5);  // TODO(kmankow): move as const
   while (true) {
@@ -47,10 +48,11 @@ void Server::run() {
       msgsock = accept(sockid, reinterpret_cast<sockaddr *>(0), 0);
       if (msgsock < 0) {
         log("Error on try to accept connection");
-
       } else if (msgsock > 0) {
         nfds = std::max(nfds, msgsock + 1);
         sockets.push_back(msgsock);
+        interpreters.insert(std::make_pair(msgsock, Interpreter(msgsock)));
+        gdata.addUser(msgsock);
         log("Accepted connection", msgsock);
       }
     }
@@ -58,25 +60,35 @@ void Server::run() {
     for (auto sock_it = sockets.begin(); sock_it != sockets.end();) {
       int msgsock = *sock_it;
       if (msgsock > 0 && FD_ISSET(msgsock, &ready_sockets)) {
-        recived = read(msgsock, &nextChar, 1);
+        recived = read(msgsock, &buff, BUFFER_SIZE);
 
         if (recived == -1) {
           log("Error on reading", msgsock);
         } else if (recived == 0) {
           close(msgsock);
           sock_it = sockets.erase(sock_it);
+          interpreters.erase(msgsock);
+          gdata.removeUser(msgsock);
           log("Close connection", msgsock);
           continue;
         } else {
-          // comm.addChar(nextChar);
-          std::cout << "[" << msgsock << "] " << nextChar << std::endl;
+          for (int i = 0; i < recived; ++i)
+            interpreters[msgsock].interpretChar(buff[i], &gdata);
         }
       }
       ++sock_it;
+    }
+
+    for (auto msgsock : sockets) {
+      while (gdata.isMessageToSend(msgsock)) {
+        std::string msg = gdata.popMessage(msgsock);
+        if (write(msgsock, msg.c_str(), msg.size()) == -1)
+          log("Sending error", msgsock);
+      }
     }
   }
 }
 
 void Server::log(const std::string &msg, int sock) {
-  std::cout << "SYSLOG [" << sock << "]: " << msg << std::endl;
+  std::cout << "SERVER_LOG [" << sock << "]: " << msg << std::endl;
 }
