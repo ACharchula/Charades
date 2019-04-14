@@ -27,7 +27,7 @@ class Client {
 
     std::pair<char*, ssize_t> _receive(size_t expectedDataSize); // first- header, second- body
 
-    Message* _receiveMessage(size_t expectedDataSize);
+    Message* _receiveMessage(size_t expectedDataSize, Message::Type type);
 
 public:
     Client();

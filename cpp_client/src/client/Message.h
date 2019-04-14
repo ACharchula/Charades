@@ -23,7 +23,7 @@ private:
     size_t currentSize = 0;
 
 public:
-    Message(size_t size);
+    Message(size_t size, Message::Type type);
 
     Message(std::string& value, Type type, size_t size);
 
@@ -34,6 +34,10 @@ public:
     void append(std::pair<char*, ssize_t> nextData);
 
     const std::string& getValue() const;
+
+    const size_t getBodySize() const;
+
+    void print() const;
 };
 
 

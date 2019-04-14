@@ -52,8 +52,8 @@ std::pair<char*, ssize_t> Client::_receive(size_t expectedDataSize) {
     return std::make_pair(buffer, result);
 }
 
-Message* Client::_receiveMessage(size_t expectedDataSize) {
-    Message* message = new Message(expectedDataSize);
+Message* Client::_receiveMessage(size_t expectedDataSize, Message::Type type) {
+    Message* message = new Message(expectedDataSize, type);
     try {
         do{
             std::pair<char*, ssize_t> nextData = _receive(expectedDataSize);
@@ -85,10 +85,9 @@ void Client::send(const char* message) {
 }
 
 std::pair<Message*, Message*> Client::receive() {
-    Message* header = _receiveMessage(HEADERSIZE);
-    std::cout <<header->getValue() <<std::endl;
-    Message* body;
+    Message* header = _receiveMessage(HEADERSIZE, Message::Type::HEADER);
+    Message* body = _receiveMessage(header->getBodySize(), Message::Type::BODY);
 
-    return std::make_pair(nullptr, nullptr);
+    return std::make_pair(header, body);
 }
 
