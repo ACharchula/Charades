@@ -10,7 +10,7 @@
 
 class Message {
 public:
-    enum Type{
+    enum Type {
         HEADER,
         BODY
     };

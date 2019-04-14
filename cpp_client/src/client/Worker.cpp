@@ -3,12 +3,10 @@
 
 #include <QDebug>
 #include "Worker.h"
-#include "client.h"
-#include "Message.h"
 
 
 Worker::Worker(Client* client, QObject* parent) : client(client),
-        QObject(parent) {}
+                                                  QObject(parent) {}
 
 void Worker::doMethod1() {
     qDebug() << "Starting Method1 in Thread " << thread()->currentThreadId();
@@ -17,7 +15,7 @@ void Worker::doMethod1() {
     forever {
         std::cin >> message;
         client->send(message);
-        emit valueChanged(QString::number(543543534));
+//        emit valueChanged();
     }
 }
 
@@ -28,6 +26,6 @@ void Worker::doMethod2() {
     forever {
         data = client->receive();
         delete data.first;
-//        delete data.second;
+        delete data.second;
     }
 }
