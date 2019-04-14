@@ -1,4 +1,4 @@
-SOURCE_CODE=src/server/*.cpp
+SOURCE_CODE=src/server/*.cpp src/server/commands/*.cpp
 TEST_CODE=src/server/tests/*.cpp
 MAIN=src/main.cpp
 
