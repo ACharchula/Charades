@@ -9,10 +9,7 @@
 #include <cstring>
 #include "client.h"
 
-const size_t HEADERSIZE = 16;
-const std::string TEXT = "TEXT_MESSAGE";
-
-Client::Client() {}
+Client::Client(const char* userName) : userName (userName){}
 
 Client::~Client() {
     if (sock >= 0)
@@ -80,9 +77,9 @@ std::string Client::_getMessageSize(size_t size) {
     return result;
 }
 
-const char* Client::_preparedMessage(const std::string message){
+const char* Client::_preparedMessage(const std::string message, const std::string messageType){
     std::string result;
-    result.append(TEXT); //TODO fix it when drawn will be implemented
+    result.append(messageType);
     result.append(_getMessageSize(message.size()));
     result.append(message);
 
@@ -96,14 +93,15 @@ void Client::run(const char* serverName, unsigned port) {
     try {
         _createSocket();
         _connect(serverName, port);
+        send(userName, HELLO);
     } catch (const std::runtime_error& error) {
         std::cerr << error.what() << std::endl;
     }
 }
 
-void Client::send(const std::string message) {
+void Client::send(const std::string message, const std::string messageType) {
     try {
-        const char* messageToSend = _preparedMessage(message);
+        const char* messageToSend = _preparedMessage(message, messageType);
         _send(messageToSend);
     } catch (const std::runtime_error& error) {
         std::cerr << error.what() << std::endl;

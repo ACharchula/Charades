@@ -3,9 +3,11 @@
 
 #include <QDebug>
 #include "Worker.h"
+#include "client.h"
 
 const int lineFeed = 10;
-const size_t MAXMESSAGESIZE = 10;
+const size_t MAXMESSAGESIZE = 9000;
+extern const std::string TEXT;
 
 Worker::Worker(Client* client, QObject* parent) : client(client),
                                                   QObject(parent) {}
@@ -23,7 +25,7 @@ void Worker::doMethod1() {
 
         if (message.size() == MAXMESSAGESIZE)
             message +='\0';
-        client->send(message);
+        client->send(message, TEXT);
 //        emit valueChanged();
     }
 }
@@ -34,6 +36,8 @@ void Worker::doMethod2() {
     std::pair<Message*, Message*> data;
     forever {
         data = client->receive();
+        data.first->print();
+        data.second->print();
         delete data.first;
         delete data.second;
     }

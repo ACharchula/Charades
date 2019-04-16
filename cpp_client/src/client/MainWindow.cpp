@@ -5,10 +5,12 @@
 #include "MainWindow.h"
 #include <QDebug>
 
+const char* userName = "zetraxus";
+
 MainWindow::MainWindow(QWidget* parent) :
         QMainWindow(parent) {
 
-    Client* client = new Client();
+    Client* client = new Client(userName);
     client->run("localhost", 44444);
 
     threadR = new QThread();

@@ -33,7 +33,7 @@ const size_t Message::getBodySize() const {
     if (type != HEADER)
         return 0;
     else
-        return stoi(value.substr(12, 15));
+        return stoi(value.substr(12, 15)) + 2;
 }
 
 void Message::print() const {
