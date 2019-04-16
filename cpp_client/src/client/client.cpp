@@ -9,9 +9,7 @@
 #include <cstring>
 #include "client.h"
 
-const size_t HEADERSIZE = 16;
-
-Client::Client() {}
+Client::Client(const char* userName) : userName (userName){}
 
 Client::~Client() {
     if (sock >= 0)
@@ -67,18 +65,44 @@ Message* Client::_receiveMessage(size_t expectedDataSize, Message::Type type) {
     return message;
 }
 
+std::string Client::_getMessageSize(size_t size) {
+    std::string result;
+
+    for(int i = 1000 ; i > 0; i /= 10){
+        result += std::to_string((size/i));
+        if(size/i > 0)
+            size = size % i;
+    }
+
+    return result;
+}
+
+const char* Client::_preparedMessage(const std::string message, const std::string messageType){
+    std::string result;
+    result.append(messageType);
+    result.append(_getMessageSize(message.size()));
+    result.append(message);
+
+    char* ret = new char[result.size()];
+    result.copy(ret, result.size());
+
+    return ret;
+}
+
 void Client::run(const char* serverName, unsigned port) {
     try {
         _createSocket();
         _connect(serverName, port);
+        send(userName, HELLO);
     } catch (const std::runtime_error& error) {
         std::cerr << error.what() << std::endl;
     }
 }
 
-void Client::send(const char* message) {
+void Client::send(const std::string message, const std::string messageType) {
     try {
-        _send(message);
+        const char* messageToSend = _preparedMessage(message, messageType);
+        _send(messageToSend);
     } catch (const std::runtime_error& error) {
         std::cerr << error.what() << std::endl;
     }
@@ -86,6 +110,8 @@ void Client::send(const char* message) {
 
 std::pair<Message*, Message*> Client::receive() {
     Message* header = _receiveMessage(HEADERSIZE, Message::Type::HEADER);
+    if(header->getBodySize() == 2)
+        read(sock, new char [1], 1);
     Message* body = _receiveMessage(header->getBodySize(), Message::Type::BODY);
 
     return std::make_pair(header, body);
