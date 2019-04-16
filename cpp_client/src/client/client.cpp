@@ -110,6 +110,8 @@ void Client::send(const std::string message, const std::string messageType) {
 
 std::pair<Message*, Message*> Client::receive() {
     Message* header = _receiveMessage(HEADERSIZE, Message::Type::HEADER);
+    if(header->getBodySize() == 2)
+        read(sock, new char [1], 1);
     Message* body = _receiveMessage(header->getBodySize(), Message::Type::BODY);
 
     return std::make_pair(header, body);
