@@ -5,7 +5,7 @@
 Server::Server(int port) {
   address.sin_family = AF_INET;
   address.sin_addr.s_addr = INADDR_ANY;
-  address.sin_port = port;
+  address.sin_port = htons(port);
 
   for (auto &sock : sockets) sock = 0;
 }

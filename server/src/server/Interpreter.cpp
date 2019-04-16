@@ -17,24 +17,32 @@ void Interpreter::interpretChar(char c, GlobalData *gdata) {
 
 void Interpreter::proceedInput(GlobalData *gdata) {
   if (actionState == ActionState::SelectCommand) {
-    if (tmp.compare("HELLO") == 0) {
+    std::string commName = tmp.substr(0, 12);
+
+    if (commName.compare("HELLO_SERVER") == 0) {
       currentCommand = new HelloCmd(userid);
-    } else if (tmp.compare("SEND_MESSAGE") == 0) {
+    } else if (commName.compare("SEND_MESSAGE") == 0) {
       currentCommand = new SendMessageCmd(userid);
     } else {
       tmp = "";  // TO DO: handle invalid command
       return;
     }
+
+    bytesToRead = std::stoi(tmp.substr(12, 16));
+    inState = InputState::GivenBytes;  // TO DO: check if bytesToRead > 0
+    actionState = ActionState::PushToCommand;
+  } else {
+    auto retState = currentCommand->pushInput(tmp, &bytesToRead, gdata);
+    setStates(retState);
   }
-  auto retState = currentCommand->pushInput(tmp, &bytesToRead, gdata);
-  setStates(retState);
   tmp = "";
 }
 
 void Interpreter::setStates(Command::ReturnState rstate) {
   if (rstate == Command::CommandEnded) {
     delete currentCommand;
-    inState = InputState::UntilNewLine;
+    inState = InputState::GivenBytes;
+    bytesToRead = 16;
     actionState = ActionState::SelectCommand;
   } else if (rstate == Command::ReadLine) {
     inState = InputState::UntilNewLine;

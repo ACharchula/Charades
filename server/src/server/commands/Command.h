@@ -6,6 +6,7 @@
 #include <string>
 
 #include "../GlobalData.h"
+#include "Helpers.h"
 
 class Command {
  public:

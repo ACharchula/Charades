@@ -19,11 +19,11 @@ class Interpreter {
   int userid = -1;
   std::string tmp = "";
 
-  int bytesToRead = 0;
+  int bytesToRead = 16;
   enum InputState {
     UntilNewLine,
     GivenBytes
-  } inState = InputState::UntilNewLine;
+  } inState = InputState::GivenBytes;
   enum ActionState {
     SelectCommand,
     PushToCommand
