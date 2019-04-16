@@ -10,6 +10,7 @@
 #include "client.h"
 
 const size_t HEADERSIZE = 16;
+const std::string TEXT = "TEXT_MESSAGE";
 
 Client::Client() {}
 
@@ -67,6 +68,30 @@ Message* Client::_receiveMessage(size_t expectedDataSize, Message::Type type) {
     return message;
 }
 
+std::string Client::_getMessageSize(size_t size) {
+    std::string result;
+
+    for(int i = 1000 ; i > 0; i /= 10){
+        result += std::to_string((size/i));
+        if(size/i > 0)
+            size = size % i;
+    }
+
+    return result;
+}
+
+const char* Client::_preparedMessage(const std::string message){
+    std::string result;
+    result.append(TEXT); //TODO fix it when drawn will be implemented
+    result.append(_getMessageSize(message.size()));
+    result.append(message);
+
+    char* ret = new char[result.size()];
+    result.copy(ret, result.size());
+
+    return ret;
+}
+
 void Client::run(const char* serverName, unsigned port) {
     try {
         _createSocket();
@@ -76,9 +101,10 @@ void Client::run(const char* serverName, unsigned port) {
     }
 }
 
-void Client::send(const char* message) {
+void Client::send(const std::string message) {
     try {
-        _send(message);
+        const char* messageToSend = _preparedMessage(message);
+        _send(messageToSend);
     } catch (const std::runtime_error& error) {
         std::cerr << error.what() << std::endl;
     }

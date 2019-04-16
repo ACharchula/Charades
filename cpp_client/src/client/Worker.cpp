@@ -4,6 +4,8 @@
 #include <QDebug>
 #include "Worker.h"
 
+const int lineFeed = 10;
+const size_t MAXMESSAGESIZE = 10;
 
 Worker::Worker(Client* client, QObject* parent) : client(client),
                                                   QObject(parent) {}
@@ -11,9 +13,16 @@ Worker::Worker(Client* client, QObject* parent) : client(client),
 void Worker::doMethod1() {
     qDebug() << "Starting Method1 in Thread " << thread()->currentThreadId();
 
-    char* message = new char[MAXMESSAGESIZE];
+    int nextChar;
     forever {
-        std::cin >> message;
+        std::string message;
+        do{
+            nextChar = getchar();
+            message += static_cast<char>(nextChar);
+        } while(nextChar != lineFeed && message.size() != MAXMESSAGESIZE);
+
+        if (message.size() == MAXMESSAGESIZE)
+            message +='\0';
         client->send(message);
 //        emit valueChanged();
     }

@@ -12,8 +12,6 @@
 #include <iostream>
 #include "Message.h"
 
-const size_t MAXMESSAGESIZE = 255;
-
 class Client {
     int sock;
     struct sockaddr_in server;
@@ -24,6 +22,10 @@ class Client {
     void _connect(const char* serverName, unsigned port);
 
     void _send(const char* message);
+
+    std::string _getMessageSize(size_t size);
+
+    const char* _preparedMessage(const std::string message);
 
     std::pair<char*, ssize_t> _receive(size_t expectedDataSize); // first- header, second- body
 
@@ -36,7 +38,7 @@ public:
 
     void run(const char* serverName, unsigned port);
 
-    void send(const char* message);
+    void send(const std::string message);
 
     std::pair<Message*, Message*> receive();
 };
