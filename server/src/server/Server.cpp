@@ -103,6 +103,4 @@ void Server::disconnect(int usersock) {
   log("Close connection", usersock);
 }
 
-void Server::close_serv(){
-  close(sockid);
-}
+void Server::close_serv() { close(sockid); }
