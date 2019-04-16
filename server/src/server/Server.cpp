@@ -102,3 +102,7 @@ void Server::disconnect(int usersock) {
   gdata.removeUser(usersock);
   log("Close connection", usersock);
 }
+
+void Server::close_serv(){
+  close(sockid);
+}

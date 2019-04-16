@@ -24,6 +24,7 @@ class Server {
   explicit Server(int port = 0);
   void run();
   void prepare();
+  void close_serv();
   unsigned int getPort();
 
   static const int MAX_CONNECTIONS = 100;
