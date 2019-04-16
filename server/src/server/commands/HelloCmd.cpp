@@ -4,14 +4,10 @@
 
 #include "HelloCmd.h"
 
-Command::ReturnState HelloCmd::pushInput(std::string input, int *outWaitBytes,
-                                         GlobalData *gdata) {
-  // if (state == State::Start) {
-  //   state = State::WaitForName;
-  //   return ReturnState::ReadLine;
-  // } else {
-    std::cout << "Welcome user: " << input << std::endl;
-    gdata->addMessageToQueue(userid, "WELCOME_USER0000");
-    return ReturnState::CommandEnded;
-  // }
+const char HelloCmd::HEADER[] = "HELLO_SERVER";
+const char HelloCmd::output_packet[] = "WELCOME_USER0000";
+
+void HelloCmd::pushInput(std::string input, GlobalData *gdata) {
+  std::cout << "Welcome user: " << input << std::endl;
+  gdata->addMessageToQueue(userid, output_packet);
 }

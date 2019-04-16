@@ -1,54 +1,48 @@
 // Copyright 2019 Kamil Mankowski
 
-#include <iostream>
-
 #include "Interpreter.h"
 
 void Interpreter::interpretChar(char c, GlobalData *gdata) {
-  if (inState == InputState::UntilNewLine && c == '\n') {
+  tmp += c;
+  while (tmp.size() == bytesToRead) {
     proceedInput(gdata);
-  } else {
-    tmp += c;
-    if (inState == InputState::GivenBytes && tmp.size() == bytesToRead) {
-      proceedInput(gdata);
-    }
+    tmp = "";
   }
 }
 
 void Interpreter::proceedInput(GlobalData *gdata) {
   if (actionState == ActionState::SelectCommand) {
-    std::string commName = tmp.substr(0, 12);
+    std::string commName = tmp.substr(0, Command::HEADER_SIZE);
 
-    if (commName.compare("HELLO_SERVER") == 0) {
+    if (commName.compare(HelloCmd::HEADER) == 0) {
       currentCommand = new HelloCmd(userid);
-    } else if (commName.compare("SEND_MESSAGE") == 0) {
+    } else if (commName.compare(SendMessageCmd::HEADER) == 0) {
       currentCommand = new SendMessageCmd(userid);
     } else {
-      tmp = "";  // TO DO: handle invalid command
-      return;
+      throw std::exception();
     }
 
-    bytesToRead = std::stoi(tmp.substr(12, 16));
-    inState = InputState::GivenBytes;  // TO DO: check if bytesToRead > 0
-    actionState = ActionState::PushToCommand;
+    setPushState();
+
   } else {
-    auto retState = currentCommand->pushInput(tmp, &bytesToRead, gdata);
-    setStates(retState);
+    currentCommand->pushInput(tmp, gdata);
+    delete currentCommand;
+    currentCommand = nullptr;
+    setSelectCommandState();
   }
-  tmp = "";
 }
 
-void Interpreter::setStates(Command::ReturnState rstate) {
-  if (rstate == Command::CommandEnded) {
-    delete currentCommand;
-    inState = InputState::GivenBytes;
-    bytesToRead = 16;
-    actionState = ActionState::SelectCommand;
-  } else if (rstate == Command::ReadLine) {
-    inState = InputState::UntilNewLine;
-    actionState = ActionState::PushToCommand;
-  } else {
-    inState = InputState::GivenBytes;
-    actionState = ActionState::PushToCommand;
-  }
+void Interpreter::setPushState() {
+  size_t interpreted_chars;
+
+  actionState = ActionState::PushToCommand;
+  bytesToRead = std::stoi(tmp.substr(12, 16), &interpreted_chars);
+  if (interpreted_chars != Command::DATA_LENGTH_SIZE) throw std::exception();
 }
+
+void Interpreter::setSelectCommandState() {
+  actionState = ActionState::SelectCommand;
+  bytesToRead = Command::HEADER_SIZE + Command::DATA_LENGTH_SIZE;
+}
+
+Interpreter::~Interpreter() { delete currentCommand; }

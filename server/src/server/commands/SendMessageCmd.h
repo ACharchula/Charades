@@ -10,11 +10,12 @@
 class SendMessageCmd : public Command {
  public:
   explicit SendMessageCmd(int userid) : Command(userid) {}
-  ReturnState pushInput(std::string input, int *outWaitBytes,
-                        GlobalData *gdata) override;
+  void pushInput(std::string input, GlobalData *gdata) override;
+
+  static const char HEADER[];
 
  private:
-  enum State { Start, WaitForLength, WaitForMessage } state = State::Start;
+  static const char output_header[];
 };
 
 #endif  // SRC_SERVER_COMMANDS_SENDMESSAGECMD_H_

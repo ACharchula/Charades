@@ -10,11 +10,12 @@
 class HelloCmd : public Command {
  public:
   explicit HelloCmd(int userid) : Command(userid) {}
-  ReturnState pushInput(std::string input, int *outWaitBytes,
-                        GlobalData *gdata) override;
+  void pushInput(std::string input, GlobalData *gdata) override;
+
+  static const char HEADER[];
 
  private:
-  enum State { Start, WaitForName } state = State::Start;
+  static const char output_packet[];
 };
 
 #endif  // SRC_SERVER_COMMANDS_HELLOCMD_H_

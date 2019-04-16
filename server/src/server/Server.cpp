@@ -32,7 +32,6 @@ void Server::run() {
 
   int recived, msgsock = -1, actives;
   char buff[BUFFER_SIZE];
-  GlobalData gdata;
 
   listen(sockid, 5);  // TODO(kmankow): move as const
   while (true) {
@@ -65,15 +64,19 @@ void Server::run() {
         if (recived == -1) {
           log("Error on reading", msgsock);
         } else if (recived == 0) {
-          close(msgsock);
+          disconnect(msgsock);
           sock_it = sockets.erase(sock_it);
-          interpreters.erase(msgsock);
-          gdata.removeUser(msgsock);
-          log("Close connection", msgsock);
           continue;
         } else {
-          for (int i = 0; i < recived; ++i)
-            interpreters[msgsock].interpretChar(buff[i], &gdata);
+          try {
+            for (int i = 0; i < recived; ++i)
+              interpreters[msgsock].interpretChar(buff[i], &gdata);
+          } catch (const std::exception &e) {
+            log("Error on interpreting", msgsock);
+            disconnect(msgsock);
+            sock_it = sockets.erase(sock_it);
+            continue;
+          }
         }
       }
       ++sock_it;
@@ -91,4 +94,11 @@ void Server::run() {
 
 void Server::log(const std::string &msg, int sock) {
   std::cout << "SERVER_LOG [" << sock << "]: " << msg << std::endl;
+}
+
+void Server::disconnect(int usersock) {
+  close(usersock);
+  interpreters.erase(usersock);
+  gdata.removeUser(usersock);
+  log("Close connection", usersock);
 }
