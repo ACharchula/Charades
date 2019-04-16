@@ -10,6 +10,6 @@ Use `make tests`. Require `boost` >= `1.59`
 Run `server.out`, it's should produce output like
 
     ./server.out
-    Server runs on localhost:43503
+    Server runs on localhost:44444
 
-Where `43503` is a local port. You can connect to server with any TCP client, e.g. netcat. For netcat, command is `nc localhost 43503`. Let's type & try.
+Where `44444` is a local port. You can connect to server with any TCP client, e.g. netcat. For netcat, command is `nc localhost 44444`. Let's type & try.
