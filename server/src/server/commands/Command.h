@@ -6,15 +6,16 @@
 #include <string>
 
 #include "../GlobalData.h"
+#include "Helpers.h"
 
 class Command {
  public:
-  enum ReturnState { ReadLine, ReadBytes, CommandEnded };
-
   Command() {}
   explicit Command(int userid) : userid(userid) {}
-  virtual ReturnState pushInput(std::string input, int *outWaitBytes,
-                                GlobalData *gdata) {}
+  virtual void pushInput(std::string input, GlobalData *gdata) {}
+
+  static const int HEADER_SIZE = 12;
+  static const int DATA_LENGTH_SIZE = 4;
 
  protected:
   int userid = -1;

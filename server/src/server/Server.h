@@ -16,8 +16,8 @@
 #include <map>
 #include <string>
 
-#include "Interpreter.h"
 #include "GlobalData.h"
+#include "Interpreter.h"
 
 class Server {
  public:
@@ -35,6 +35,7 @@ class Server {
   socklen_t length;
   struct sockaddr_in address;
 
+  GlobalData gdata;
   std::list<int> sockets;
   std::map<int, Interpreter> interpreters;
   fd_set ready_sockets;
@@ -42,6 +43,7 @@ class Server {
   timeval select_timeout = {5, 0};
 
   void log(const std::string &msg, int sock = -1);
+  void disconnect(int usersock);
 };
 
 #endif  // SRC_SERVER_SERVER_H_
