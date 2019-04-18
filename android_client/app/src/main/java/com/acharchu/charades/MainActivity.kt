@@ -80,9 +80,7 @@ class MainActivity : AppCompatActivity() {
 
             if(!outputThread.isAlive)
                 outputThread.start()
-
-            connectionService.status = State.CONNECTED
-        } catch (exception : java.lang.Exception) {
+        } catch (e: Throwable) {
             messagesListView.visibility = GONE
             sendButton.visibility = GONE
             messageContent.visibility = GONE

@@ -1,19 +1,17 @@
 package com.acharchu.charades
 
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.io.PrintWriter
 import java.lang.StringBuilder
-import java.net.Socket
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.nio.ByteBuffer
+import java.nio.channels.SocketChannel
 
 class ConnectionService {
 
     private val serverHost = "10.0.2.2" //has to be changed if u want to run on real smartphone
     private val serverPort = 44444
-    private var socket: Socket? = null
-    private var output: PrintWriter? = null
-    private var input: BufferedReader? = null
-    var messages = arrayListOf<String>()
+    private var socketChannel: SocketChannel? = null
+    var messages = arrayListOf<String>() // needs to be moved
 
     private val HEADER_LENGTH = 12
     private val BYTES_TO_READ_LENGTH = 4
@@ -24,12 +22,11 @@ class ConnectionService {
 
     fun connectToServer() {
         try {
-            socket = Socket(serverHost, serverPort)
+            val address = InetSocketAddress(InetAddress.getByName(serverHost), serverPort)
 
-            output = PrintWriter(socket!!.getOutputStream(), false)
-            input = BufferedReader(InputStreamReader(socket?.getInputStream()))
-
-            hello()
+            socketChannel = SocketChannel.open(address)
+            socketChannel!!.configureBlocking(false)
+            performServerHandshake()
 
         } catch (exception: Exception) {
             throw exception
@@ -37,16 +34,18 @@ class ConnectionService {
     }
 
     private fun send(msg : String) {
-        //output?.write(msg)
-        output?.print(msg)
-        output?.flush()
-        //output?.write(msg)
+        socketChannel!!.write(ByteBuffer.wrap(msg.toByteArray()))
     }
 
 
-    private fun hello() {
+    private fun performServerHandshake() {
         send("HELLO_SERVER0015AndroidClient$id")
-        read(16)
+        val handshakeResult = read(16) //check if result is ok
+
+        if (handshakeResult == "WELCOME_USER0000")
+            status = State.CONNECTED
+        else
+            throw Throwable("CANNOT CONNECT TO SERVER")
     }
 
     fun sendMessage(msg : String) {
@@ -93,22 +92,26 @@ class ConnectionService {
     private fun read(bytesToRead : Int) : String {
         var amountOfCharacters = 0
         var consumedCharacters = 0
-        val buffer = CharArray(bytesToRead)
+        var result : String = ""
+        val buffer = ByteBuffer.allocate(bytesToRead)
 
         while (amountOfCharacters != bytesToRead && consumedCharacters != -1) {
-            consumedCharacters = input?.read(buffer, amountOfCharacters, bytesToRead - amountOfCharacters)!!
-            amountOfCharacters += consumedCharacters
+            buffer.clear()
+            consumedCharacters = socketChannel?.read(buffer)!!
+
+            if (consumedCharacters != 0) {
+                result += String(buffer.array())
+                amountOfCharacters += consumedCharacters
+            }
         }
 
         if(consumedCharacters == -1)
             throw Throwable("CONNECTION CLOSED")
 
-        return String(buffer)
+        return result
     }
 
     fun closeSocket() {
-        output?.close()
-        input?.close()
-        socket?.close()
+        socketChannel!!.close()
     }
 }
