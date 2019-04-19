@@ -2,44 +2,21 @@
 
 <?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
    <children>
-      <MenuBar>
-        <menus>
-          <Menu mnemonicParsing="false" text="File">
-            <items>
-              <MenuItem mnemonicParsing="false" text="Close" />
-            </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Edit">
-            <items>
-              <MenuItem mnemonicParsing="false" text="Delete" />
-            </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Help">
-            <items>
-              <MenuItem mnemonicParsing="false" text="About" />
-            </items>
-          </Menu>
-        </menus>
-      </MenuBar>
-      <SplitPane dividerPositions="0.5" prefHeight="371.0" prefWidth="380.0">
-         <items>
-            <Canvas height="372.0" width="372.0" />
-            <SplitPane dividerPositions="0.9193548387096774" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
-              <items>
-                  <ListView fx:id="messagesBox" prefHeight="200.0" prefWidth="200.0" />
-                  <TextField fx:id="messageField" prefHeight="79.0" prefWidth="218.0" />
-              </items>
-            </SplitPane>
-         </items>
-      </SplitPane>
+      <HBox prefHeight="411.0" prefWidth="600.0">
+         <children>
+            <Canvas height="399.0" width="376.0" />
+            <VBox fx:id="chatBox" prefHeight="400.0" prefWidth="249.0">
+               <children>
+                  <ListView fx:id="messagesBox" prefHeight="386.0" prefWidth="224.0" />
+                  <TextField fx:id="messageField"/>
+               </children></VBox>
+         </children>
+      </HBox>
    </children>
 </VBox>

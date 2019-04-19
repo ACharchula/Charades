@@ -1,8 +1,6 @@
 package sample;
 
 import javafx.application.Platform;
-import javafx.concurrent.Task;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.ListCell;
@@ -11,6 +9,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
+import sample.Model.HeaderType;
 import sample.Model.Message;
 
 import java.io.*;
@@ -19,7 +18,7 @@ public class Controller {
 
     private ConnectionService connectionService;
     private String IP = "127.0.0.1";
-    private int PORT = 44001;
+    private int PORT = 44444;
     private Button reconnectButton;
     private Thread readingThread;
     private Thread writingThread;
@@ -82,9 +81,9 @@ public class Controller {
     private void runChatReceiverTask() {
         try {
             while (connectionService.isConnected()) {
-                String header = connectionService.read("CHAT_MESSAGE".length());
+                HeaderType header = connectionService.readHeader();
                 System.out.println(header);
-                if (header.equals("CHAT_MESSAGE")) {
+                if (header == HeaderType.CHAT_MESSAGE) {
                     Message message = connectionService.getMessage();
                     Platform.runLater(() -> {
                         messagesBox.getItems().add(messagesBox.getItems().size(), formatMessageToShow(message));

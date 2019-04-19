@@ -1,5 +1,7 @@
 package sample;
 
+import sample.Model.HeaderType;
+import sample.Model.Headers;
 import sample.Model.Message;
 
 import java.io.BufferedReader;
@@ -38,11 +40,9 @@ public class ConnectionService {
 
     private boolean handShakeServer() throws IOException {
         sendWelcomePackage();
-//        String header = read("WELCOME".length());
-//        read(1);
-//        return header.equals("WELCOME");
-
-        return true;
+        HeaderType header = readHeader();
+        read(4);
+        return  header.equals(HeaderType.WELCOME_USER);
     }
 
     public String read(int expectedLength) throws IOException {
@@ -61,8 +61,10 @@ public class ConnectionService {
     }
 
     private void sendWelcomePackage() {
-        String welcomePackage = "HELLO\ntokarz";
-        out.println(welcomePackage);
+        StringBuilder welcomePackage = new StringBuilder("HELLO_SERVER");
+        welcomePackage.append(String.format("%04d","Ja".length()));
+        out.write(welcomePackage.toString());
+        out.flush();
     }
 
     public void sendMessage(String message){
@@ -88,4 +90,13 @@ public class ConnectionService {
         socket.close();
     }
 
+    public HeaderType readHeader() throws IOException {
+        String header = read(12);
+        System.out.println(header);
+        if(Headers.HEADERS.containsKey(header)){
+            return Headers.HEADERS.get(header);
+        }
+
+        return HeaderType.UNDEFINED;
+    }
 }
