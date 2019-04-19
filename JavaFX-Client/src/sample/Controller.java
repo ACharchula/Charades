@@ -3,10 +3,7 @@ package sample;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Button;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import sample.Model.HeaderType;
@@ -123,12 +120,32 @@ public class Controller {
         String text = messageField.getText();
         if (text.length() > 0) {
             Message message = new Message("Ja", text);
-            connectionService.sendMessage(message.getContent());
-            Platform.runLater(() -> {
-                messagesBox.getItems().add(messagesBox.getItems().size(), formatMessageToShow(message));
-                messageField.clear();
-            });
+
+            try {
+                connectionService.sendMessage(message.getContent());
+
+                Platform.runLater(() -> {
+                    messagesBox.getItems().add(messagesBox.getItems().size(), formatMessageToShow(message));
+                    messageField.clear();
+                });
+
+            } catch (IOException e) {
+                showAlert("SEND_ERROR");
+            }
+
         }
+    }
+
+    private void showAlert(String type){
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+
+        if(type.equals("SEND_ERROR")){
+            alert.setTitle("Sending message error");
+            alert.setHeaderText("Oops, something went wrong");
+            alert.setContentText("Please try to send that message again");
+        }
+
+        alert.showAndWait();
     }
 
     private void showChatBox() {

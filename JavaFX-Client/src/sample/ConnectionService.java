@@ -4,20 +4,15 @@ import sample.Model.HeaderType;
 import sample.Model.Headers;
 import sample.Model.Message;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
-public class ConnectionService {
+import static java.lang.System.out;
 
-    private Socket socket;
-    private PrintWriter out;
-    private BufferedReader in;
+public class ConnectionService {
 
     private SocketChannel socketChannel;
 
@@ -38,11 +33,7 @@ public class ConnectionService {
 
            socketChannel = SocketChannel.open(address);
 
-            socket = new Socket(ip, port);
-            socket.setTcpNoDelay(true);
-            out = new PrintWriter(socket.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            success = handShakeServer();
+           success = handShakeServer();
         } catch (Exception e) {
            return false;
         }
@@ -53,44 +44,54 @@ public class ConnectionService {
     private boolean handShakeServer() throws IOException {
         sendWelcomePackage();
         HeaderType header = readHeader();
-        read(4);
+        read(BYTES_TO_READ_LENGTH);
         return  header.equals(HeaderType.WELCOME_USER);
     }
 
     public String read(int expectedLength) throws IOException {
-        char[] buff = new char[expectedLength];
+        ByteBuffer buff = ByteBuffer.allocate(expectedLength);
         int read = 0;
-        int consumed = 0;
+        int consumed;
+        StringBuilder stringBuilder = new StringBuilder();
+
         do{
-            consumed = in.read(buff, read, expectedLength - read);
+            buff.clear();
+            consumed = socketChannel.read(buff);
+
             if(consumed == -1) {
                 throw new IOException();
             }
-            read += consumed;
+
+            stringBuilder.append(new String(buff.array()));
+            read +=consumed;
+
         } while (read != expectedLength);
 
-        return new String(buff);
+        return stringBuilder.toString();
     }
 
-    private void sendWelcomePackage() {
+    private void sendWelcomePackage() throws IOException {
         StringBuilder welcomePackage = new StringBuilder("HELLO_SERVER");
         welcomePackage.append(String.format("%04d","Ja".length()));
         welcomePackage.append("Ja");
-        out.write(welcomePackage.toString());
-        out.flush();
+        socketChannel.write(ByteBuffer.wrap(welcomePackage.toString().getBytes()));
     }
 
-    public void sendMessage(String message){
+    private void send(String message) throws IOException {
+        socketChannel.write(ByteBuffer.wrap(message.getBytes()));
+    }
+
+
+    public void sendMessage(String message) throws IOException {
         StringBuilder stringBuilder = new StringBuilder("SEND_MESSAGE");
         stringBuilder.append(String.format("%04d",message.length()));
         stringBuilder.append(message);
 
-        out.write(stringBuilder.toString());
-        out.flush();
+        send(stringBuilder.toString());
     }
 
     public Message getMessage() throws IOException {
-        int length = Integer.parseInt(read(4));
+        int length = Integer.parseInt(read(BYTES_TO_READ_LENGTH));
         String userNameAndMessage = read(length);
 
         return new Message(userNameAndMessage.split("\n")[0],userNameAndMessage.split("\n")[1]);
@@ -101,14 +102,12 @@ public class ConnectionService {
     }
 
     public void closeSocket() throws IOException {
-        in.close();
-        out.close();
-        socket.close();
+        socketChannel.close();
     }
 
     public HeaderType readHeader() throws IOException {
-        String header = read(12);
-        System.out.println(header);
+        String header = read(HEADER_LENGTH);
+
         if(Headers.HEADERS.containsKey(header)){
             return Headers.HEADERS.get(header);
         }
