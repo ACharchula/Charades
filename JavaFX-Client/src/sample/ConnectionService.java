@@ -8,7 +8,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.channels.SocketChannel;
 
 public class ConnectionService {
 
@@ -16,7 +19,12 @@ public class ConnectionService {
     private PrintWriter out;
     private BufferedReader in;
 
+    private SocketChannel socketChannel;
+
+
     private boolean connected;
+    private int HEADER_LENGTH = 12;
+    private int BYTES_TO_READ_LENGTH = 4;
 
     public ConnectionService(String ip, int port){
             connected = startConnection(ip, port);
@@ -26,6 +34,10 @@ public class ConnectionService {
 
        boolean success;
        try {
+           InetSocketAddress address = new InetSocketAddress(InetAddress.getByName(ip), port);
+
+           socketChannel = SocketChannel.open(address);
+
             socket = new Socket(ip, port);
             socket.setTcpNoDelay(true);
             out = new PrintWriter(socket.getOutputStream(), true);
@@ -63,19 +75,23 @@ public class ConnectionService {
     private void sendWelcomePackage() {
         StringBuilder welcomePackage = new StringBuilder("HELLO_SERVER");
         welcomePackage.append(String.format("%04d","Ja".length()));
+        welcomePackage.append("Ja");
         out.write(welcomePackage.toString());
         out.flush();
     }
 
     public void sendMessage(String message){
-        out.println("SEND_MESSAGE");
-        out.println(message.length());
-        out.println(message);
+        StringBuilder stringBuilder = new StringBuilder("SEND_MESSAGE");
+        stringBuilder.append(String.format("%04d",message.length()));
+        stringBuilder.append(message);
+
+        out.write(stringBuilder.toString());
+        out.flush();
     }
 
     public Message getMessage() throws IOException {
         int length = Integer.parseInt(read(4));
-        String userNameAndMessage = read(length+1);
+        String userNameAndMessage = read(length);
 
         return new Message(userNameAndMessage.split("\n")[0],userNameAndMessage.split("\n")[1]);
     }
