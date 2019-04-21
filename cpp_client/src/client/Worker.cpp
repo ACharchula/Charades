@@ -25,6 +25,8 @@ void Worker::doMethod1() {
 
         if (message.size() == MAXMESSAGESIZE)
             message +='\0';
+        if (message[message.size()-1] == lineFeed)
+            message = message.substr(0, message.size()-1);
         client->send(message, TEXT);
 //        emit valueChanged();
     }
@@ -37,8 +39,10 @@ void Worker::doMethod2() {
     forever {
         data = client->receive();
         data.first->print();
-        data.second->print();
+        if(data.second != nullptr){
+            data.second->print();
+            delete data.second;
+        }
         delete data.first;
-        delete data.second;
     }
 }

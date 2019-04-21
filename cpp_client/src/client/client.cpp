@@ -58,6 +58,7 @@ Message* Client::_receiveMessage(size_t expectedDataSize, Message::Type type) {
             expectedDataSize -= nextData.second;
             message->append(nextData);
         } while(expectedDataSize);
+        message->endMessage();
     } catch (const std::runtime_error& error) {
         std::cerr << error.what() << std::endl;
     }
@@ -79,10 +80,10 @@ std::string Client::_getMessageSize(size_t size) {
 
 const char* Client::_preparedMessage(const std::string message, const std::string messageType){
     std::string result;
-    result.append(messageType);
-    result.append(_getMessageSize(message.size()));
-    result.append(message);
-
+    result += messageType;
+    result += _getMessageSize(message.size());
+    result += message;
+    result += '\0';
     char* ret = new char[result.size()];
     result.copy(ret, result.size());
 
@@ -102,6 +103,7 @@ void Client::run(const char* serverName, unsigned port) {
 void Client::send(const std::string message, const std::string messageType) {
     try {
         const char* messageToSend = _preparedMessage(message, messageType);
+        std::cout<< "*" << messageToSend <<"*";
         _send(messageToSend);
     } catch (const std::runtime_error& error) {
         std::cerr << error.what() << std::endl;
@@ -110,9 +112,10 @@ void Client::send(const std::string message, const std::string messageType) {
 
 std::pair<Message*, Message*> Client::receive() {
     Message* header = _receiveMessage(HEADERSIZE, Message::Type::HEADER);
-    if(header->getBodySize() == 2)
-        read(sock, new char [1], 1);
-    Message* body = _receiveMessage(header->getBodySize(), Message::Type::BODY);
+    Message* body = nullptr;
+    if(header->getBodySize() != 0){
+        body = _receiveMessage(header->getBodySize(), Message::Type::BODY);
+    }
 
     return std::make_pair(header, body);
 }

@@ -25,15 +25,9 @@ private:
 public:
     Message(size_t size, Message::Type type);
 
-    Message(std::string& value, Type type, size_t size);
-
-    size_t getSize() const;
-
-    size_t getCurrentSize() const;
-
     void append(std::pair<char*, ssize_t> nextData);
 
-    const std::string& getValue() const;
+    void endMessage();
 
     const size_t getBodySize() const;
 
