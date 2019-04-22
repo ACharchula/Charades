@@ -18,15 +18,15 @@ void Worker::doMethod1() {
     int nextChar;
     forever {
         std::string message;
-        do{
+        do {
             nextChar = getchar();
             message += static_cast<char>(nextChar);
-        } while(nextChar != lineFeed && message.size() != MAXMESSAGESIZE);
+        } while (nextChar != lineFeed && message.size() != MAXMESSAGESIZE);
 
         if (message.size() == MAXMESSAGESIZE)
-            message +='\0';
-        if (message[message.size()-1] == lineFeed)
-            message = message.substr(0, message.size()-1);
+            message += '\0';
+        if (message[message.size() - 1] == lineFeed)
+            message = message.substr(0, message.size() - 1);
         client->send(message, TEXT);
 //        emit valueChanged();
     }
@@ -39,7 +39,7 @@ void Worker::doMethod2() {
     forever {
         data = client->receive();
         data.first->print();
-        if(data.second != nullptr){
+        if (data.second != nullptr) {
             data.second->print();
             delete data.second;
         }

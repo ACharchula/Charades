@@ -9,7 +9,7 @@
 #include <cstring>
 #include "client.h"
 
-Client::Client(const char* userName) : userName (userName){}
+Client::Client(const char* userName) : userName(userName) {}
 
 Client::~Client() {
     if (sock >= 0)
@@ -41,7 +41,7 @@ void Client::_send(const char* message) {
 }
 
 std::pair<char*, ssize_t> Client::_receive(size_t expectedDataSize) {
-    char* buffer = new char[expectedDataSize+1];
+    char* buffer = new char[expectedDataSize + 1];
 
     ssize_t result;
     if ((result = read(sock, buffer, expectedDataSize)) < 0)
@@ -53,11 +53,11 @@ std::pair<char*, ssize_t> Client::_receive(size_t expectedDataSize) {
 Message* Client::_receiveMessage(size_t expectedDataSize, Message::Type type) {
     Message* message = new Message(expectedDataSize, type);
     try {
-        do{
+        do {
             std::pair<char*, ssize_t> nextData = _receive(expectedDataSize);
             expectedDataSize -= nextData.second;
             message->append(nextData);
-        } while(expectedDataSize);
+        } while (expectedDataSize);
         message->endMessage();
     } catch (const std::runtime_error& error) {
         std::cerr << error.what() << std::endl;
@@ -69,16 +69,16 @@ Message* Client::_receiveMessage(size_t expectedDataSize, Message::Type type) {
 std::string Client::_getMessageSize(size_t size) {
     std::string result;
 
-    for(int i = 1000 ; i > 0; i /= 10){
-        result += std::to_string((size/i));
-        if(size/i > 0)
+    for (int i = 1000; i > 0; i /= 10) {
+        result += std::to_string((size / i));
+        if (size / i > 0)
             size = size % i;
     }
 
     return result;
 }
 
-const char* Client::_preparedMessage(const std::string message, const std::string messageType){
+const char* Client::_preparedMessage(const std::string message, const std::string messageType) {
     std::string result;
     result += messageType;
     result += _getMessageSize(message.size());
@@ -103,7 +103,6 @@ void Client::run(const char* serverName, unsigned port) {
 void Client::send(const std::string message, const std::string messageType) {
     try {
         const char* messageToSend = _preparedMessage(message, messageType);
-        std::cout<< "*" << messageToSend <<"*";
         _send(messageToSend);
     } catch (const std::runtime_error& error) {
         std::cerr << error.what() << std::endl;
@@ -113,7 +112,7 @@ void Client::send(const std::string message, const std::string messageType) {
 std::pair<Message*, Message*> Client::receive() {
     Message* header = _receiveMessage(HEADERSIZE, Message::Type::HEADER);
     Message* body = nullptr;
-    if(header->getBodySize() != 0){
+    if (header->getBodySize() != 0) {
         body = _receiveMessage(header->getBodySize(), Message::Type::BODY);
     }
 
