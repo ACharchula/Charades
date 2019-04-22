@@ -3,6 +3,7 @@ package sample;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
@@ -19,6 +20,7 @@ public class Controller {
     private Button reconnectButton;
     private Thread readingThread;
     private Thread writingThread;
+    private DrawingController drawingController;
 
     @FXML
     private ListView messagesBox;
@@ -28,6 +30,9 @@ public class Controller {
 
     @FXML
     private VBox chatBox;
+
+    @FXML
+    private Canvas canvas;
 
     @FXML
     public void initialize() {
@@ -60,6 +65,8 @@ public class Controller {
         } else {
             showReconnectButton();
         }
+
+        drawingController = new DrawingController(canvas);
     }
 
     public Controller() {

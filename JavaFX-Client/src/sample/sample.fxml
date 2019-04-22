@@ -10,11 +10,11 @@
    <children>
       <HBox prefHeight="411.0" prefWidth="600.0">
          <children>
-            <Canvas height="399.0" width="376.0" />
+            <Canvas fx:id="canvas" height="401.0" width="376.0" />
             <VBox fx:id="chatBox" prefHeight="400.0" prefWidth="249.0">
                <children>
                   <ListView fx:id="messagesBox" prefHeight="386.0" prefWidth="224.0" />
-                  <TextField fx:id="messageField"/>
+                  <TextField fx:id="messageField" />
                </children></VBox>
          </children>
       </HBox>
