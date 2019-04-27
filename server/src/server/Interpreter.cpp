@@ -18,6 +18,8 @@ void Interpreter::proceedInput(GlobalData *gdata) {
       currentCommand = new HelloCmd(userid);
     } else if (commName.compare(SendMessageCmd::HEADER) == 0) {
       currentCommand = new SendMessageCmd(userid);
+    } else if (commName.compare(EnterTableCmd::HEADER) == 0) {
+      currentCommand = new EnterTableCmd(userid);
     } else {
       throw std::exception();
     }

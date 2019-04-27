@@ -89,9 +89,14 @@ void Server::run() {
 
     for (auto msgsock : sockets) {
       while (gdata.isMessageToSend(msgsock)) {
-        std::string msg = gdata.popMessage(msgsock);
-        if (write(msgsock, msg.c_str(), msg.size()) == -1)
-          log("Sending error", msgsock);
+        auto msg = gdata.popMessage(msgsock);
+        if (msg.type == GlobalData::message::MsgType::String) {
+          if (write(msgsock, msg.str.c_str(), msg.str.size()) == -1)
+            log("Sending string error", msgsock);
+        } else {
+            if (write(msgsock, msg.point->data(), msg.point->size()) == -1)
+            log("Sending binary data error", msgsock);
+        }
       }
     }
   }

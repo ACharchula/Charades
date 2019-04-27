@@ -9,6 +9,7 @@
 #include "commands/Command.h"
 #include "commands/HelloCmd.h"
 #include "commands/SendMessageCmd.h"
+#include "commands/EnterTableCmd.h"
 
 class Interpreter {
  public:
