@@ -24,13 +24,14 @@ class Server {
   explicit Server(int port = 0);
   void run();
   void prepare();
-  void close_serv();
+  void stop();
   unsigned int getPort();
 
   static const int MAX_CONNECTIONS = 100;
   static const int BUFFER_SIZE = 1024;
 
  private:
+  bool run_srv = false;
   int sockid = -1;  // TODO(kamman): rename to server_socket
   int nfds = 0;
   socklen_t length;
@@ -45,6 +46,7 @@ class Server {
 
   void log(const std::string &msg, int sock = -1);
   void disconnect(int usersock);
+  void close_srv();
 };
 
 #endif  // SRC_SERVER_SERVER_H_

@@ -6,13 +6,17 @@ Server::Server(int port) {
   address.sin_family = AF_INET;
   address.sin_addr.s_addr = INADDR_ANY;
   address.sin_port = htons(port);
-
-  for (auto &sock : sockets) sock = 0;
 }
 
 void Server::prepare() {
   sockid = socket(AF_INET, SOCK_STREAM, 0);
   if (sockid < 0) throw std::runtime_error("Error on creating socket!");
+
+  int reuse_yes = 1;
+  if (setsockopt(sockid, SOL_SOCKET, SO_REUSEADDR, &reuse_yes,
+                 sizeof(reuse_yes)) == -1) {
+    throw std::runtime_error("Error on sersockopt");
+  }
 
   if (bind(sockid, reinterpret_cast<sockaddr *>(&address), sizeof address) < 0)
     throw std::runtime_error("Error on binding socket!");
@@ -29,19 +33,20 @@ unsigned int Server::getPort() {
 
 void Server::run() {
   if (sockid < 0) return;
+  run_srv = true;
 
   int recived, msgsock = -1, actives;
   char buff[BUFFER_SIZE];
 
   listen(sockid, 5);  // TODO(kmankow): move as const
-  while (true) {
+  while (run_srv) {
     FD_ZERO(&ready_sockets);
     FD_SET(sockid, &ready_sockets);
     for (auto &sock : sockets)
       if (sock > 0) FD_SET(sock, &ready_sockets);
 
     if ((actives = select(nfds, &ready_sockets, 0, 0, &select_timeout)) == -1)
-      log("Select error, continuing...");
+      continue;
 
     if (FD_ISSET(sockid, &ready_sockets) && sockets.size() < MAX_CONNECTIONS) {
       msgsock = accept(sockid, reinterpret_cast<sockaddr *>(0), 0);
@@ -90,17 +95,32 @@ void Server::run() {
       }
     }
   }
+
+  close_srv();
+  log("Server stopped.");
 }
 
 void Server::log(const std::string &msg, int sock) {
-  std::cout << "SERVER_LOG [" << sock << "]: " << msg << std::endl;
+  std::cout << "SERVER_LOG";
+  if (sock >= 0) std::cout << " [" << sock << "]";
+  std::cout << ": " << msg << std::endl;
 }
 
 void Server::disconnect(int usersock) {
   close(usersock);
   interpreters.erase(usersock);
   gdata.removeUser(usersock);
-  log("Close connection", usersock);
+  log("Client disconnected", usersock);
 }
 
-void Server::close_serv() { close(sockid); }
+void Server::stop() {
+  log("SIGNAL: STOP SERVER.");
+  run_srv = false;
+}
+
+void Server::close_srv() {
+  for (auto sock : sockets)
+    if (sock > 0) disconnect(sock);
+  close(sockid);
+  log("Server listening socket closed");
+}

@@ -12,8 +12,7 @@ int PORT = 44444;
 Server srv(PORT);
 
 void handler(int s) {
-  srv.close_serv();
-  exit(0);
+  srv.stop();
 }
 
 int main(int argc, char **argv) {
