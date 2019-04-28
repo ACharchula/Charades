@@ -48,6 +48,8 @@ class TableMgmt {
   static const char CLUE_CORRECT_PACKET[];
   static const char CLUE_INCORRECT_PACKET[];
   static const char YOU_ARE_DRAWER[];
+
+  static const int CANVAS_LENGTH_SIZE = 8;
 };
 
 #endif  // SRC_SERVER_TABLEMGMT_H_

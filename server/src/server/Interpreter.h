@@ -27,12 +27,14 @@ class Interpreter {
   int bytesToRead;
   enum ActionState {
     SelectCommand,
+    ReadLength,
     PushToCommand
   } actionState;
   Command *currentCommand = nullptr;
 
   void proceedInput(GlobalData *gdata);
 
+  void setLengthState();
   void setPushState();
   void setSelectCommandState();
 };

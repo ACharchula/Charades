@@ -44,8 +44,9 @@ void TableMgmt::setGameEnd(int winner_id) {
 void TableMgmt::sendUpdateCanvasIfNeeded() {
   if (table.canvasUpdated) {
     sendToAllExcept(UPDATE_CANVAS, table.drawer);
-    sendToAllExcept(helpers::get_zero_width_size(table.canvas.size()),
-                    table.drawer);
+    sendToAllExcept(
+        helpers::get_zero_width_size(table.canvas.size(), CANVAS_LENGTH_SIZE),
+        table.drawer);
     sendToAllExcept(&table.canvas, table.drawer);
 
     table.canvasUpdated = false;
@@ -91,8 +92,8 @@ void TableMgmt::proceed() {
 
 void TableMgmt::sendCurrentCanvas(int userid) {
   gdata.addMessageToQueue(userid, UPDATE_CANVAS);
-  gdata.addMessageToQueue(userid,
-                          helpers::get_zero_width_size(table.canvas.size()));
+  gdata.addMessageToQueue(userid, helpers::get_zero_width_size(
+                                      table.canvas.size(), CANVAS_LENGTH_SIZE));
   gdata.addMessageToQueue(userid, &table.canvas);
 }
 

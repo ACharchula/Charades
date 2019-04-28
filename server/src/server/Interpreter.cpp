@@ -12,22 +12,21 @@ void Interpreter::interpretChar(char c, GlobalData *gdata) {
 
 void Interpreter::proceedInput(GlobalData *gdata) {
   if (actionState == ActionState::SelectCommand) {
-    std::string commName = tmp.substr(0, Command::HEADER_SIZE);
-
-    if (commName.compare(HelloCmd::HEADER) == 0) {
+    if (tmp.compare(HelloCmd::HEADER) == 0) {
       currentCommand = new HelloCmd(userid);
-    } else if (commName.compare(SendMessageCmd::HEADER) == 0) {
+    } else if (tmp.compare(SendMessageCmd::HEADER) == 0) {
       currentCommand = new SendMessageCmd(userid);
-    } else if (commName.compare(EnterTableCmd::HEADER) == 0) {
+    } else if (tmp.compare(EnterTableCmd::HEADER) == 0) {
       currentCommand = new EnterTableCmd(userid);
-    } else if (commName.compare(SetCanvasCmd::HEADER) == 0) {
+    } else if (tmp.compare(SetCanvasCmd::HEADER) == 0) {
       currentCommand = new SetCanvasCmd(userid);
     } else {
       throw std::exception();
     }
 
+    setLengthState();
+  } else if (actionState == ActionState::ReadLength) {
     setPushState();
-
   } else {
     currentCommand->pushInput(tmp, gdata);
     delete currentCommand;
@@ -36,17 +35,24 @@ void Interpreter::proceedInput(GlobalData *gdata) {
   }
 }
 
+void Interpreter::setLengthState() {
+  actionState = ActionState::ReadLength;
+  bytesToRead = currentCommand->lengthSize();
+  helpers::log(std::to_string(bytesToRead));
+}
+
 void Interpreter::setPushState() {
   size_t interpreted_chars;
 
   actionState = ActionState::PushToCommand;
-  bytesToRead = std::stoi(tmp.substr(12, 16), &interpreted_chars);
-  if (interpreted_chars != Command::DATA_LENGTH_SIZE) throw std::exception();
+  bytesToRead = std::stoi(tmp, &interpreted_chars);
+  if (interpreted_chars != currentCommand->lengthSize())
+    throw std::exception();
 }
 
 void Interpreter::setSelectCommandState() {
   actionState = ActionState::SelectCommand;
-  bytesToRead = Command::HEADER_SIZE + Command::DATA_LENGTH_SIZE;
+  bytesToRead = Command::HEADER_SIZE;
 }
 
 Interpreter::~Interpreter() { delete currentCommand; }

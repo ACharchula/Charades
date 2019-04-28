@@ -7,7 +7,7 @@
 #include <string>
 
 namespace helpers {
-std::string get_zero_width_size(int size);
+std::string get_zero_width_size(int size, int width = 4);
 void log(const std::string &msg, int user = -1);
 }  // namespace helpers
 

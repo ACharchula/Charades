@@ -3,9 +3,9 @@
 #include "Helpers.h"
 
 namespace helpers {
-std::string get_zero_width_size(int size) {
+std::string get_zero_width_size(int size, int width) {
   std::string out = std::to_string(size);
-  while (out.size() < 4) {
+  while (out.size() < width) {
     out = "0" + out;
   }
   return out;

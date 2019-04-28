@@ -14,12 +14,13 @@ class Command {
   Command() {}
   explicit Command(int userid) : userid(userid) {}
   virtual void pushInput(std::string input, GlobalData *gdata) {}
+  virtual int lengthSize() { return data_length_size; }
 
   static const int HEADER_SIZE = 12;
-  static const int DATA_LENGTH_SIZE = 4;
 
  protected:
   int userid = -1;
+  const int data_length_size = 4;
 };
 
 #endif  // SRC_SERVER_COMMAND_H_
