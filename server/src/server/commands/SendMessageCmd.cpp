@@ -8,8 +8,9 @@ const char SendMessageCmd::output_header[] = "CHAT_MESSAGE";
 void SendMessageCmd::pushInput(std::string input, GlobalData *gdata) {
   TableMgmt tmgmt(gdata->getTable(), *gdata);
 
-  std::string data =
-      "User: " + std::to_string(userid) + "\n" + input;  // TODO: username
+  if (!tmgmt.isUserInTable(userid)) return;
+
+  std::string data = gdata->getUsername(userid) + "\n" + input;
   std::string header =
       output_header + helpers::get_zero_width_size(data.size());
 

@@ -14,6 +14,9 @@ void Interpreter::proceedInput(GlobalData *gdata) {
   if (actionState == ActionState::SelectCommand) {
     if (tmp.compare(HelloCmd::HEADER) == 0) {
       currentCommand = new HelloCmd(userid);
+    } else if (!gdata->isLogged(userid)) {
+      helpers::log("Not logged user try to execute non-hello command");
+      throw std::exception();
     } else if (tmp.compare(SendMessageCmd::HEADER) == 0) {
       currentCommand = new SendMessageCmd(userid);
     } else if (tmp.compare(EnterTableCmd::HEADER) == 0) {
@@ -38,7 +41,6 @@ void Interpreter::proceedInput(GlobalData *gdata) {
 void Interpreter::setLengthState() {
   actionState = ActionState::ReadLength;
   bytesToRead = currentCommand->lengthSize();
-  helpers::log(std::to_string(bytesToRead));
 }
 
 void Interpreter::setPushState() {
@@ -46,8 +48,7 @@ void Interpreter::setPushState() {
 
   actionState = ActionState::PushToCommand;
   bytesToRead = std::stoi(tmp, &interpreted_chars);
-  if (interpreted_chars != currentCommand->lengthSize())
-    throw std::exception();
+  if (interpreted_chars != currentCommand->lengthSize()) throw std::exception();
 }
 
 void Interpreter::setSelectCommandState() {

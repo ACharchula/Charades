@@ -12,9 +12,12 @@ const char TableMgmt::YOU_ARE_DRAWER[] = "YOUAREDRAWER";
 
 void TableMgmt::checkClue(std::string propose, int userid) {
   std::transform(propose.begin(), propose.end(), propose.begin(), ::tolower);
-  if (table.clue.compare(propose) != 0 || table.state == table.ENDED) {
+  if (userid == table.drawer) {
+    helpers::log("Drawer try to send message, ignored", userid);
+  } else if (table.clue.compare(propose) != 0 || table.state == table.ENDED) {
     gdata.addMessageToQueue(userid, CLUE_INCORRECT_PACKET);
   } else {
+    helpers::log("User won: " + gdata.getUsername(userid), userid);
     gdata.addMessageToQueue(userid, CLUE_CORRECT_PACKET);
     setGameEnd(userid);
   }
@@ -55,8 +58,7 @@ void TableMgmt::sendUpdateCanvasIfNeeded() {
 
 void TableMgmt::proceedGameEndIfNeeded() {
   if (table.state == table.ENDED) {
-    std::string winner = "User: " + std::to_string(table.winner);
-    std::string data = winner + "\n" + table.clue;
+    std::string data = gdata.getUsername(table.winner) + "\n" + table.clue;
 
     sendToAll(GAME_ENDED);
     sendToAll(helpers::get_zero_width_size(data.size()));
@@ -72,7 +74,7 @@ void TableMgmt::startGameIfNeeded() {
     table.drawer = getRandomPlayer();
     table.state = table.READY;
 
-    std::string drawer_name = "User: " + std::to_string(table.drawer);
+    std::string drawer_name = gdata.getUsername(table.drawer);
     sendToAll(GAME_READY);
     sendToAll(helpers::get_zero_width_size(drawer_name.size()));
     sendToAll(drawer_name);
@@ -81,6 +83,9 @@ void TableMgmt::startGameIfNeeded() {
     gdata.addMessageToQueue(table.drawer,
                             helpers::get_zero_width_size(table.clue.size()));
     gdata.addMessageToQueue(table.drawer, table.clue);
+
+    helpers::log("Game started, clue: " + table.clue);
+    helpers::log("Drawer is " + gdata.getUsername(table.drawer), table.drawer);
   }
 }
 
@@ -100,10 +105,10 @@ void TableMgmt::sendCurrentCanvas(int userid) {
 void TableMgmt::sendCurrentStatus(int userid) {
   if (table.state == table.READY) {
     gdata.addMessageToQueue(userid, GAME_READY);
-    std::string username = "User: " + std::to_string(table.drawer);
+    std::string drawe_name = gdata.getUsername(table.drawer);
     gdata.addMessageToQueue(userid,
-                            helpers::get_zero_width_size(username.size()));
-    gdata.addMessageToQueue(userid, username);
+                            helpers::get_zero_width_size(drawe_name.size()));
+    gdata.addMessageToQueue(userid, drawe_name);
   } else {
     gdata.addMessageToQueue(userid, GAME_WAITING_PACKET);
   }
@@ -129,4 +134,16 @@ void TableMgmt::setCanvas(std::string input, int userid) {
   std::ofstream debug_picture("data/debug_out.png", std::ofstream::binary);
   debug_picture.write(table.canvas.data(), table.canvas.size());
   debug_picture.close();
+}
+
+bool TableMgmt::isUserInTable(int userid) {
+  auto find_player = table.players.find(userid);
+  if (find_player == table.players.end())
+    helpers::log("Player not on table", userid);
+  return !(find_player == table.players.end());
+}
+
+void TableMgmt::addPlayer(int userid) {
+  table.players.insert(userid);
+  helpers::log("User entered to table", userid);
 }

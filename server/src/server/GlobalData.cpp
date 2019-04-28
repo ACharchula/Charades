@@ -10,13 +10,18 @@ GlobalData::message GlobalData::popMessage(int userid) {
   msgQueues[userid].pop();
   return tmp;
 }
+
 void GlobalData::addUser(int userid) {
   msgQueues[userid] = std::queue<message>();
+  usernames[userid] = "";
+  logged[userid] = false;
   userids.push_back(userid);
 }
+
 void GlobalData::removeUser(int userid) {
   userids.erase(std::find(userids.begin(), userids.end(), userid));
   msgQueues.erase(userid);
+  usernames.erase(userid);
 }
 
 void GlobalData::addMessageToQueue(int userid, std::string msg) {

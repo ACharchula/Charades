@@ -29,11 +29,19 @@ class GlobalData {
   bool isMessageToSend(int userid) { return !msgQueues[userid].empty(); }
   void addUser(int userid);
   void removeUser(int userid);
+  void setUsername(int userid, const std::string& username) {
+    usernames[userid] = username;
+  }
+  bool isLogged(int userid) { return logged[userid]; }
+  void login(int userid) { logged[userid] = true; }
+  std::string getUsername(int userid) { return usernames[userid]; }
 
   TableData& getTable() { return table; }
 
  private:
   std::map<int, std::queue<message>> msgQueues;
+  std::map<int, std::string> usernames;
+  std::map<int, bool> logged;
   std::list<int> userids;
 
   TableData table;
