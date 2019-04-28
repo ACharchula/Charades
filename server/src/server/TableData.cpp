@@ -1,10 +1,10 @@
 // Copyright 2019 Kamil Mankowski
 
-#include "Table.h"
+#include "TableData.h"
 
-Table::Table() { loadStartCanvas(); }
+TableData::TableData() { loadStartCanvas(); }
 
-void Table::loadStartCanvas() {
+void TableData::loadStartCanvas() {
   std::string filename =
       "data/start_canvas.png";  // TODO: this have to be configured!
   std::ifstream start_canvas(filename,

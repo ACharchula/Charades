@@ -2,7 +2,7 @@
 
 #include "Server.h"
 
-Server::Server(int port) {
+Server::Server(int port) : tmgmt(TableMgmt(gdata.getTable(), gdata)) {
   address.sin_family = AF_INET;
   address.sin_addr.s_addr = INADDR_ANY;
   address.sin_port = htons(port);
@@ -87,6 +87,8 @@ void Server::run() {
       ++sock_it;
     }
 
+    tmgmt.proceed();
+
     for (auto msgsock : sockets) {
       while (gdata.isMessageToSend(msgsock)) {
         auto msg = gdata.popMessage(msgsock);
@@ -94,7 +96,7 @@ void Server::run() {
           if (write(msgsock, msg.str.c_str(), msg.str.size()) == -1)
             log("Sending string error", msgsock);
         } else {
-            if (write(msgsock, msg.point->data(), msg.point->size()) == -1)
+          if (write(msgsock, msg.point->data(), msg.point->size()) == -1)
             log("Sending binary data error", msgsock);
         }
       }

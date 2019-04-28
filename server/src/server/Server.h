@@ -18,6 +18,7 @@
 
 #include "GlobalData.h"
 #include "Interpreter.h"
+#include "TableMgmt.h"
 
 class Server {
  public:
@@ -38,6 +39,7 @@ class Server {
   struct sockaddr_in address;
 
   GlobalData gdata;
+  TableMgmt tmgmt;
   std::list<int> sockets;
   std::map<int, Interpreter> interpreters;
   fd_set ready_sockets;

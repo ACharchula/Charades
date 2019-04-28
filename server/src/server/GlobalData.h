@@ -11,16 +11,17 @@
 #include <string>
 #include <vector>
 
-#include "Table.h"
+#include "TableData.h"
 
 class GlobalData {
  public:
   struct message {
     enum MsgType { String, Pointer } type;
     std::string str;
-    std::vector<char> *point;
+    std::vector<char>* point;
   };
 
+  // GlobalData() {}
   const std::list<int>& getAllUsers() { return userids; }
   void addMessageToQueue(int userid, std::string msg);
   void addMessageToQueue(int userid, std::vector<char>* msg);
@@ -29,13 +30,13 @@ class GlobalData {
   void addUser(int userid);
   void removeUser(int userid);
 
-  Table& getTable() { return table; }
+  TableData& getTable() { return table; }
 
  private:
   std::map<int, std::queue<message>> msgQueues;
   std::list<int> userids;
 
-  Table table;
+  TableData table;
 };
 
 #endif  // SRC_SERVER_GLOBALDATA_H_
