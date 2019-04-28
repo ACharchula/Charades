@@ -6,13 +6,14 @@ const char SendMessageCmd::HEADER[] = "SEND_MESSAGE";
 const char SendMessageCmd::output_header[] = "CHAT_MESSAGE";
 
 void SendMessageCmd::pushInput(std::string input, GlobalData *gdata) {
-  std::string data = "User: " + std::to_string(userid) + "\n" + input;
+  TableMgmt tmgmt(gdata->getTable(), *gdata);
+
+  if (!tmgmt.isUserInTable(userid)) return;
+
+  std::string data = gdata->getUsername(userid) + "\n" + input;
   std::string header =
       output_header + helpers::get_zero_width_size(data.size());
-  for (auto id : gdata->getAllUsers()) {
-    if (id != userid) {
-      gdata->addMessageToQueue(id, header);
-      gdata->addMessageToQueue(id, data);
-    }
-  }
+
+  tmgmt.sendToAllExcept(header + data, userid);
+  tmgmt.checkClue(input, userid);
 }

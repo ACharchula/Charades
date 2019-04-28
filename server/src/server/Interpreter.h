@@ -9,6 +9,8 @@
 #include "commands/Command.h"
 #include "commands/HelloCmd.h"
 #include "commands/SendMessageCmd.h"
+#include "commands/EnterTableCmd.h"
+#include "commands/SetCanvasCmd.h"
 
 class Interpreter {
  public:
@@ -25,12 +27,14 @@ class Interpreter {
   int bytesToRead;
   enum ActionState {
     SelectCommand,
+    ReadLength,
     PushToCommand
   } actionState;
   Command *currentCommand = nullptr;
 
   void proceedInput(GlobalData *gdata);
 
+  void setLengthState();
   void setPushState();
   void setSelectCommandState();
 };
