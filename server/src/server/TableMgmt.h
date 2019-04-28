@@ -23,6 +23,7 @@ class TableMgmt {
   void sendToAllExcept(std::string msg, int userid);
   void sendCurrentCanvas(int userid);
   void sendCurrentStatus(int userid);
+  void setCanvas(std::string input, int userid);
 
  private:
   TableData& table;

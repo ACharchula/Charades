@@ -114,3 +114,18 @@ int TableMgmt::getRandomPlayer() {
   std::advance(it, move);
   return *it;
 }
+
+void TableMgmt::setCanvas(std::string input, int userid) {
+  if (userid != table.drawer) {
+    helpers::log("Not a drawer try to draw");
+    return;  // TODO: exception or send error packet
+  }
+  table.canvas.reserve(input.size());
+  table.canvas.assign(input.begin(), input.end());
+  table.canvasUpdated = true;
+
+  // THIS IS DEBUG ONLY AND WILL BE REMOVED
+  std::ofstream debug_picture("data/debug_out.png", std::ofstream::binary);
+  debug_picture.write(table.canvas.data(), table.canvas.size());
+  debug_picture.close();
+}

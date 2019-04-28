@@ -10,6 +10,7 @@
 #include "commands/HelloCmd.h"
 #include "commands/SendMessageCmd.h"
 #include "commands/EnterTableCmd.h"
+#include "commands/SetCanvasCmd.h"
 
 class Interpreter {
  public:

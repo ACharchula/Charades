@@ -15,4 +15,6 @@ void TableData::loadStartCanvas() {
 
   canvas.reserve(size);
   canvas.assign(start, end);
+
+  start_canvas.clear();
 }
