@@ -95,6 +95,7 @@ void Client::run(const char* serverName, unsigned port) {
         _createSocket();
         _connect(serverName, port);
         send(userName, HELLO);
+        send("", ENTER);
     } catch (const std::runtime_error& error) {
         std::cerr << error.what() << std::endl;
     }
@@ -103,6 +104,7 @@ void Client::run(const char* serverName, unsigned port) {
 void Client::send(const std::string message, const std::string messageType) {
     try {
         const char* messageToSend = _preparedMessage(message, messageType);
+//        std::cout << "%" << messageToSend <<std::endl;
         _send(messageToSend);
     } catch (const std::runtime_error& error) {
         std::cerr << error.what() << std::endl;
@@ -112,6 +114,7 @@ void Client::send(const std::string message, const std::string messageType) {
 std::pair<Message*, Message*> Client::receive() {
     Message* header = _receiveMessage(HEADERSIZE, Message::Type::HEADER);
     Message* body = nullptr;
+//    std::cout << "*" << header <<std::endl;
     if (header->getBodySize() != 0) {
         body = _receiveMessage(header->getBodySize(), Message::Type::BODY);
     }

@@ -8,9 +8,6 @@
 #include <QtWidgets/QGraphicsPixmapItem>
 #include "DrawScene.h"
 
-int x;
-int y;
-
 DrawScene::DrawScene() {
    setSceneRect(0,0,400,400);
 
