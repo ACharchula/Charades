@@ -13,7 +13,10 @@ class DrawScene : public QGraphicsScene {
 
 public:
     DrawScene();
+    void temp(QGraphicsSceneMouseEvent *event);
     void mouseReleaseEvent (QGraphicsSceneMouseEvent *event) override;
+    void mouseMoveEvent (QGraphicsSceneMouseEvent *event) override;
+    void mousePressEvent (QGraphicsSceneMouseEvent *event) override;
 };
 
 

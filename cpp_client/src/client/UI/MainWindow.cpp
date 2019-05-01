@@ -16,25 +16,28 @@ const char* userName = "zetraxus";
 MainWindow::MainWindow(QWidget* parent) :
         QMainWindow(parent) {
 
+    //connect
     Client* client = new Client(userName);
     client->run("localhost", 44444);
 
+    //prepare ui
     drawView = new DrawView (0,0);
     drawView->setScene(&drawScene);
 
-    auto* layout = new QHBoxLayout;
-    auto* widget = new QWidget;
+    QHBoxLayout* layout = new QHBoxLayout;
+    QWidget* widget = new QWidget;
 
     widget->setLayout(layout);
     setCentralWidget(widget);
     setWindowTitle("Test");
 
     layout->addWidget(drawView);
+    layout->addWidget(new QPushButton);
 
     resize(QDesktopWidget().availableGeometry(this).size() * 0.3);
-    drawScene.setForegroundBrush(QBrush(Qt::lightGray, Qt::CrossPattern));
+//    drawScene.setForegroundBrush(QBrush(Qt::lightGray, Qt::CrossPattern));
 
-    
+    //run sending/receiving data threads
     threadR = new QThread();
     threadW = new QThread();
 
