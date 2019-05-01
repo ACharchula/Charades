@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_MainWindow_t {
-    QByteArrayData data[4];
-    char stringdata0[25];
+    QByteArrayData data[5];
+    char stringdata0[37];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -32,10 +32,11 @@ static const qt_meta_stringdata_MainWindow_t qt_meta_stringdata_MainWindow = {
 QT_MOC_LITERAL(0, 0, 10), // "MainWindow"
 QT_MOC_LITERAL(1, 11, 6), // "method"
 QT_MOC_LITERAL(2, 18, 0), // ""
-QT_MOC_LITERAL(3, 19, 5) // "value"
+QT_MOC_LITERAL(3, 19, 11), // "std::string"
+QT_MOC_LITERAL(4, 31, 5) // "value"
 
     },
-    "MainWindow\0method\0\0value"
+    "MainWindow\0method\0\0std::string\0value"
 };
 #undef QT_MOC_LITERAL
 
@@ -56,7 +57,7 @@ static const uint qt_meta_data_MainWindow[] = {
        1,    1,   19,    2, 0x08 /* Private */,
 
  // slots: parameters
-    QMetaType::Void, QMetaType::QString,    3,
+    QMetaType::Void, 0x80000000 | 3,    4,
 
        0        // eod
 };
@@ -67,7 +68,7 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         MainWindow *_t = static_cast<MainWindow *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
-        case 0: _t->method((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 0: _t->method((*reinterpret_cast< const std::string(*)>(_a[1]))); break;
         default: ;
         }
     }

@@ -6,7 +6,7 @@
 #include "client.h"
 
 const int lineFeed = 10;
-const size_t MAXMESSAGESIZE = 9000;
+const size_t MAXMESSAGESIZE = 1000 * 1000 - 20;
 extern const std::string TEXT;
 
 Worker::Worker(Client* client, QObject* parent) : client(client),
@@ -14,7 +14,6 @@ Worker::Worker(Client* client, QObject* parent) : client(client),
 
 void Worker::doMethod1() {
     qDebug() << "Starting Method1 in Thread " << thread()->currentThreadId();
-
     int nextChar;
     forever {
         std::string message;
@@ -34,13 +33,15 @@ void Worker::doMethod1() {
 
 void Worker::doMethod2() {
     qDebug() << "Starting Method2 in Thread " << thread()->currentThreadId();
-
     std::pair<Message*, Message*> data;
     forever {
         data = client->receive();
         data.first->print();
         if (data.second != nullptr) {
-            data.second->print();
+            if(data.first->equal(SET) || data.first->equal(UPDATE)){
+                std::cout << data.second->getValue().size() << std::endl;
+                emit valueChanged(data.second->getValue());
+            }
             delete data.second;
         }
         delete data.first;

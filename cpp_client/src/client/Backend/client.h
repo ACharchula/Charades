@@ -12,10 +12,26 @@
 #include <iostream>
 #include "Message.h"
 
-const size_t HEADERSIZE = 16;
+const size_t HEADERSIZE = 12;
+const size_t SHORT = 4;
+const size_t LONG = 8;
+
+//client
 const std::string TEXT = "SEND_MESSAGE";
 const std::string HELLO = "HELLO_SERVER";
 const std::string ENTER = "ENTER__TABLE";
+
+//server
+const std::string WELCOME = "WELCOME_USER"; //4
+const std::string CHAT = "CHAT_MESSAGE"; // 4
+const std::string WAIT = "GAME_WAITING"; // 4
+const std::string END = "GAME___ENDED"; // 4
+const std::string READY = "GAME___READY"; // 4
+const std::string DRAW = "YOUAREDRAWER"; // 4
+const std::string CORRECT = "CLUE_CORRECT"; // 4
+const std::string INCORRECT = "CLUEINCORECT"; // 4
+const std::string SET = "SET___CANVAS"; // 8
+const std::string UPDATE = "UPDATECANVAS"; // 8
 
 class Client {
     int sock;
@@ -35,7 +51,7 @@ class Client {
 
     std::pair<char*, ssize_t> _receive(size_t expectedDataSize); // first- header, second- body
 
-    Message* _receiveMessage(size_t expectedDataSize, Message::Type type);
+    Message* _receiveMessage(size_t expectedDataSize);
 
 public:
     Client(const char* userName);

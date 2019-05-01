@@ -54,7 +54,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
     threadR->start();
     threadW->start();
-    connect(workerR, SIGNAL(valueChanged(QString)), this, SLOT(method(QString)));
+    connect(workerW, SIGNAL(valueChanged(QString)), this, SLOT(method(const std::string& value)));
 }
 
 MainWindow::~MainWindow() {
@@ -67,7 +67,7 @@ MainWindow::~MainWindow() {
     delete workerW;
 }
 
-void MainWindow::method(const QString& value) {
-    qDebug() << value;
+void MainWindow::method(const std::string& value) {
+    qDebug() << value.size();
 }
 

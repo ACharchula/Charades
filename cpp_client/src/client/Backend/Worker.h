@@ -20,7 +20,7 @@ public:
 
 signals:
 
-    void valueChanged(const QString& value);
+    void valueChanged(const std::string& value);
 
     void finished();
 

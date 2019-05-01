@@ -36,7 +36,7 @@ private:
 
 private slots:
 
-    void method(const QString& value);
+    void method(const std::string& value);
 };
 
 #endif //CPP_CLIENT_MAINWINDOW_H

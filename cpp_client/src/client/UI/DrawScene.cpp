@@ -6,6 +6,7 @@
 #include <iostream>
 #include <QtGui/QPainter>
 #include <QtWidgets/QGraphicsPixmapItem>
+#include <QDebug>
 #include "DrawScene.h"
 
 DrawScene::DrawScene() {
@@ -55,4 +56,8 @@ void DrawScene::temp(QGraphicsSceneMouseEvent *event){
        update();
    }
    std::cout << x << " " << y << std::endl;
+}
+
+void DrawScene::method(const QString& value) {
+    qDebug() << value;
 }

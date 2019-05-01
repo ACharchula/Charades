@@ -17,6 +17,9 @@ public:
     void mouseReleaseEvent (QGraphicsSceneMouseEvent *event) override;
     void mouseMoveEvent (QGraphicsSceneMouseEvent *event) override;
     void mousePressEvent (QGraphicsSceneMouseEvent *event) override;
+
+private slots:
+    void method(const QString& value);
 };
 
 
