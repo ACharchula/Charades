@@ -8,7 +8,11 @@
 
 #include <QMainWindow>
 #include <QThread>
-#include "Worker.h"
+#include <QtWidgets/QGraphicsScene>
+#include <QtWidgets/QGraphicsView>
+#include "../Backend/Worker.h"
+#include "DrawView.h"
+#include "DrawScene.h"
 
 namespace Ui {
     class MainWindow;
@@ -19,10 +23,12 @@ Q_OBJECT
 
 public:
     explicit MainWindow(QWidget* parent = 0);
-
     ~MainWindow();
 
 private:
+    DrawView* drawView;
+    DrawScene drawScene;
+
     QThread* threadR;
     QThread* threadW;
     Worker* workerR;

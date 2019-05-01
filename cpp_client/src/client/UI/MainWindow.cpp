@@ -3,7 +3,13 @@
 //
 
 #include "MainWindow.h"
+#include "DrawView.h"
 #include <QDebug>
+#include <QtWidgets/QDesktopWidget>
+#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QGraphicsScene>
+#include <QtWidgets/QGraphicsView>
 
 const char* userName = "zetraxus";
 
@@ -13,6 +19,22 @@ MainWindow::MainWindow(QWidget* parent) :
     Client* client = new Client(userName);
     client->run("localhost", 44444);
 
+    drawView = new DrawView (0,0);
+    drawView->setScene(&drawScene);
+
+    auto* layout = new QHBoxLayout;
+    auto* widget = new QWidget;
+
+    widget->setLayout(layout);
+    setCentralWidget(widget);
+    setWindowTitle("Test");
+
+    layout->addWidget(drawView);
+
+    resize(QDesktopWidget().availableGeometry(this).size() * 0.3);
+    drawScene.setForegroundBrush(QBrush(Qt::lightGray, Qt::CrossPattern));
+
+    
     threadR = new QThread();
     threadW = new QThread();
 
@@ -45,3 +67,4 @@ MainWindow::~MainWindow() {
 void MainWindow::method(const QString& value) {
     qDebug() << value;
 }
+

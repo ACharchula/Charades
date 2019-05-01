@@ -69,8 +69,8 @@ rebuild_cache/fast: rebuild_cache
 
 # Special rule for the target edit_cache
 edit_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
-	/home/adam/clion-2018.2.6/bin/cmake/linux/bin/ccmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
+	/home/adam/clion-2018.2.6/bin/cmake/linux/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -163,113 +163,167 @@ cpp_client_autogen/mocs_compilation.cpp.s:
 	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/cpp_client_autogen/mocs_compilation.cpp.s
 .PHONY : cpp_client_autogen/mocs_compilation.cpp.s
 
-src/client/MainWindow.o: src/client/MainWindow.cpp.o
+src/client/Backend/Message.o: src/client/Backend/Message.cpp.o
 
-.PHONY : src/client/MainWindow.o
-
-# target to build an object file
-src/client/MainWindow.cpp.o:
-	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/MainWindow.cpp.o
-.PHONY : src/client/MainWindow.cpp.o
-
-src/client/MainWindow.i: src/client/MainWindow.cpp.i
-
-.PHONY : src/client/MainWindow.i
-
-# target to preprocess a source file
-src/client/MainWindow.cpp.i:
-	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/MainWindow.cpp.i
-.PHONY : src/client/MainWindow.cpp.i
-
-src/client/MainWindow.s: src/client/MainWindow.cpp.s
-
-.PHONY : src/client/MainWindow.s
-
-# target to generate assembly for a file
-src/client/MainWindow.cpp.s:
-	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/MainWindow.cpp.s
-.PHONY : src/client/MainWindow.cpp.s
-
-src/client/Message.o: src/client/Message.cpp.o
-
-.PHONY : src/client/Message.o
+.PHONY : src/client/Backend/Message.o
 
 # target to build an object file
-src/client/Message.cpp.o:
-	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/Message.cpp.o
-.PHONY : src/client/Message.cpp.o
+src/client/Backend/Message.cpp.o:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/Backend/Message.cpp.o
+.PHONY : src/client/Backend/Message.cpp.o
 
-src/client/Message.i: src/client/Message.cpp.i
+src/client/Backend/Message.i: src/client/Backend/Message.cpp.i
 
-.PHONY : src/client/Message.i
+.PHONY : src/client/Backend/Message.i
 
 # target to preprocess a source file
-src/client/Message.cpp.i:
-	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/Message.cpp.i
-.PHONY : src/client/Message.cpp.i
+src/client/Backend/Message.cpp.i:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/Backend/Message.cpp.i
+.PHONY : src/client/Backend/Message.cpp.i
 
-src/client/Message.s: src/client/Message.cpp.s
+src/client/Backend/Message.s: src/client/Backend/Message.cpp.s
 
-.PHONY : src/client/Message.s
+.PHONY : src/client/Backend/Message.s
 
 # target to generate assembly for a file
-src/client/Message.cpp.s:
-	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/Message.cpp.s
-.PHONY : src/client/Message.cpp.s
+src/client/Backend/Message.cpp.s:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/Backend/Message.cpp.s
+.PHONY : src/client/Backend/Message.cpp.s
 
-src/client/Worker.o: src/client/Worker.cpp.o
+src/client/Backend/Worker.o: src/client/Backend/Worker.cpp.o
 
-.PHONY : src/client/Worker.o
+.PHONY : src/client/Backend/Worker.o
 
 # target to build an object file
-src/client/Worker.cpp.o:
-	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/Worker.cpp.o
-.PHONY : src/client/Worker.cpp.o
+src/client/Backend/Worker.cpp.o:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/Backend/Worker.cpp.o
+.PHONY : src/client/Backend/Worker.cpp.o
 
-src/client/Worker.i: src/client/Worker.cpp.i
+src/client/Backend/Worker.i: src/client/Backend/Worker.cpp.i
 
-.PHONY : src/client/Worker.i
+.PHONY : src/client/Backend/Worker.i
 
 # target to preprocess a source file
-src/client/Worker.cpp.i:
-	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/Worker.cpp.i
-.PHONY : src/client/Worker.cpp.i
+src/client/Backend/Worker.cpp.i:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/Backend/Worker.cpp.i
+.PHONY : src/client/Backend/Worker.cpp.i
 
-src/client/Worker.s: src/client/Worker.cpp.s
+src/client/Backend/Worker.s: src/client/Backend/Worker.cpp.s
 
-.PHONY : src/client/Worker.s
+.PHONY : src/client/Backend/Worker.s
 
 # target to generate assembly for a file
-src/client/Worker.cpp.s:
-	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/Worker.cpp.s
-.PHONY : src/client/Worker.cpp.s
+src/client/Backend/Worker.cpp.s:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/Backend/Worker.cpp.s
+.PHONY : src/client/Backend/Worker.cpp.s
 
-src/client/client.o: src/client/client.cpp.o
+src/client/Backend/client.o: src/client/Backend/client.cpp.o
 
-.PHONY : src/client/client.o
+.PHONY : src/client/Backend/client.o
 
 # target to build an object file
-src/client/client.cpp.o:
-	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/client.cpp.o
-.PHONY : src/client/client.cpp.o
+src/client/Backend/client.cpp.o:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/Backend/client.cpp.o
+.PHONY : src/client/Backend/client.cpp.o
 
-src/client/client.i: src/client/client.cpp.i
+src/client/Backend/client.i: src/client/Backend/client.cpp.i
 
-.PHONY : src/client/client.i
+.PHONY : src/client/Backend/client.i
 
 # target to preprocess a source file
-src/client/client.cpp.i:
-	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/client.cpp.i
-.PHONY : src/client/client.cpp.i
+src/client/Backend/client.cpp.i:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/Backend/client.cpp.i
+.PHONY : src/client/Backend/client.cpp.i
 
-src/client/client.s: src/client/client.cpp.s
+src/client/Backend/client.s: src/client/Backend/client.cpp.s
 
-.PHONY : src/client/client.s
+.PHONY : src/client/Backend/client.s
 
 # target to generate assembly for a file
-src/client/client.cpp.s:
-	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/client.cpp.s
-.PHONY : src/client/client.cpp.s
+src/client/Backend/client.cpp.s:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/Backend/client.cpp.s
+.PHONY : src/client/Backend/client.cpp.s
+
+src/client/UI/DrawScene.o: src/client/UI/DrawScene.cpp.o
+
+.PHONY : src/client/UI/DrawScene.o
+
+# target to build an object file
+src/client/UI/DrawScene.cpp.o:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/UI/DrawScene.cpp.o
+.PHONY : src/client/UI/DrawScene.cpp.o
+
+src/client/UI/DrawScene.i: src/client/UI/DrawScene.cpp.i
+
+.PHONY : src/client/UI/DrawScene.i
+
+# target to preprocess a source file
+src/client/UI/DrawScene.cpp.i:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/UI/DrawScene.cpp.i
+.PHONY : src/client/UI/DrawScene.cpp.i
+
+src/client/UI/DrawScene.s: src/client/UI/DrawScene.cpp.s
+
+.PHONY : src/client/UI/DrawScene.s
+
+# target to generate assembly for a file
+src/client/UI/DrawScene.cpp.s:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/UI/DrawScene.cpp.s
+.PHONY : src/client/UI/DrawScene.cpp.s
+
+src/client/UI/DrawView.o: src/client/UI/DrawView.cpp.o
+
+.PHONY : src/client/UI/DrawView.o
+
+# target to build an object file
+src/client/UI/DrawView.cpp.o:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/UI/DrawView.cpp.o
+.PHONY : src/client/UI/DrawView.cpp.o
+
+src/client/UI/DrawView.i: src/client/UI/DrawView.cpp.i
+
+.PHONY : src/client/UI/DrawView.i
+
+# target to preprocess a source file
+src/client/UI/DrawView.cpp.i:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/UI/DrawView.cpp.i
+.PHONY : src/client/UI/DrawView.cpp.i
+
+src/client/UI/DrawView.s: src/client/UI/DrawView.cpp.s
+
+.PHONY : src/client/UI/DrawView.s
+
+# target to generate assembly for a file
+src/client/UI/DrawView.cpp.s:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/UI/DrawView.cpp.s
+.PHONY : src/client/UI/DrawView.cpp.s
+
+src/client/UI/MainWindow.o: src/client/UI/MainWindow.cpp.o
+
+.PHONY : src/client/UI/MainWindow.o
+
+# target to build an object file
+src/client/UI/MainWindow.cpp.o:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/UI/MainWindow.cpp.o
+.PHONY : src/client/UI/MainWindow.cpp.o
+
+src/client/UI/MainWindow.i: src/client/UI/MainWindow.cpp.i
+
+.PHONY : src/client/UI/MainWindow.i
+
+# target to preprocess a source file
+src/client/UI/MainWindow.cpp.i:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/UI/MainWindow.cpp.i
+.PHONY : src/client/UI/MainWindow.cpp.i
+
+src/client/UI/MainWindow.s: src/client/UI/MainWindow.cpp.s
+
+.PHONY : src/client/UI/MainWindow.s
+
+# target to generate assembly for a file
+src/client/UI/MainWindow.cpp.s:
+	$(MAKE) -f CMakeFiles/cpp_client.dir/build.make CMakeFiles/cpp_client.dir/src/client/UI/MainWindow.cpp.s
+.PHONY : src/client/UI/MainWindow.cpp.s
 
 src/main.o: src/main.cpp.o
 
@@ -311,18 +365,24 @@ help:
 	@echo "... cpp_client_autogen/mocs_compilation.o"
 	@echo "... cpp_client_autogen/mocs_compilation.i"
 	@echo "... cpp_client_autogen/mocs_compilation.s"
-	@echo "... src/client/MainWindow.o"
-	@echo "... src/client/MainWindow.i"
-	@echo "... src/client/MainWindow.s"
-	@echo "... src/client/Message.o"
-	@echo "... src/client/Message.i"
-	@echo "... src/client/Message.s"
-	@echo "... src/client/Worker.o"
-	@echo "... src/client/Worker.i"
-	@echo "... src/client/Worker.s"
-	@echo "... src/client/client.o"
-	@echo "... src/client/client.i"
-	@echo "... src/client/client.s"
+	@echo "... src/client/Backend/Message.o"
+	@echo "... src/client/Backend/Message.i"
+	@echo "... src/client/Backend/Message.s"
+	@echo "... src/client/Backend/Worker.o"
+	@echo "... src/client/Backend/Worker.i"
+	@echo "... src/client/Backend/Worker.s"
+	@echo "... src/client/Backend/client.o"
+	@echo "... src/client/Backend/client.i"
+	@echo "... src/client/Backend/client.s"
+	@echo "... src/client/UI/DrawScene.o"
+	@echo "... src/client/UI/DrawScene.i"
+	@echo "... src/client/UI/DrawScene.s"
+	@echo "... src/client/UI/DrawView.o"
+	@echo "... src/client/UI/DrawView.i"
+	@echo "... src/client/UI/DrawView.s"
+	@echo "... src/client/UI/MainWindow.o"
+	@echo "... src/client/UI/MainWindow.i"
+	@echo "... src/client/UI/MainWindow.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
