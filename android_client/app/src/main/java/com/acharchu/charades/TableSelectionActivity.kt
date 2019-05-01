@@ -18,6 +18,7 @@ class TableSelectionActivity : AppCompatActivity() {
 
     private fun startGame() {
         val intent = Intent(this, GameActivity::class.java)
+
         startActivity(intent)
     }
 }

@@ -1,5 +1,6 @@
 package com.acharchu.charades
 
+import android.graphics.Bitmap
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.StrictMode
@@ -7,10 +8,9 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.ArrayAdapter
 import kotlinx.android.synthetic.main.activity_game.*
+import kotlinx.android.synthetic.main.activity_table_selection.*
 
 class GameActivity : AppCompatActivity() {
-
-    private val connectionService : ConnectionService = ConnectionService()
 
     private val outputThread = Thread {
         sendButton.setOnClickListener {
@@ -18,7 +18,7 @@ class GameActivity : AppCompatActivity() {
             val msg : String = messageContent.text.toString()
 
             if(msg != "") {
-                connectionService.sendMessage(msg)
+                ConnectionService.sendMessage(msg)
                 updateMessageList("Me: $msg")
                 clearTextInput()
             }
@@ -27,20 +27,28 @@ class GameActivity : AppCompatActivity() {
 
     private val inputThread = Thread {
 
-        while(connectionService.status == State.CONNECTED) {
+        while(ConnectionService.status == State.CONNECTED) {
             try{
-                val header : HeaderType? = connectionService.getHeader()
+                val header : HeaderType? = ConnectionService.getHeader()
 
                 if (header == HeaderType.CHAT_MESSAGE)
-                    updateMessageList(connectionService.getMessage())
+                    updateMessageList(ConnectionService.getMessage())
+                else if (header == HeaderType.UPDATECANVAS)
+                    updateCanvas(ConnectionService.getCanvas())
+                else if (header == HeaderType.GAME_WAITING)
+                    ConnectionService.getGameWaiting()
+                else if (header == HeaderType.GAME_ENDED)
+                    ConnectionService.getTheWinner()
+                else if (header == HeaderType.GAME_READY)
+                    ConnectionService.getGameReady()
 
             } catch (e : Throwable) {
                 if (e.message == "CONNECTION CLOSED") {
 
-                    connectionService.status = State.DISCONNECTED
+                    ConnectionService.status = State.DISCONNECTED
 
                     runOnUiThread {
-                        connectionService.closeSocket()
+                        ConnectionService.closeSocket()
                         messagesListView.visibility = GONE
                         sendButton.visibility = GONE
                         messageContent.visibility = GONE
@@ -73,12 +81,13 @@ class GameActivity : AppCompatActivity() {
 
     private fun connectToServer() {
         try {
-            connectionService.connectToServer()
+            ConnectionService.connectToServer()
             if(!inputThread.isAlive)
                 inputThread.start()
 
             if(!outputThread.isAlive)
                 outputThread.start()
+            ConnectionService.joinToTable()
         } catch (e: Throwable) {
             messagesListView.visibility = GONE
             sendButton.visibility = GONE
@@ -88,16 +97,20 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun printMessages() {
-        val adapter = ArrayAdapter(this, R.layout.message, connectionService.messages)
+        val adapter = ArrayAdapter(this, R.layout.message, ConnectionService.messages)
         messagesListView.adapter = adapter
         messagesListView.setSelection(adapter.count - 1)
     }
 
     private fun updateMessageList(msg : String?) {
         runOnUiThread {
-            connectionService.messages.add(msg!!)
+            ConnectionService.messages.add(msg!!)
             printMessages()
         }
+    }
+
+    private fun updateCanvas(bitmap: Bitmap) {
+        imageView.setImageBitmap(bitmap)
     }
 
     private fun clearTextInput() {

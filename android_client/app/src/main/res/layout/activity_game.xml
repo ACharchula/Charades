@@ -44,4 +44,11 @@
             android:layout_marginEnd="8dp" app:layout_constraintStart_toStartOf="parent"
             android:layout_marginStart="8dp" android:layout_marginTop="8dp" app:layout_constraintTop_toTopOf="parent"
             android:layout_marginBottom="8dp" app:layout_constraintBottom_toTopOf="@+id/messagesListView"/>
+    <ImageView
+            android:layout_width="0dp"
+            android:layout_height="0dp" app:srcCompat="@android:color/white"
+            android:id="@+id/imageView"
+            app:layout_constraintBottom_toBottomOf="@+id/draw_view" app:layout_constraintTop_toTopOf="@+id/draw_view"
+            app:layout_constraintEnd_toEndOf="@+id/draw_view" app:layout_constraintStart_toStartOf="@+id/draw_view"
+            android:layout_marginStart="8dp"/>
 </android.support.constraint.ConstraintLayout>
