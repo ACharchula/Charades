@@ -15,6 +15,7 @@
 const size_t HEADERSIZE = 16;
 const std::string TEXT = "SEND_MESSAGE";
 const std::string HELLO = "HELLO_SERVER";
+const std::string ENTER = "ENTER__TABLE";
 
 class Client {
     int sock;
