@@ -12,5 +12,8 @@ enum class HeaderType {
     UPDATECANVAS,
     GAME_WAITING,
     GAME_ENDED,
-    GAME_READY
+    GAME_READY,
+    YOU_ARE_DRAWER,
+    CLUE_INCORRECT,
+    CLUE_CORRECT
 }

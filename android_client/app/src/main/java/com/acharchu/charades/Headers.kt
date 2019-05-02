@@ -7,7 +7,10 @@ class Headers {
             "UPDATECANVAS" to HeaderType.UPDATECANVAS,
             "GAME___ENDED" to HeaderType.GAME_ENDED,
             "GAME_WAITING" to HeaderType.GAME_WAITING,
-            "GAME___READY" to HeaderType.GAME_READY
+            "GAME___READY" to HeaderType.GAME_READY,
+            "YOUAREDRAWER" to HeaderType.YOU_ARE_DRAWER,
+            "CLUEINCORECT" to HeaderType.CLUE_INCORRECT,
+            "CLUE_CORRECT" to HeaderType.CLUE_CORRECT
         )
     }
 }

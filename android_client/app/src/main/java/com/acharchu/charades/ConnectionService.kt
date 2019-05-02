@@ -143,5 +143,18 @@ class ConnectionService {
             val length = read(BYTES_TO_READ_LENGTH)
             var result = read(length.toInt())
         }
+
+        fun startDrawing() {
+            var length = read(BYTES_TO_READ_LENGTH)
+            var result = read(length.toInt())
+        }
+
+        fun clueCorrect() {
+            read(BYTES_TO_READ_LENGTH)
+        }
+
+        fun clueIncorrect() {
+            read(BYTES_TO_READ_LENGTH)
+        }
     }
 }

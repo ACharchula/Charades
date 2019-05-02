@@ -41,6 +41,12 @@ class GameActivity : AppCompatActivity() {
                     ConnectionService.getTheWinner()
                 else if (header == HeaderType.GAME_READY)
                     ConnectionService.getGameReady()
+                else if (header == HeaderType.YOU_ARE_DRAWER)
+                    ConnectionService.startDrawing()
+                else if (header == HeaderType.CLUE_CORRECT)
+                    ConnectionService.clueCorrect()
+                else if (header == HeaderType.CLUE_INCORRECT)
+                    ConnectionService.clueIncorrect()
 
             } catch (e : Throwable) {
                 if (e.message == "CONNECTION CLOSED") {
