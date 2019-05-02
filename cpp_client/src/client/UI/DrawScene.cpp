@@ -11,7 +11,6 @@
 
 DrawScene::DrawScene() {
    setSceneRect(0,0,400,400);
-
 }
 
 void DrawScene::mousePressEvent (QGraphicsSceneMouseEvent *event){
@@ -40,24 +39,21 @@ void DrawScene::temp(QGraphicsSceneMouseEvent *event){
               QPen(), QBrush(Qt::SolidPattern));
 
    if(x>300){
-       QImage image(sceneRect().size().toSize(), QImage::Format_ARGB32);  // Create the image with the exact size of the shrunk scene
-       image.fill(Qt::transparent);                                              // Start all pixels transparent
+       QImage image(sceneRect().size().toSize(), QImage::Format_ARGB32);
+       image.fill(Qt::transparent);
 
        QPainter painter(&image);
        render(&painter);
        image.save("file_name2.png");
    }
-   if(x<100){
-       clear();
-       QImage image(sceneRect().size().toSize(), QImage::Format_ARGB32);  // Create the image with the exact size of the shrunk scene
-       image.load("file_name.png");
-       setSceneRect(image.rect());
-       addPixmap(QPixmap::fromImage(image));
-       update();
-   }
    std::cout << x << " " << y << std::endl;
 }
 
-void DrawScene::method(const QString& value) {
-    qDebug() << value;
+void DrawScene::updateScene() {
+    clear();
+    QImage image(sceneRect().size().toSize(), QImage::Format_ARGB32);
+    image.load("nextFrame.png");
+    setSceneRect(image.rect());
+    addPixmap(QPixmap::fromImage(image));
+    update();
 }

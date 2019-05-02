@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_Worker_t {
-    QByteArrayData data[8];
-    char stringdata0[68];
+    QByteArrayData data[6];
+    char stringdata0[50];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -32,15 +32,13 @@ static const qt_meta_stringdata_Worker_t qt_meta_stringdata_Worker = {
 QT_MOC_LITERAL(0, 0, 6), // "Worker"
 QT_MOC_LITERAL(1, 7, 12), // "valueChanged"
 QT_MOC_LITERAL(2, 20, 0), // ""
-QT_MOC_LITERAL(3, 21, 11), // "std::string"
-QT_MOC_LITERAL(4, 33, 5), // "value"
-QT_MOC_LITERAL(5, 39, 8), // "finished"
-QT_MOC_LITERAL(6, 48, 9), // "doMethod1"
-QT_MOC_LITERAL(7, 58, 9) // "doMethod2"
+QT_MOC_LITERAL(3, 21, 8), // "finished"
+QT_MOC_LITERAL(4, 30, 9), // "doMethod1"
+QT_MOC_LITERAL(5, 40, 9) // "doMethod2"
 
     },
-    "Worker\0valueChanged\0\0std::string\0value\0"
-    "finished\0doMethod1\0doMethod2"
+    "Worker\0valueChanged\0\0finished\0doMethod1\0"
+    "doMethod2"
 };
 #undef QT_MOC_LITERAL
 
@@ -58,15 +56,15 @@ static const uint qt_meta_data_Worker[] = {
        2,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    1,   34,    2, 0x06 /* Public */,
-       5,    0,   37,    2, 0x06 /* Public */,
+       1,    0,   34,    2, 0x06 /* Public */,
+       3,    0,   35,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-       6,    0,   38,    2, 0x0a /* Public */,
-       7,    0,   39,    2, 0x0a /* Public */,
+       4,    0,   36,    2, 0x0a /* Public */,
+       5,    0,   37,    2, 0x0a /* Public */,
 
  // signals: parameters
-    QMetaType::Void, 0x80000000 | 3,    4,
+    QMetaType::Void,
     QMetaType::Void,
 
  // slots: parameters
@@ -82,7 +80,7 @@ void Worker::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void
         Worker *_t = static_cast<Worker *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
-        case 0: _t->valueChanged((*reinterpret_cast< const std::string(*)>(_a[1]))); break;
+        case 0: _t->valueChanged(); break;
         case 1: _t->finished(); break;
         case 2: _t->doMethod1(); break;
         case 3: _t->doMethod2(); break;
@@ -92,7 +90,7 @@ void Worker::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void
         int *result = reinterpret_cast<int *>(_a[0]);
         void **func = reinterpret_cast<void **>(_a[1]);
         {
-            typedef void (Worker::*_t)(const std::string & );
+            typedef void (Worker::*_t)();
             if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&Worker::valueChanged)) {
                 *result = 0;
             }
@@ -104,6 +102,7 @@ void Worker::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void
             }
         }
     }
+    Q_UNUSED(_a);
 }
 
 const QMetaObject Worker::staticMetaObject = {
@@ -143,10 +142,9 @@ int Worker::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 }
 
 // SIGNAL 0
-void Worker::valueChanged(const std::string & _t1)
+void Worker::valueChanged()
 {
-    void *_a[] = { Q_NULLPTR, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
-    QMetaObject::activate(this, &staticMetaObject, 0, _a);
+    QMetaObject::activate(this, &staticMetaObject, 0, Q_NULLPTR);
 }
 
 // SIGNAL 1

@@ -2,6 +2,7 @@
 #include <QThread>
 
 #include <QDebug>
+#include <fstream>
 #include "Worker.h"
 #include "client.h"
 
@@ -27,7 +28,6 @@ void Worker::doMethod1() {
         if (message[message.size() - 1] == lineFeed)
             message = message.substr(0, message.size() - 1);
         client->send(message, TEXT);
-//        emit valueChanged();
     }
 }
 
@@ -39,11 +39,19 @@ void Worker::doMethod2() {
         data.first->print();
         if (data.second != nullptr) {
             if(data.first->equal(SET) || data.first->equal(UPDATE)){
-                std::cout << data.second->getValue().size() << std::endl;
-                emit valueChanged(data.second->getValue());
+                saveToFile(data.second->getValue());
+                emit valueChanged();
             }
             delete data.second;
         }
         delete data.first;
     }
+}
+
+void Worker::saveToFile(const std::string& data){
+    std::string path = "nextFrame.png";
+    std::ofstream output(path.c_str(), std::ios_base::out | std::ios::binary);
+    if (output.is_open())
+        output.write(data.data(), data.length());
+    output.close();
 }

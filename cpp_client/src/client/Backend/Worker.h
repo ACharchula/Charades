@@ -20,7 +20,7 @@ public:
 
 signals:
 
-    void valueChanged(const std::string& value);
+    void valueChanged();
 
     void finished();
 
@@ -29,6 +29,9 @@ public slots:
     void doMethod1();
 
     void doMethod2();
+
+private:
+    void saveToFile(const std::string& data);
 };
 
 #endif // WINDOW_H

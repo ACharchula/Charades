@@ -34,7 +34,7 @@ MainWindow::MainWindow(QWidget* parent) :
     layout->addWidget(drawView);
     layout->addWidget(new QPushButton);
 
-    resize(QDesktopWidget().availableGeometry(this).size() * 0.3);
+    resize(QDesktopWidget().availableGeometry(this).size() * 0.4);
 //    drawScene.setForegroundBrush(QBrush(Qt::lightGray, Qt::CrossPattern));
 
     //run sending/receiving data threads
@@ -54,7 +54,8 @@ MainWindow::MainWindow(QWidget* parent) :
 
     threadR->start();
     threadW->start();
-    connect(workerW, SIGNAL(valueChanged(QString)), this, SLOT(method(const std::string& value)));
+
+    connect(workerW, SIGNAL(valueChanged()), this, SLOT(method()));
 }
 
 MainWindow::~MainWindow() {
@@ -67,7 +68,7 @@ MainWindow::~MainWindow() {
     delete workerW;
 }
 
-void MainWindow::method(const std::string& value) {
-    qDebug() << value.size();
+void MainWindow::method() {
+    drawScene.updateScene();
 }
 

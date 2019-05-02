@@ -35,8 +35,7 @@ private:
     Worker* workerW;
 
 private slots:
-
-    void method(const std::string& value);
+    void method();
 };
 
 #endif //CPP_CLIENT_MAINWINDOW_H
