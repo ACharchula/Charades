@@ -131,26 +131,32 @@ class ConnectionService {
             return BitmapFactory.decodeByteArray(bitmapByteArray, 0, bitmapByteArray.size)
         }
 
-        fun getGameWaiting() {
+        fun getGameWaiting(): String {
             readByteArray(BYTES_TO_READ_LENGTH)
+            return "The game has not started yet."
         }
 
-        fun getTheWinner() {
-            getMessage()
+        fun getTheWinner(): String {
+            return "CORRECT ANSWER! ${getMessage()}"
+
         }
 
-        fun getGameReady() {
+        fun getGameReady(): String{
             val length = read(BYTES_TO_READ_LENGTH)
             var result = read(length.toInt())
+
+            return "The drawer is - $result"
         }
 
-        fun startDrawing() {
+        fun getThingToDraw() : String {
             var length = read(BYTES_TO_READ_LENGTH)
             var result = read(length.toInt())
+            return "Your turn! Draw - $result"
         }
 
-        fun clueCorrect() {
+        fun clueCorrect(): String {
             read(BYTES_TO_READ_LENGTH)
+            return "Correct answer!"
         }
 
         fun clueIncorrect() {
