@@ -1,6 +1,3 @@
 .idea/
-cmake-build-debug/
-exe
-CMakeFiles/
-cpp_client
-cpp_client.cbp
+compile/
+data/

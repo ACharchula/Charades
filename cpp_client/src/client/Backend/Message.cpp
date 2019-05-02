@@ -6,7 +6,7 @@
 #include <iostream>
 #include "Message.h"
 
-Message::Message(size_t size, Message::Type type) : size(size), type(type) {}
+Message::Message(size_t size) : size(size) {}
 
 void Message::append(std::pair<char*, ssize_t> nextData) {
     if (currentSize + nextData.second > size)
@@ -15,11 +15,8 @@ void Message::append(std::pair<char*, ssize_t> nextData) {
     currentSize += nextData.second - 1;
 }
 
-const size_t Message::getBodySize() const {
-    if (type != HEADER)
-        return 0;
-    else
-        return stoi(value.substr(12, 15));
+const size_t Message::getSize() const {
+    return stoi(value.substr(0, value.size()));
 }
 
 void Message::print() const {
@@ -28,4 +25,12 @@ void Message::print() const {
 
 void Message::endMessage() {
     value += '\0';
+}
+
+bool Message::equal (std::string other) const {
+    return value == other;
+}
+
+const std::string& Message::getValue() const {
+    return value;
 }

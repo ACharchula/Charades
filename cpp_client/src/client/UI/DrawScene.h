@@ -17,6 +17,7 @@ public:
     void mouseReleaseEvent (QGraphicsSceneMouseEvent *event) override;
     void mouseMoveEvent (QGraphicsSceneMouseEvent *event) override;
     void mousePressEvent (QGraphicsSceneMouseEvent *event) override;
+    void updateScene();
 };
 
 
