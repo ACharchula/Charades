@@ -51,8 +51,9 @@ void DrawScene::temp(QGraphicsSceneMouseEvent *event){
 
 void DrawScene::updateScene() {
     clear();
+    
     QImage image(sceneRect().size().toSize(), QImage::Format_ARGB32);
-    image.load("nextFrame.png");
+    image.load("../data/nextFrame.png");
     setSceneRect(image.rect());
     addPixmap(QPixmap::fromImage(image));
     update();

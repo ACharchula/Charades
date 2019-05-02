@@ -49,7 +49,7 @@ void Worker::doMethod2() {
 }
 
 void Worker::saveToFile(const std::string& data){
-    std::string path = "nextFrame.png";
+    std::string path = "../data/nextFrame.png";
     std::ofstream output(path.c_str(), std::ios_base::out | std::ios::binary);
     if (output.is_open())
         output.write(data.data(), data.length());
