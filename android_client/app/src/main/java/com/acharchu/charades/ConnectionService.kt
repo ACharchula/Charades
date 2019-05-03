@@ -2,6 +2,7 @@ package com.acharchu.charades
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Picture
 import java.lang.StringBuilder
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -37,9 +38,16 @@ class ConnectionService {
         }
 
         private fun send(msg: String) {
-            socketChannel!!.write(ByteBuffer.wrap(msg.toByteArray()))
+            var length = msg.length
+            var result = socketChannel!!.write(ByteBuffer.wrap(msg.toByteArray()))
+            var a = 0
         }
 
+        private fun sendByteArray(byteArray: ByteArray) {
+            var length = byteArray.size
+            var result = socketChannel!!.write(ByteBuffer.wrap(byteArray))
+            var a = 0
+        }
 
         private fun performServerHandshake() {
             send("HELLO_SERVER0015AndroidClient$id")
@@ -64,17 +72,14 @@ class ConnectionService {
 
             builder.append(length)
 
-            if (length < 10)
-                return "000$length"
-            else if (length < 100)
-                return "00$length"
-            else if (length < 1000)
-                return "0$length"
-            else if (length < 10000)
-                return length.toString()
-
-            return ""
-            //out of bound error
+            return when {
+                length < 10 -> "000$length"
+                length < 100 -> "00$length"
+                length < 1000 -> "0$length"
+                length < 10000 -> length.toString()
+                //out of bound error
+                else -> ""
+            }
 
         }
 
@@ -154,13 +159,38 @@ class ConnectionService {
             return "Your turn! Draw - $result"
         }
 
-        fun clueCorrect(): String {
+        fun clueCorrect() {
             read(BYTES_TO_READ_LENGTH)
-            return "Correct answer!"
         }
 
         fun clueIncorrect() {
             read(BYTES_TO_READ_LENGTH)
+        }
+
+        fun sendPicture(picture: ByteArray) {
+            var header = "SET___CANVAS${preparePictureLength(picture.size)}".toByteArray()
+            header += picture
+            sendByteArray(header)
+        }
+
+        fun preparePictureLength(length: Int): String {
+            val builder = StringBuilder()
+
+            builder.append(length)
+
+            return when {
+                length < 10 -> "0000000$length"
+                length < 100 -> "000000$length"
+                length < 1000 -> "00000$length"
+                length < 10000 -> "0000$length"
+                length < 100000 -> "000$length"
+                length < 1000000 -> "00$length"
+                length < 10000000 -> "0$length"
+                length < 100000000 -> length.toString()
+                //out of bound error
+                else -> throw Exception("The length of the picture is too big!")
+            }
+
         }
     }
 }

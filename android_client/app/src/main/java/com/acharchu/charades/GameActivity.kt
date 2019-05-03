@@ -9,8 +9,11 @@ import android.view.View.VISIBLE
 import android.widget.ArrayAdapter
 import kotlinx.android.synthetic.main.activity_game.*
 import kotlinx.android.synthetic.main.activity_table_selection.*
+import kotlin.concurrent.fixedRateTimer
 
 class GameActivity : AppCompatActivity() {
+
+    private var sendPicture = false;
 
     private val outputThread = Thread {
         sendButton.setOnClickListener {
@@ -37,14 +40,18 @@ class GameActivity : AppCompatActivity() {
                     updateCanvas(ConnectionService.getCanvas())
                 else if (header == HeaderType.GAME_WAITING)
                     updateMessageList(ConnectionService.getGameWaiting())
-                else if (header == HeaderType.GAME_ENDED)
+                else if (header == HeaderType.GAME_ENDED) {
                     updateMessageList(ConnectionService.getTheWinner())
+                    guessingPlayerView()
+                }
                 else if (header == HeaderType.GAME_READY)
                     updateMessageList(ConnectionService.getGameReady())
-                else if (header == HeaderType.YOU_ARE_DRAWER)
+                else if (header == HeaderType.YOU_ARE_DRAWER) {
                     updateMessageList(ConnectionService.getThingToDraw())
+                    drawerView()
+                }
                 else if (header == HeaderType.CLUE_CORRECT)
-                    updateMessageList(ConnectionService.clueCorrect())
+                    ConnectionService.clueCorrect()
                 else if (header == HeaderType.CLUE_INCORRECT)
                     ConnectionService.clueIncorrect()
 
@@ -82,7 +89,40 @@ class GameActivity : AppCompatActivity() {
             connectToServer()
         }
 
+        button.setOnClickListener {
+            prepareAndSendPicture()
+        }
+
         connectToServer()
+    }
+
+    private fun drawerView() {
+        runOnUiThread {
+            sendButton.visibility = GONE
+            messageContent.visibility = GONE
+            imageView.visibility = GONE
+            draw_view.clearCanvas()
+            draw_view.visibility = VISIBLE
+        }
+
+        sendPicture = true
+
+        fixedRateTimer("sendPicture", false, 2000L, 100) {
+            prepareAndSendPicture()
+            if(!sendPicture)
+                cancel()
+        }
+    }
+
+    private fun guessingPlayerView() {
+        runOnUiThread {
+            sendButton.visibility = VISIBLE
+            messageContent.visibility = VISIBLE
+            imageView.visibility = VISIBLE
+            draw_view.visibility = GONE
+        }
+
+        sendPicture = false
     }
 
     private fun connectToServer() {
@@ -116,12 +156,18 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun updateCanvas(bitmap: Bitmap) {
-        imageView.setImageBitmap(bitmap)
+        runOnUiThread {
+            imageView.setImageBitmap(bitmap)
+        }
     }
 
     private fun clearTextInput() {
         runOnUiThread {
             messageContent.setText("")
         }
+    }
+
+    private fun prepareAndSendPicture() {
+        ConnectionService.sendPicture(draw_view.getByteArray())
     }
 }

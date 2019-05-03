@@ -1,13 +1,13 @@
 package com.acharchu.charades
 
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Path
+import android.graphics.*
+import android.media.ThumbnailUtils
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 
 class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
@@ -79,5 +79,15 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     fun clearCanvas() {
         mPath.reset()
         invalidate()
+    }
+
+    fun getByteArray(): ByteArray {
+        var bitmap = Bitmap.createBitmap(this.width, this.height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        this.draw(canvas)
+        bitmap = ThumbnailUtils.extractThumbnail(bitmap, 400, 400)
+        val png = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.PNG, 0, png)
+        return png.toByteArray()
     }
 }
