@@ -5,6 +5,7 @@
 #include "MainWindow.h"
 #include "DrawView.h"
 #include <QDebug>
+#include <QTimer>
 #include <QtWidgets/QDesktopWidget>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QPushButton>
@@ -35,7 +36,6 @@ MainWindow::MainWindow(QWidget* parent) :
     layout->addWidget(new QPushButton);
 
     resize(QDesktopWidget().availableGeometry(this).size() * 0.4);
-//    drawScene.setForegroundBrush(QBrush(Qt::lightGray, Qt::CrossPattern));
 
     //run sending/receiving data threads
     threadR = new QThread();
@@ -55,7 +55,11 @@ MainWindow::MainWindow(QWidget* parent) :
     threadR->start();
     threadW->start();
 
-    connect(workerW, SIGNAL(valueChanged()), this, SLOT(method()));
+    connect(workerW, SIGNAL(valueChanged(QString)), this, SLOT(method(QString)));
+    connect(this, SIGNAL(sendNextFrame()), workerW, SLOT(doMethod3()), Qt::DirectConnection);
+
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(update()));
 }
 
 MainWindow::~MainWindow() {
@@ -68,7 +72,20 @@ MainWindow::~MainWindow() {
     delete workerW;
 }
 
-void MainWindow::method() {
-    drawScene.updateScene();
+void MainWindow::method(QString type) {
+    if(type == QString::fromStdString(SET) || type == QString::fromStdString(UPDATE)){
+        drawScene.updateScene();
+        qDebug() << "#1";
+    }
+    else if(type == QString::fromStdString(DRAW)){
+        timer->start(1000);
+        qDebug() << "#2";
+    }
+    qDebug() << "#3";
+}
+
+void MainWindow::update() {
+    drawScene.saveNextFrame();
+    emit sendNextFrame();
 }
 

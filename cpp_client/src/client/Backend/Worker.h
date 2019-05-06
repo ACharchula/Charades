@@ -13,6 +13,13 @@ class Worker : public QObject {
 Q_OBJECT
 
 private:
+    enum GameState{
+        Draw,
+        Guess,
+        Other
+    };
+
+    GameState gameState;
     Client* client;
 
 public:
@@ -20,7 +27,7 @@ public:
 
 signals:
 
-    void valueChanged();
+    void valueChanged(QString);
 
     void finished();
 
@@ -30,8 +37,11 @@ public slots:
 
     void doMethod2();
 
+    void doMethod3();
+
 private:
     void saveToFile(const std::string& data);
+    void sendNextFrame();
 };
 
 #endif // WINDOW_H

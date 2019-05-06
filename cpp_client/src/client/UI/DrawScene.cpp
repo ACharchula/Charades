@@ -14,17 +14,14 @@ DrawScene::DrawScene() {
 }
 
 void DrawScene::mousePressEvent (QGraphicsSceneMouseEvent *event){
-    std::cout<<"@";
     temp(event);
 }
 
 void DrawScene::mouseMoveEvent (QGraphicsSceneMouseEvent *event){
-   std::cout<<"$";
    temp(event);
 }
 
 void DrawScene::mouseReleaseEvent (QGraphicsSceneMouseEvent *event){
-    std::cout<<"%";
     temp(event);
 }
 
@@ -38,23 +35,24 @@ void DrawScene::temp(QGraphicsSceneMouseEvent *event){
    addEllipse(x-rad, y-rad, rad*2.0, rad*2.0,
               QPen(), QBrush(Qt::SolidPattern));
 
-   if(x>300){
-       QImage image(sceneRect().size().toSize(), QImage::Format_ARGB32);
-       image.fill(Qt::transparent);
-
-       QPainter painter(&image);
-       render(&painter);
-       image.save("file_name2.png");
-   }
    std::cout << x << " " << y << std::endl;
 }
 
 void DrawScene::updateScene() {
     clear();
-    
+
     QImage image(sceneRect().size().toSize(), QImage::Format_ARGB32);
-    image.load("../data/nextFrame.png");
+    image.load("../data/guess/nextFrame.png");
     setSceneRect(image.rect());
     addPixmap(QPixmap::fromImage(image));
     update();
+}
+
+void DrawScene::saveNextFrame() {
+    QImage image(sceneRect().size().toSize(), QImage::Format_ARGB32);
+    image.fill(Qt::transparent);
+
+    QPainter painter(&image);
+    render(&painter);
+    image.save("../data/draw/nextFrame.png");
 }

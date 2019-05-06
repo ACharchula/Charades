@@ -45,7 +45,7 @@ class Client {
 
     void _send(const char* message);
 
-    std::string _getMessageSize(size_t size);
+    std::string _getMessageSize(size_t size, const std::string messageType);
 
     const char* _preparedMessage(const std::string message, const std::string messageType);
 

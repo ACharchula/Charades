@@ -58,7 +58,6 @@ Message* Client::_receiveMessage(size_t expectedDataSize) {
             expectedDataSize -= nextData.second;
             message->append(nextData);
         } while (expectedDataSize);
-//        message->endMessage();
     } catch (const std::runtime_error& error) {
         std::cerr << error.what() << std::endl;
     }
@@ -66,22 +65,26 @@ Message* Client::_receiveMessage(size_t expectedDataSize) {
     return message;
 }
 
-std::string Client::_getMessageSize(size_t size) {
+std::string Client::_getMessageSize(size_t size, const std::string messageType) {
     std::string result;
 
-    for (int i = 1000; i > 0; i /= 10) {
+    int i;
+    if(messageType == SET || messageType == UPDATE)
+      i = 1000 * 1000;
+    else
+      i = 1000;
+    for (; i > 0; i /= 10) {
         result += std::to_string((size / i));
         if (size / i > 0)
             size = size % i;
     }
-
     return result;
 }
 
 const char* Client::_preparedMessage(const std::string message, const std::string messageType) {
     std::string result;
     result += messageType;
-    result += _getMessageSize(message.size());
+    result += _getMessageSize(message.size(), messageType);
     result += message;
     result += '\0';
     char* ret = new char[result.size()];
@@ -118,7 +121,7 @@ std::pair<Message*, Message*> Client::receive() {
         bodySize = _receiveMessage(LONG);
     else
         bodySize = _receiveMessage(SHORT);
-
+    std::cout <<"oczekuje: " << bodySize->getValue() <<std::endl;
     Message* body = nullptr;
     if (bodySize->getSize() != 0)
         body = _receiveMessage(bodySize->getSize());
