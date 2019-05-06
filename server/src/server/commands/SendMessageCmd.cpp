@@ -2,25 +2,18 @@
 
 #include "SendMessageCmd.h"
 
-Command::ReturnState SendMessageCmd::pushInput(std::string input,
-                                               int *outWaitBytes,
-                                               GlobalData *gdata) {
-  if (state == State::Start) {
-    state = State::WaitForLength;
-    return ReturnState::ReadLine;
-  } else if (state == State::WaitForLength) {
-    *outWaitBytes = std::stoi(input);
-    state = State::WaitForMessage;
-    return ReturnState::ReadBytes;
-  } else {
-    for (auto id : gdata->getAllUsers()) {
-      if (id != userid) {
-        gdata->addMessageToQueue(id, "CHAT_MESSAGE\n");
-        gdata->addMessageToQueue(id, "User: " + std::to_string(userid) + "\n");
-        gdata->addMessageToQueue(id, std::to_string(input.size()) + "\n");
-        gdata->addMessageToQueue(id, input);
-      }
-    }
-    return ReturnState::CommandEnded;
-  }
+const char SendMessageCmd::HEADER[] = "SEND_MESSAGE";
+const char SendMessageCmd::output_header[] = "CHAT_MESSAGE";
+
+void SendMessageCmd::pushInput(std::string input, GlobalData *gdata) {
+  TableMgmt tmgmt(gdata->getTable(), *gdata);
+
+  if (!tmgmt.isUserInTable(userid)) return;
+
+  std::string data = gdata->getUsername(userid) + "\n" + input;
+  std::string header =
+      output_header + helpers::get_zero_width_size(data.size());
+
+  tmgmt.sendToAllExcept(header + data, userid);
+  tmgmt.checkClue(input, userid);
 }

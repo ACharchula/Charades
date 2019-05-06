@@ -9,35 +9,27 @@
 #include <string>
 
 class Message {
-public:
-    enum Type {
-        HEADER,
-        BODY
-    };
 
 private:
 
     std::string value;
-    Type type;
     size_t size;
     size_t currentSize = 0;
 
 public:
-    Message(size_t size, Message::Type type);
-
-    Message(std::string& value, Type type, size_t size);
-
-    size_t getSize() const;
-
-    size_t getCurrentSize() const;
+    Message(size_t size);
 
     void append(std::pair<char*, ssize_t> nextData);
 
+    void endMessage();
+
     const std::string& getValue() const;
 
-    const size_t getBodySize() const;
+    const size_t getSize() const;
 
     void print() const;
+
+    bool equal (std::string other) const;
 };
 
 

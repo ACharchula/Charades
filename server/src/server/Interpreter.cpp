@@ -1,46 +1,59 @@
 // Copyright 2019 Kamil Mankowski
 
-#include <iostream>
-
 #include "Interpreter.h"
 
 void Interpreter::interpretChar(char c, GlobalData *gdata) {
-  if (inState == InputState::UntilNewLine && c == '\n') {
+  tmp += c;
+  while (tmp.size() == bytesToRead) {
     proceedInput(gdata);
-  } else {
-    tmp += c;
-    if (inState == InputState::GivenBytes && tmp.size() == bytesToRead) {
-      proceedInput(gdata);
-    }
+    tmp = "";
   }
 }
 
 void Interpreter::proceedInput(GlobalData *gdata) {
   if (actionState == ActionState::SelectCommand) {
-    if (tmp.compare("HELLO") == 0) {
+    if (tmp.compare(HelloCmd::HEADER) == 0) {
       currentCommand = new HelloCmd(userid);
-    } else if (tmp.compare("SEND_MESSAGE") == 0) {
+    } else if (!gdata->isLogged(userid)) {
+      helpers::log("Not logged user try to execute non-hello command");
+      throw std::exception();
+    } else if (tmp.compare(SendMessageCmd::HEADER) == 0) {
       currentCommand = new SendMessageCmd(userid);
+    } else if (tmp.compare(EnterTableCmd::HEADER) == 0) {
+      currentCommand = new EnterTableCmd(userid);
+    } else if (tmp.compare(SetCanvasCmd::HEADER) == 0) {
+      currentCommand = new SetCanvasCmd(userid);
     } else {
-      tmp = "";  // TO DO: handle invalid command
-      return;
+      throw std::exception();
     }
+
+    setLengthState();
+  } else if (actionState == ActionState::ReadLength) {
+    setPushState();
+  } else {
+    currentCommand->pushInput(tmp, gdata);
+    delete currentCommand;
+    currentCommand = nullptr;
+    setSelectCommandState();
   }
-  auto retState = currentCommand->pushInput(tmp, &bytesToRead, gdata);
-  setStates(retState);
-  tmp = "";
 }
 
-void Interpreter::setStates(Command::ReturnState rstate) {
-  if (rstate == Command::CommandEnded) {
-    delete currentCommand;
-    inState = InputState::UntilNewLine;
-    actionState = ActionState::SelectCommand;
-  } else if (rstate == Command::ReadLine) {
-    inState = InputState::UntilNewLine;
-    actionState = ActionState::PushToCommand;
-  } else {
-    inState = InputState::GivenBytes;
-    actionState = ActionState::PushToCommand;
-  }
+void Interpreter::setLengthState() {
+  actionState = ActionState::ReadLength;
+  bytesToRead = currentCommand->lengthSize();
 }
+
+void Interpreter::setPushState() {
+  size_t interpreted_chars;
+
+  actionState = ActionState::PushToCommand;
+  bytesToRead = std::stoi(tmp, &interpreted_chars);
+  if (interpreted_chars != currentCommand->lengthSize()) throw std::exception();
+}
+
+void Interpreter::setSelectCommandState() {
+  actionState = ActionState::SelectCommand;
+  bytesToRead = Command::HEADER_SIZE;
+}
+
+Interpreter::~Interpreter() { delete currentCommand; }

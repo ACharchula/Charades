@@ -2,21 +2,32 @@
 
 #include "GlobalData.h"
 
-std::string GlobalData::popMessage(int userid) {
-  if (!isMessageToSend(userid)) return "";
-  std::string tmp = msgQueues[userid].front();
+GlobalData::message GlobalData::popMessage(int userid) {
+  if (!isMessageToSend(userid)) {
+    return {message::MsgType::String, "", nullptr};
+  }
+  auto tmp = msgQueues[userid].front();
   msgQueues[userid].pop();
   return tmp;
 }
+
 void GlobalData::addUser(int userid) {
-  msgQueues[userid] = std::queue<std::string>();
+  msgQueues[userid] = std::queue<message>();
+  usernames[userid] = "";
+  logged[userid] = false;
   userids.push_back(userid);
 }
+
 void GlobalData::removeUser(int userid) {
   userids.erase(std::find(userids.begin(), userids.end(), userid));
   msgQueues.erase(userid);
+  usernames.erase(userid);
 }
 
 void GlobalData::addMessageToQueue(int userid, std::string msg) {
-  msgQueues[userid].push(msg);
+  msgQueues[userid].push({message::MsgType::String, msg, nullptr});
+}
+
+void GlobalData::addMessageToQueue(int userid, std::vector<char>* msg) {
+  msgQueues[userid].push({message::MsgType::Pointer, "", msg});
 }
