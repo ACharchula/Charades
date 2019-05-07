@@ -35,9 +35,12 @@ void Client::_connect(const char* serverName, unsigned port) {
         throw std::runtime_error("Connection failed.");
 }
 
-void Client::_send(const char* message) {
-    if (write(sock, message, strlen(message)) < 0)
+void Client::_send(const char* message, size_t messageSize) {
+    int writen;
+    if ((writen = write(sock, message, messageSize)) < 0)
         throw std::runtime_error("Error writing to socket.");
+    std::cout << "???? " << writen << " " << strlen(message) << std::endl;
+
 }
 
 std::pair<char*, ssize_t> Client::_receive(size_t expectedDataSize) {
@@ -46,6 +49,11 @@ std::pair<char*, ssize_t> Client::_receive(size_t expectedDataSize) {
     ssize_t result;
     if ((result = read(sock, buffer, expectedDataSize)) < 0)
         throw std::runtime_error("Error reading from socket.");
+
+    if (result == 0){
+        std::cout << "STOOOOPPPPP";
+        std::cin >> result;
+    }
 
     return std::make_pair(buffer, result);
 }
@@ -70,7 +78,7 @@ std::string Client::_getMessageSize(size_t size, const std::string messageType) 
 
     int i;
     if(messageType == SET || messageType == UPDATE)
-      i = 1000 * 1000;
+      i = 1000 * 1000 * 10;
     else
       i = 1000;
     for (; i > 0; i /= 10) {
@@ -78,19 +86,20 @@ std::string Client::_getMessageSize(size_t size, const std::string messageType) 
         if (size / i > 0)
             size = size % i;
     }
+    std::cout << "*" << result << std::endl;
     return result;
 }
 
-const char* Client::_preparedMessage(const std::string message, const std::string messageType) {
+std::pair<const char*, size_t> Client::_preparedMessage(const std::string message, const std::string messageType) {
     std::string result;
     result += messageType;
     result += _getMessageSize(message.size(), messageType);
     result += message;
-    result += '\0';
+//    result += '\0';
     char* ret = new char[result.size()];
     result.copy(ret, result.size());
-
-    return ret;
+    std::cout << "&&" << result.size()  << " = " << result <<std::endl;
+    return std::make_pair(ret, result.size());
 }
 
 void Client::run(const char* serverName, unsigned port) {
@@ -106,8 +115,8 @@ void Client::run(const char* serverName, unsigned port) {
 
 void Client::send(const std::string message, const std::string messageType) {
     try {
-        const char* messageToSend = _preparedMessage(message, messageType);
-        _send(messageToSend);
+        std::pair<const char*, size_t> messageToSend = _preparedMessage(message, messageType);
+        _send(messageToSend.first, messageToSend.second);
     } catch (const std::runtime_error& error) {
         std::cerr << error.what() << std::endl;
     }

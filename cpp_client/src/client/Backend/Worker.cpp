@@ -57,7 +57,9 @@ void Worker::doMethod3(){
     std::ifstream fin("../data/draw/nextFrame.png", std::ios::binary);
     std::string data((std::istreambuf_iterator<char>(fin)), std::istreambuf_iterator<char>());
     qDebug() << "data.size() " << data.size();
-//    client->send(data, SET);
+
+    client->send(data, SET);
+    fin.close();
 }
 
 
