@@ -13,7 +13,8 @@ import kotlin.concurrent.fixedRateTimer
 
 class GameActivity : AppCompatActivity() {
 
-    private var sendPicture = false;
+    private var sendPicture = false
+    private var pictureByteArray = ByteArray(0)
 
     private val outputThread = Thread {
         sendButton.setOnClickListener {
@@ -36,8 +37,10 @@ class GameActivity : AppCompatActivity() {
 
                 if (header == HeaderType.CHAT_MESSAGE)
                     updateMessageList(ConnectionService.getMessage())
-                else if (header == HeaderType.UPDATECANVAS)
+                else if (header == HeaderType.UPDATECANVAS) {
+                    Thread.sleep(50)
                     updateCanvas(ConnectionService.getCanvas())
+                }
                 else if (header == HeaderType.GAME_WAITING)
                     updateMessageList(ConnectionService.getGameWaiting())
                 else if (header == HeaderType.GAME_ENDED) {
@@ -76,9 +79,6 @@ class GameActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-//        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
-//        StrictMode.setThreadPolicy(policy)
-
         setContentView(R.layout.activity_game)
 
         reconnectButton.setOnClickListener {
@@ -87,10 +87,6 @@ class GameActivity : AppCompatActivity() {
             sendButton.visibility = VISIBLE
             messageContent.visibility = VISIBLE
             connectToServer()
-        }
-
-        button.setOnClickListener {
-            prepareAndSendPicture()
         }
 
         connectToServer()
@@ -106,6 +102,7 @@ class GameActivity : AppCompatActivity() {
         }
 
         sendPicture = true
+
 
         fixedRateTimer("sendPicture", false, 2000L, 100) {
             prepareAndSendPicture()
@@ -168,6 +165,10 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun prepareAndSendPicture() {
-        ConnectionService.sendPicture(draw_view.getByteArray())
+            if(!pictureByteArray.contentEquals(draw_view.getByteArray())) {
+                pictureByteArray = draw_view.getByteArray()
+                ConnectionService.sendPicture(draw_view.getByteArray())
+            }
+
     }
 }

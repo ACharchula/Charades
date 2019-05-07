@@ -2,7 +2,6 @@ package com.acharchu.charades
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Picture
 import java.lang.StringBuilder
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -37,20 +36,31 @@ class ConnectionService {
             }
         }
 
-        private fun send(msg: String) {
-            var length = msg.length
-            var result = socketChannel!!.write(ByteBuffer.wrap(msg.toByteArray()))
-            var a = 0
+        private fun sendString(msg: String) {
+            socketChannel!!.write(ByteBuffer.wrap(msg.toByteArray()))
         }
 
         private fun sendByteArray(byteArray: ByteArray) {
-            var length = byteArray.size
-            var result = socketChannel!!.write(ByteBuffer.wrap(byteArray))
-            var a = 0
+            send(byteArray.size, ByteBuffer.wrap(byteArray))
+        }
+
+        private fun send(bytesToSend: Int, message: ByteBuffer) {
+            var bytesAlreadySent = 0
+            var byteBuffer = message
+
+            while(bytesAlreadySent != bytesToSend) {
+                bytesAlreadySent += socketChannel!!.write(byteBuffer)
+
+                if(bytesAlreadySent != bytesToSend) {
+                    val restOfMessage = ByteArray(bytesToSend - bytesAlreadySent)
+                    byteBuffer.get(restOfMessage,bytesAlreadySent,bytesToSend - bytesAlreadySent)
+                    byteBuffer = ByteBuffer.wrap(restOfMessage)
+                }
+            }
         }
 
         private fun performServerHandshake() {
-            send("HELLO_SERVER0015AndroidClient$id")
+            sendString("HELLO_SERVER0015AndroidClient$id")
             val handshakeResult = read(16) //check if result is ok
 
             if (handshakeResult == "WELCOME_USER0000")
@@ -60,14 +70,14 @@ class ConnectionService {
         }
 
         fun joinToTable() {
-            send("ENTER__TABLE0000")
+            sendString("ENTER__TABLE0000")
         }
 
         fun sendMessage(msg: String) {
-            send("SEND_MESSAGE${prepareMessageLength(msg.length)}$msg")
+            sendString("SEND_MESSAGE${prepareMessageLength(msg.length)}$msg")
         }
 
-        fun prepareMessageLength(length: Int): String {
+        private fun prepareMessageLength(length: Int): String {
             val builder = StringBuilder()
 
             builder.append(length)
@@ -80,7 +90,6 @@ class ConnectionService {
                 //out of bound error
                 else -> ""
             }
-
         }
 
         fun getMessage(): String? {
@@ -108,9 +117,9 @@ class ConnectionService {
             var amountOfCharacters = 0
             var consumedCharacters = 0
             var result: ByteArray = ByteArray(0)
-            val buffer = ByteBuffer.allocate(bytesToRead)
 
             while (amountOfCharacters != bytesToRead && consumedCharacters != -1) {
+                val buffer = ByteBuffer.allocate(bytesToRead - amountOfCharacters)
                 buffer.clear()
                 consumedCharacters = socketChannel?.read(buffer)!!
 
@@ -131,8 +140,8 @@ class ConnectionService {
         }
 
         fun getCanvas() : Bitmap {
-            var length = read(BYTES_TO_READ_LENGTH*2)
-            var bitmapByteArray = readByteArray(length.toInt())
+            val length = read(BYTES_TO_READ_LENGTH*2)
+            val bitmapByteArray = readByteArray(length.toInt())
             return BitmapFactory.decodeByteArray(bitmapByteArray, 0, bitmapByteArray.size)
         }
 
@@ -148,14 +157,14 @@ class ConnectionService {
 
         fun getGameReady(): String{
             val length = read(BYTES_TO_READ_LENGTH)
-            var result = read(length.toInt())
+            val result = read(length.toInt())
 
             return "The drawer is - $result"
         }
 
         fun getThingToDraw() : String {
-            var length = read(BYTES_TO_READ_LENGTH)
-            var result = read(length.toInt())
+            val length = read(BYTES_TO_READ_LENGTH)
+            val result = read(length.toInt())
             return "Your turn! Draw - $result"
         }
 
@@ -173,7 +182,7 @@ class ConnectionService {
             sendByteArray(header)
         }
 
-        fun preparePictureLength(length: Int): String {
+        private fun preparePictureLength(length: Int): String {
             val builder = StringBuilder()
 
             builder.append(length)
