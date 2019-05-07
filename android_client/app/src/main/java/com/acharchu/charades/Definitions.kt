@@ -8,5 +8,12 @@ enum class State {
 enum class HeaderType {
     CHAT_MESSAGE,
     CONNECTION_CLOSED,
-    UNDEFINED
+    UNDEFINED,
+    UPDATECANVAS,
+    GAME_WAITING,
+    GAME_ENDED,
+    GAME_READY,
+    YOU_ARE_DRAWER,
+    CLUE_INCORRECT,
+    CLUE_CORRECT
 }
