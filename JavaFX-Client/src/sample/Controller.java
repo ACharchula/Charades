@@ -15,6 +15,8 @@ import sample.Model.HeaderType;
 import sample.Model.Message;
 
 import java.io.*;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Controller {
 
@@ -98,10 +100,10 @@ public class Controller {
                 HeaderType header = connectionService.readHeader();
                 if (header == HeaderType.CHAT_MESSAGE) {
                     updateChatBox(connectionService.getMessage());
-                } else if (header == HeaderType.UPDATECANVAS){
-                    Image image = SwingFXUtils.toFXImage(connectionService.getCanvas(),null);
+                } else if (header == HeaderType.UPDATECANVAS) {
+                    Image image = SwingFXUtils.toFXImage(connectionService.getCanvas(), null);
                     drawingController.updateImage(image);
-                } else if (header == HeaderType.GAME_WAITING){
+                } else if (header == HeaderType.GAME_WAITING) {
                     updateChatBox(connectionService.getGameWaiting());
                 } else if (header == HeaderType.GAME_ENDED) {
                     updateChatBox(connectionService.getWinner());
@@ -128,11 +130,27 @@ public class Controller {
         Platform.runLater(() -> {
             chatBox.getChildren().remove(messageField);
         });
+
+        class SendImage extends TimerTask {
+            @Override
+            public void run() {
+                try {
+                    connectionService.sendPicture(drawingController.getByteArrayFromCanvas());
+                    System.out.println("send");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        Timer timer = new Timer();
+        timer.schedule(new SendImage(), 0, 100);
+
     }
 
     private void showMessageField() {
         Platform.runLater(() -> {
-            if(!chatBox.getChildren().contains(messageField)){
+            if (!chatBox.getChildren().contains(messageField)) {
                 chatBox.getChildren().add(messageField);
             }
         });
@@ -146,7 +164,7 @@ public class Controller {
     }
 
     private void updateChatBox(String message) throws IOException {
-        Message msg = new Message("INFO",message);
+        Message msg = new Message("INFO", message);
         Platform.runLater(() -> {
             messagesBox.getItems().add(messagesBox.getItems().size(), formatMessageToShow(msg));
             messageField.clear();
@@ -195,10 +213,10 @@ public class Controller {
         }
     }
 
-    private void showAlert(String type){
+    private void showAlert(String type) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
 
-        if(type.equals("SEND_ERROR")){
+        if (type.equals("SEND_ERROR")) {
             alert.setTitle("Sending message error");
             alert.setHeaderText("Oops, something went wrong");
             alert.setContentText("Please try to send that message again");
@@ -216,7 +234,7 @@ public class Controller {
 
     private void showReconnectButton() {
         try {
-            if(connectionService.isConnected()){
+            if (connectionService.isConnected()) {
                 connectionService.closeSocket();
             }
         } catch (IOException e) {

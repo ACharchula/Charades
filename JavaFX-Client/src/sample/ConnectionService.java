@@ -1,7 +1,5 @@
 package sample;
 
-import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
-import com.sun.org.apache.xml.internal.security.utils.Base64;
 import sample.Model.HeaderType;
 import sample.Model.Headers;
 import sample.Model.Message;
@@ -15,7 +13,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 class ConnectionService {
 
@@ -26,26 +25,26 @@ class ConnectionService {
     private int HEADER_LENGTH = 12;
     private int BYTES_TO_READ_LENGTH = 4;
 
-    ConnectionService(String ip, int port){
-            connected = startConnection(ip, port);
+    ConnectionService(String ip, int port) {
+        connected = startConnection(ip, port);
     }
 
     private boolean startConnection(String ip, int port) {
 
-       boolean success;
-       try {
-           InetSocketAddress address = new InetSocketAddress(InetAddress.getByName(ip), port);
+        boolean success;
+        try {
+            InetSocketAddress address = new InetSocketAddress(InetAddress.getByName(ip), port);
 
-           socketChannel = SocketChannel.open(address);
-           socketChannel.configureBlocking(false);
+            socketChannel = SocketChannel.open(address);
+            socketChannel.configureBlocking(false);
 
-           success = handShakeServer();
-           joinTable();
+            success = handShakeServer();
+            joinTable();
         } catch (Exception e) {
-           return false;
+            return false;
         }
 
-       return success;
+        return success;
     }
 
     private boolean handShakeServer() throws IOException {
@@ -61,17 +60,17 @@ class ConnectionService {
         int consumed;
         StringBuilder stringBuilder = new StringBuilder();
 
-        do{
+        do {
             buff.clear();
             consumed = socketChannel.read(buff);
 
-            if(consumed == -1) {
+            if (consumed == -1) {
                 throw new IOException();
             }
-            if(consumed > 0){
+            if (consumed > 0) {
                 stringBuilder.append(new String(buff.array()));
             }
-            read +=consumed;
+            read += consumed;
 
         } while (read != expectedLength);
 
@@ -84,15 +83,15 @@ class ConnectionService {
         int consumed;
         byte[] result = new byte[0];
 
-        do{
+        do {
             buff.clear();
             consumed = socketChannel.read(buff);
-            if(consumed == -1) {
+            if (consumed == -1) {
                 throw new IOException();
             }
 
             result = concatByteArrays(result, convertByteBufferToByteArray(buff));
-            read +=consumed;
+            read += consumed;
 
         } while (read != expectedLength);
 
@@ -113,7 +112,7 @@ class ConnectionService {
 
     private void sendWelcomePackage() throws IOException {
         StringBuilder welcomePackage = new StringBuilder("HELLO_SERVER");
-        welcomePackage.append(String.format("%04d","Ja".length()));
+        welcomePackage.append(String.format("%04d", "Ja".length()));
         welcomePackage.append("Ja");
         socketChannel.write(ByteBuffer.wrap(welcomePackage.toString().getBytes()));
     }
@@ -129,7 +128,7 @@ class ConnectionService {
 
     public void sendMessage(String message) throws IOException {
         StringBuilder stringBuilder = new StringBuilder("SEND_MESSAGE");
-        stringBuilder.append(String.format("%04d",message.length()));
+        stringBuilder.append(String.format("%04d", message.length()));
         stringBuilder.append(message);
 
         send(stringBuilder.toString());
@@ -138,7 +137,7 @@ class ConnectionService {
     public Message getMessage() throws IOException {
         int length = Integer.parseInt(read(BYTES_TO_READ_LENGTH));
         String userNameAndMessage = read(length);
-        Message message = new Message(userNameAndMessage.split("\n")[0],userNameAndMessage.split("\n")[1]);
+        Message message = new Message(userNameAndMessage.split("\n")[0], userNameAndMessage.split("\n")[1]);
         System.out.println(message);
         return message;
     }
@@ -155,7 +154,7 @@ class ConnectionService {
         String header = read(HEADER_LENGTH);
         System.out.println(header);
 
-        if(Headers.HEADERS.containsKey(header)){
+        if (Headers.HEADERS.containsKey(header)) {
             return Headers.HEADERS.get(header);
         }
 
@@ -184,7 +183,7 @@ class ConnectionService {
     }
 
     public BufferedImage getCanvas() throws IOException {
-        int length = Integer.parseInt(read(BYTES_TO_READ_LENGTH*2));
+        int length = Integer.parseInt(read(BYTES_TO_READ_LENGTH * 2));
         byte[] bitmapByteArray = readByteArray(length);
         ByteArrayInputStream bais = new ByteArrayInputStream(bitmapByteArray);
         File outputFile = new File("saved.png");
@@ -208,26 +207,27 @@ class ConnectionService {
         read(BYTES_TO_READ_LENGTH);
     }
 
-    public void sendPicture(byte[] picture  ) throws Exception {
+    public void sendPicture(byte[] picture) throws Exception {
         String header = "SET___CANVAS" + preparePictureLength(picture.length);
+        System.out.println(header);
         byte[] byteHeader = concatByteArrays(header.getBytes(), picture);
+        System.out.println(byteHeader);
         sendByteArray(byteHeader);
     }
 
     public String preparePictureLength(int length) throws Exception {
-        StringBuilder stringBuilder = new StringBuilder(length);
-        if(length > 100000000) throw new Exception("The length of picture is too big!");
+        if (length > 100000000) throw new Exception("The length of picture is too big!");
         String message = String.format("%08d", length);
-//        System.out.println(message);
         return message;
     }
 
     private byte[] concatByteArrays(byte[] array1, byte[] array2) {
         byte[] afterConcat = new byte[array1.length + array2.length];
-        System.arraycopy(array1, 0 , afterConcat, 0, array1.length);
-        System.arraycopy(array2, 0 , afterConcat, array1.length, array2.length);
+        System.arraycopy(array1, 0, afterConcat, 0, array1.length);
+        System.arraycopy(array2, 0, afterConcat, array1.length, array2.length);
 
         return afterConcat;
     }
+
 
 }

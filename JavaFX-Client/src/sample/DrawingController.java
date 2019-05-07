@@ -1,33 +1,40 @@
 package sample;
 
+import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelFormat;
-import javafx.scene.image.PixelWriter;
-import javafx.scene.input.KeyEvent;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.LineTo;
-import javafx.scene.shape.MoveTo;
-import javafx.scene.shape.Path;
 
-import java.nio.ByteBuffer;
-import java.util.Random;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
+
 
 public class DrawingController {
 
     private final Canvas canvas;
     private ImageView imageView;
     private final GraphicsContext graphicsContext;
-    private Path path;
+    private WritableImage writableImage;
+
 
     public DrawingController(Canvas canvas, ImageView imageView) {
         this.canvas = canvas;
         this.imageView = imageView;
 
         this.graphicsContext = canvas.getGraphicsContext2D();
+
+        writableImage = new WritableImage((int)canvas.getWidth(),(int)canvas.getHeight());
+
 
         initDraw(graphicsContext);
 
@@ -44,15 +51,13 @@ public class DrawingController {
                 event -> {
                     graphicsContext.lineTo(event.getX(), event.getY());
                     graphicsContext.stroke();
+                    graphicsContext.getCanvas().snapshot(null,writableImage);
                 });
 
         canvas.addEventHandler(MouseEvent.MOUSE_RELEASED,
                 event -> {
                 });
-        canvas.addEventHandler(KeyEvent.KEY_PRESSED,
-                event -> {
-                    colorPoint((new Random()).nextInt((int)canvas.getWidth()) , (new Random()).nextInt((int)canvas.getHeight()));
-                });
+
     }
 
     private void initDraw(GraphicsContext gc) {
@@ -75,6 +80,10 @@ public class DrawingController {
         gc.setLineWidth(1);
     }
 
+    public Canvas getCanvas(){
+        return canvas;
+    }
+
 
     private void colorPoint(int x, int y) {
           graphicsContext.moveTo(x,y);
@@ -90,5 +99,19 @@ public class DrawingController {
     public void allowDrawing(boolean drawing) {
         imageView.setVisible(!drawing);
         canvas.setVisible(drawing);
+    }
+
+    public byte[] getByteArrayFromCanvas(){
+        File outputFile = new File("draw.png");
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+        try {
+            ImageIO.write( SwingFXUtils.fromFXImage( writableImage, null ), "png", outputFile );
+            ImageIO.write( SwingFXUtils.fromFXImage( writableImage, null ), "png", bos );
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return new byte[1];
     }
 }
