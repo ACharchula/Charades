@@ -1,5 +1,6 @@
 package sample;
 
+import com.sun.xml.internal.ws.api.message.Header;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
@@ -86,18 +87,43 @@ public class Controller {
         try {
             while (connectionService.isConnected()) {
                 HeaderType header = connectionService.readHeader();
-                System.out.println(header);
+//                System.out.println(header);
                 if (header == HeaderType.CHAT_MESSAGE) {
-                    Message message = connectionService.getMessage();
-                    Platform.runLater(() -> {
-                        messagesBox.getItems().add(messagesBox.getItems().size(), formatMessageToShow(message));
-                        messageField.clear();
-                    });
+                    updateChatBox(connectionService.getMessage());
+                } else if (header == HeaderType.UPDATECANVAS){
+                    connectionService.getCanvas();
+                } else if (header == HeaderType.GAME_WAITING){
+                    updateChatBox(connectionService.getGameWaiting());
+                } else if (header == HeaderType.GAME_ENDED) {
+                    updateChatBox(connectionService.getWinner());
+                } else if (header == HeaderType.GAME_READY) {
+                    updateChatBox(connectionService.getGameReady());
+                } else if (header == HeaderType.YOU_ARE_DRAWER) {
+                    updateChatBox(connectionService.getThingToDraw());
+                } else if (header == HeaderType.CLUE_CORRECT) {
+                    connectionService.clueCorrect();
+                } else if (header == HeaderType.CLUE_INCORRECT) {
+                    connectionService.clueIncorrect();
                 }
             }
         } catch (IOException e) {
             Platform.runLater(this::showReconnectButton);
         }
+    }
+
+    private void updateChatBox(Message message) throws IOException {
+        Platform.runLater(() -> {
+            messagesBox.getItems().add(messagesBox.getItems().size(), formatMessageToShow(message));
+            messageField.clear();
+        });
+    }
+
+    private void updateChatBox(String message) throws IOException {
+        Message msg = new Message("INFO",message);
+        Platform.runLater(() -> {
+            messagesBox.getItems().add(messagesBox.getItems().size(), formatMessageToShow(msg));
+            messageField.clear();
+        });
     }
 
     private String formatMessageToShow(Message message) {

@@ -59,11 +59,11 @@ public class DrawingController {
 
         canvas.addEventHandler(MouseEvent.MOUSE_RELEASED,
                 event -> {
-                    System.out.println(path);
+                    //System.out.println(path);
                 });
         canvas.addEventHandler(KeyEvent.KEY_PRESSED,
                 event -> {
-                    System.out.println("click");
+                    //System.out.println("click");
                     colorPoint((new Random()).nextInt((int)canvas.getWidth()) , (new Random()).nextInt((int)canvas.getHeight()));
                 });
     }
