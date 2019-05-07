@@ -68,8 +68,9 @@ class ConnectionService {
             if(consumed == -1) {
                 throw new IOException();
             }
-
-            stringBuilder.append(new String(buff.array()));
+            if(consumed > 0){
+                stringBuilder.append(new String(buff.array()));
+            }
             read +=consumed;
 
         } while (read != expectedLength);
@@ -91,7 +92,6 @@ class ConnectionService {
             }
 
             result = concatByteArrays(result, convertByteBufferToByteArray(buff));
-//            stringBuilder.append(new String(buff.array()));
             read +=consumed;
 
         } while (read != expectedLength);
@@ -101,12 +101,9 @@ class ConnectionService {
 
     private byte[] convertByteBufferToByteArray(ByteBuffer buffer) {
 
-
-        // Retrieve bytes between the position and limit
         byte[] bytes = new byte[buffer.remaining()];
         buffer.get(bytes, 0, bytes.length);
 
-        // Retrieve all bytes in the buffer
         buffer.clear();
         bytes = new byte[buffer.capacity()];
         buffer.get(bytes, 0, bytes.length);
@@ -141,8 +138,9 @@ class ConnectionService {
     public Message getMessage() throws IOException {
         int length = Integer.parseInt(read(BYTES_TO_READ_LENGTH));
         String userNameAndMessage = read(length);
-
-        return new Message(userNameAndMessage.split("\n")[0],userNameAndMessage.split("\n")[1]);
+        Message message = new Message(userNameAndMessage.split("\n")[0],userNameAndMessage.split("\n")[1]);
+        System.out.println(message);
+        return message;
     }
 
     public boolean isConnected() {
@@ -186,7 +184,7 @@ class ConnectionService {
     }
 
     public BufferedImage getCanvas() throws IOException {
-        int length = Integer.parseInt(read(8));
+        int length = Integer.parseInt(read(BYTES_TO_READ_LENGTH*2));
         byte[] bitmapByteArray = readByteArray(length);
         ByteArrayInputStream bais = new ByteArrayInputStream(bitmapByteArray);
         File outputFile = new File("saved.png");

@@ -87,7 +87,6 @@ public class Controller {
         try {
             while (connectionService.isConnected()) {
                 HeaderType header = connectionService.readHeader();
-//                System.out.println(header);
                 if (header == HeaderType.CHAT_MESSAGE) {
                     updateChatBox(connectionService.getMessage());
                 } else if (header == HeaderType.UPDATECANVAS){
@@ -109,6 +108,10 @@ public class Controller {
         } catch (IOException e) {
             Platform.runLater(this::showReconnectButton);
         }
+    }
+
+    private void drawerView(){
+
     }
 
     private void updateChatBox(Message message) throws IOException {
