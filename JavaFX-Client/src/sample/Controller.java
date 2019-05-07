@@ -22,7 +22,6 @@ public class Controller {
     private String IP = "127.0.0.1";
     private int PORT = 44444;
     private Button reconnectButton;
-    private ImageView imageView;
     private Thread readingThread;
     private Thread writingThread;
     private DrawingController drawingController;
@@ -38,6 +37,9 @@ public class Controller {
 
     @FXML
     private VBox gameBoard;
+
+    @FXML
+    private ImageView imageView;
 
     @FXML
     private Canvas canvas;
@@ -74,8 +76,7 @@ public class Controller {
             showReconnectButton();
         }
 
-        imageView = new ImageView();
-        drawingController = new DrawingController(canvas);
+        drawingController = new DrawingController(canvas, imageView);
     }
 
     public Controller() {
@@ -99,17 +100,19 @@ public class Controller {
                     updateChatBox(connectionService.getMessage());
                 } else if (header == HeaderType.UPDATECANVAS){
                     Image image = SwingFXUtils.toFXImage(connectionService.getCanvas(),null);
-                    imageView.setImage(image);
+                    drawingController.updateImage(image);
                 } else if (header == HeaderType.GAME_WAITING){
                     updateChatBox(connectionService.getGameWaiting());
                 } else if (header == HeaderType.GAME_ENDED) {
                     updateChatBox(connectionService.getWinner());
-                    guessingPlayerView();
+                    drawingController.allowDrawing(false);
+                    showMessageField();
                 } else if (header == HeaderType.GAME_READY) {
                     updateChatBox(connectionService.getGameReady());
                 } else if (header == HeaderType.YOU_ARE_DRAWER) {
                     updateChatBox(connectionService.getThingToDraw());
-                    drawerView();
+                    drawingController.allowDrawing(true);
+                    hideMessageField();
                 } else if (header == HeaderType.CLUE_CORRECT) {
                     connectionService.clueCorrect();
                 } else if (header == HeaderType.CLUE_INCORRECT) {
@@ -121,13 +124,13 @@ public class Controller {
         }
     }
 
-    private void drawerView(){
+    private void hideMessageField() {
         Platform.runLater(() -> {
             chatBox.getChildren().remove(messageField);
         });
     }
 
-    private void guessingPlayerView(){
+    private void showMessageField() {
         Platform.runLater(() -> {
             if(!chatBox.getChildren().contains(messageField)){
                 chatBox.getChildren().add(messageField);

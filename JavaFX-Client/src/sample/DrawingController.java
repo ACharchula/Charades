@@ -2,6 +2,8 @@ package sample;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelFormat;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.input.KeyEvent;
@@ -17,53 +19,38 @@ import java.util.Random;
 public class DrawingController {
 
     private final Canvas canvas;
+    private ImageView imageView;
     private final GraphicsContext graphicsContext;
-    private PixelWriter pixelWriter;
-    private PixelFormat<ByteBuffer> pixelFormat;
-    private byte[] pixels;
     private Path path;
 
-    public DrawingController(Canvas canvas) {
+    public DrawingController(Canvas canvas, ImageView imageView) {
         this.canvas = canvas;
+        this.imageView = imageView;
 
         this.graphicsContext = canvas.getGraphicsContext2D();
 
-        pixelWriter = graphicsContext.getPixelWriter();
-        pixelFormat = PixelFormat.getByteRgbInstance();
-
-        pixels = new byte[(int)canvas.getWidth() * (int)canvas.getHeight() * 3];
-
-        path = new Path();
-
         initDraw(graphicsContext);
 
-
-
         canvas.addEventFilter(MouseEvent.ANY, (e) -> canvas.requestFocus());
-
 
         canvas.addEventHandler(MouseEvent.MOUSE_PRESSED,
                 event -> {
                     graphicsContext.beginPath();
-                    path.getElements().add(new MoveTo(event.getX(), event.getY()));
                     graphicsContext.moveTo(event.getX(), event.getY());
                     graphicsContext.stroke();
                 });
 
         canvas.addEventHandler(MouseEvent.MOUSE_DRAGGED,
                 event -> {
-                    path.getElements().add(new LineTo(event.getX(), event.getY()));
                     graphicsContext.lineTo(event.getX(), event.getY());
                     graphicsContext.stroke();
                 });
 
         canvas.addEventHandler(MouseEvent.MOUSE_RELEASED,
                 event -> {
-                    //System.out.println(path);
                 });
         canvas.addEventHandler(KeyEvent.KEY_PRESSED,
                 event -> {
-                    //System.out.println("click");
                     colorPoint((new Random()).nextInt((int)canvas.getWidth()) , (new Random()).nextInt((int)canvas.getHeight()));
                 });
     }
@@ -90,11 +77,18 @@ public class DrawingController {
 
 
     private void colorPoint(int x, int y) {
-
           graphicsContext.moveTo(x,y);
           graphicsContext.lineTo(x,y);
           graphicsContext.stroke();
-//        pixelWriter.setColor(x,y,Color.BLACK);
-//        pixelWriter.setPixels(x,y,10,1,pixelFormat+0.5,pixels,0,30);
+    }
+
+    public void updateImage(Image image) {
+        canvas.setVisible(false);
+        imageView.setImage(image);
+    }
+
+    public void allowDrawing(boolean drawing) {
+        imageView.setVisible(!drawing);
+        canvas.setVisible(drawing);
     }
 }
