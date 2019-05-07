@@ -2,10 +2,13 @@ package sample;
 
 import com.sun.xml.internal.ws.api.message.Header;
 import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import sample.Model.HeaderType;
@@ -19,6 +22,7 @@ public class Controller {
     private String IP = "127.0.0.1";
     private int PORT = 44444;
     private Button reconnectButton;
+    private ImageView imageView;
     private Thread readingThread;
     private Thread writingThread;
     private DrawingController drawingController;
@@ -31,6 +35,9 @@ public class Controller {
 
     @FXML
     private VBox chatBox;
+
+    @FXML
+    private VBox gameBoard;
 
     @FXML
     private Canvas canvas;
@@ -67,6 +74,7 @@ public class Controller {
             showReconnectButton();
         }
 
+        imageView = new ImageView();
         drawingController = new DrawingController(canvas);
     }
 
@@ -90,15 +98,18 @@ public class Controller {
                 if (header == HeaderType.CHAT_MESSAGE) {
                     updateChatBox(connectionService.getMessage());
                 } else if (header == HeaderType.UPDATECANVAS){
-                    connectionService.getCanvas();
+                    Image image = SwingFXUtils.toFXImage(connectionService.getCanvas(),null);
+                    imageView.setImage(image);
                 } else if (header == HeaderType.GAME_WAITING){
                     updateChatBox(connectionService.getGameWaiting());
                 } else if (header == HeaderType.GAME_ENDED) {
                     updateChatBox(connectionService.getWinner());
+                    guessingPlayerView();
                 } else if (header == HeaderType.GAME_READY) {
                     updateChatBox(connectionService.getGameReady());
                 } else if (header == HeaderType.YOU_ARE_DRAWER) {
                     updateChatBox(connectionService.getThingToDraw());
+                    drawerView();
                 } else if (header == HeaderType.CLUE_CORRECT) {
                     connectionService.clueCorrect();
                 } else if (header == HeaderType.CLUE_INCORRECT) {
@@ -111,7 +122,17 @@ public class Controller {
     }
 
     private void drawerView(){
+        Platform.runLater(() -> {
+            chatBox.getChildren().remove(messageField);
+        });
+    }
 
+    private void guessingPlayerView(){
+        Platform.runLater(() -> {
+            if(!chatBox.getChildren().contains(messageField)){
+                chatBox.getChildren().add(messageField);
+            }
+        });
     }
 
     private void updateChatBox(Message message) throws IOException {
@@ -130,8 +151,7 @@ public class Controller {
     }
 
     private String formatMessageToShow(Message message) {
-        StringBuilder stringBuilder = new StringBuilder(message.getAuthor() + ": " + message.getContent());
-        return stringBuilder.toString();
+        return message.getAuthor() + ": " + message.getContent();
     }
 
     private void startChatWriterTask() {
