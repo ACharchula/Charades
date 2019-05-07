@@ -163,7 +163,18 @@ class ConnectionService {
 
     public void sendByteArray(byte[] byteArray) throws IOException {
         int length = byteArray.length;
-        socketChannel.write(ByteBuffer.wrap(byteArray));
+        int sent = 0;
+        ByteBuffer buffer = ByteBuffer.wrap(byteArray);
+
+        while(sent != length) {
+            sent += socketChannel.write(buffer);
+
+            if(sent != length) {
+                byte[] rest = new byte[length - sent];
+                buffer.get(rest, sent, length - sent);
+                buffer = ByteBuffer.wrap(rest);
+            }
+        }
     }
 
     public String getGameWaiting() throws IOException {
@@ -188,7 +199,7 @@ class ConnectionService {
         ByteArrayInputStream bais = new ByteArrayInputStream(bitmapByteArray);
         File outputFile = new File("saved.png");
         BufferedImage image = ImageIO.read(bais);
-        ImageIO.write(image, "png", outputFile);
+//        ImageIO.write(image, "png", outputFile);
         return image;
     }
 
@@ -209,10 +220,9 @@ class ConnectionService {
 
     public void sendPicture(byte[] picture) throws Exception {
         String header = "SET___CANVAS" + preparePictureLength(picture.length);
-        System.out.println(header);
         byte[] byteHeader = concatByteArrays(header.getBytes(), picture);
-        System.out.println(byteHeader);
         sendByteArray(byteHeader);
+        System.out.println(byteHeader.toString());
     }
 
     public String preparePictureLength(int length) throws Exception {

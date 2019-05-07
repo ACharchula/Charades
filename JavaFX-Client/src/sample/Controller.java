@@ -136,7 +136,6 @@ public class Controller {
             public void run() {
                 try {
                     connectionService.sendPicture(drawingController.getByteArrayFromCanvas());
-                    System.out.println("send");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -144,7 +143,7 @@ public class Controller {
         }
 
         Timer timer = new Timer();
-        timer.schedule(new SendImage(), 0, 100);
+        timer.schedule(new SendImage(), 0, 10);
 
     }
 

@@ -106,12 +106,12 @@ public class DrawingController {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
         try {
-            ImageIO.write( SwingFXUtils.fromFXImage( writableImage, null ), "png", outputFile );
+//            ImageIO.write( SwingFXUtils.fromFXImage( writableImage, null ), "png", outputFile );
             ImageIO.write( SwingFXUtils.fromFXImage( writableImage, null ), "png", bos );
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return new byte[1];
+        return bos.toByteArray();
     }
 }
