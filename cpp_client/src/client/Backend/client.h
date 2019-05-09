@@ -43,11 +43,11 @@ class Client {
 
     void _connect(const char* serverName, unsigned port);
 
-    void _send(const char* message);
+    void _send(const char* message, size_t messageSize);
 
-    std::string _getMessageSize(size_t size);
+    std::string _getMessageSize(size_t size, const std::string messageType);
 
-    const char* _preparedMessage(const std::string message, const std::string messageType);
+    std::pair<const char*, size_t> _preparedMessage(const std::string message, const std::string messageType);
 
     std::pair<char*, ssize_t> _receive(size_t expectedDataSize); // first- header, second- body
 

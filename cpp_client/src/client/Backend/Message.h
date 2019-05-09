@@ -21,8 +21,6 @@ public:
 
     void append(std::pair<char*, ssize_t> nextData);
 
-    void endMessage();
-
     const std::string& getValue() const;
 
     const size_t getSize() const;
