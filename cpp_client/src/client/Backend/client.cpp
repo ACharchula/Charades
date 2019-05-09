@@ -36,11 +36,8 @@ void Client::_connect(const char* serverName, unsigned port) {
 }
 
 void Client::_send(const char* message, size_t messageSize) {
-    int writen;
-    if ((writen = write(sock, message, messageSize)) < 0)
+    if (write(sock, message, messageSize) < 0)
         throw std::runtime_error("Error writing to socket.");
-    std::cout << "???? " << writen << " " << strlen(message) << std::endl;
-
 }
 
 std::pair<char*, ssize_t> Client::_receive(size_t expectedDataSize) {
@@ -49,11 +46,6 @@ std::pair<char*, ssize_t> Client::_receive(size_t expectedDataSize) {
     ssize_t result;
     if ((result = read(sock, buffer, expectedDataSize)) < 0)
         throw std::runtime_error("Error reading from socket.");
-
-    if (result == 0){
-        std::cout << "STOOOOPPPPP";
-        std::cin >> result;
-    }
 
     return std::make_pair(buffer, result);
 }
@@ -86,7 +78,6 @@ std::string Client::_getMessageSize(size_t size, const std::string messageType) 
         if (size / i > 0)
             size = size % i;
     }
-    std::cout << "*" << result << std::endl;
     return result;
 }
 
@@ -95,10 +86,8 @@ std::pair<const char*, size_t> Client::_preparedMessage(const std::string messag
     result += messageType;
     result += _getMessageSize(message.size(), messageType);
     result += message;
-//    result += '\0';
     char* ret = new char[result.size()];
     result.copy(ret, result.size());
-    std::cout << "&&" << result.size()  << " = " << result <<std::endl;
     return std::make_pair(ret, result.size());
 }
 
@@ -130,7 +119,6 @@ std::pair<Message*, Message*> Client::receive() {
         bodySize = _receiveMessage(LONG);
     else
         bodySize = _receiveMessage(SHORT);
-    std::cout <<"oczekuje: " << bodySize->getValue() <<std::endl;
     Message* body = nullptr;
     if (bodySize->getSize() != 0)
         body = _receiveMessage(bodySize->getSize());

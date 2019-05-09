@@ -13,7 +13,7 @@ extern const std::string TEXT;
 Worker::Worker(Client* client, QObject* parent) : client(client), QObject(parent), gameState(Other) {}
 
 void Worker::doMethod1() {
-    qDebug() << "Starting Method1 in Thread " << thread()->currentThreadId();
+//    qDebug() << "Starting Method1 in Thread " << thread()->currentThreadId();
     int nextChar;
     forever {
         std::string message;
@@ -31,7 +31,7 @@ void Worker::doMethod1() {
 }
 
 void Worker::doMethod2() {
-    qDebug() << "Starting Method2 in Thread " << thread()->currentThreadId();
+//    qDebug() << "Starting Method2 in Thread " << thread()->currentThreadId();
     std::pair<Message*, Message*> data;
     forever {
         data = client->receive();
@@ -56,7 +56,6 @@ void Worker::doMethod2() {
 void Worker::doMethod3(){
     std::ifstream fin("../data/draw/nextFrame.png", std::ios::binary);
     std::string data((std::istreambuf_iterator<char>(fin)), std::istreambuf_iterator<char>());
-    qDebug() << "data.size() " << data.size();
 
     client->send(data, SET);
     fin.close();

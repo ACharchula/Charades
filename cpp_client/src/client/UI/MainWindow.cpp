@@ -73,15 +73,10 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::method(QString type) {
-    if(type == QString::fromStdString(SET) || type == QString::fromStdString(UPDATE)){
+    if(type == QString::fromStdString(SET) || type == QString::fromStdString(UPDATE))
         drawScene.updateScene();
-        qDebug() << "#1";
-    }
-    else if(type == QString::fromStdString(DRAW)){
-        timer->start(1000);
-        qDebug() << "#2";
-    }
-    qDebug() << "#3";
+    else if(type == QString::fromStdString(DRAW))
+        timer->start(100);
 }
 
 void MainWindow::update() {
