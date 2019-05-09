@@ -10,11 +10,10 @@ const int lineFeed = 10;
 const size_t MAXMESSAGESIZE = 1000 * 1000 - 20;
 extern const std::string TEXT;
 
-Worker::Worker(Client* client, QObject* parent) : client(client),
-                                                  QObject(parent) {}
+Worker::Worker(Client* client, QObject* parent) : client(client), QObject(parent), gameState(Other) {}
 
 void Worker::doMethod1() {
-    qDebug() << "Starting Method1 in Thread " << thread()->currentThreadId();
+//    qDebug() << "Starting Method1 in Thread " << thread()->currentThreadId();
     int nextChar;
     forever {
         std::string message;
@@ -32,24 +31,39 @@ void Worker::doMethod1() {
 }
 
 void Worker::doMethod2() {
-    qDebug() << "Starting Method2 in Thread " << thread()->currentThreadId();
+//    qDebug() << "Starting Method2 in Thread " << thread()->currentThreadId();
     std::pair<Message*, Message*> data;
     forever {
         data = client->receive();
         data.first->print();
         if (data.second != nullptr) {
+            data.second->print();
             if(data.first->equal(SET) || data.first->equal(UPDATE)){
                 saveToFile(data.second->getValue());
-                emit valueChanged();
+                emit valueChanged(QString::fromStdString(SET));
+            } else if(data.first->equal(DRAW)){
+                gameState = Draw;
+                emit valueChanged(QString::fromStdString(DRAW));
             }
+            else if(data.first->equal(END))
+                gameState = Guess;
             delete data.second;
         }
         delete data.first;
     }
 }
 
+void Worker::doMethod3(){
+    std::ifstream fin("../data/draw/nextFrame.png", std::ios::binary);
+    std::string data((std::istreambuf_iterator<char>(fin)), std::istreambuf_iterator<char>());
+
+    client->send(data, SET);
+    fin.close();
+}
+
+
 void Worker::saveToFile(const std::string& data){
-    std::string path = "../data/nextFrame.png";
+    std::string path = "../data/guess/nextFrame.png";
     std::ofstream output(path.c_str(), std::ios_base::out | std::ios::binary);
     if (output.is_open())
         output.write(data.data(), data.length());

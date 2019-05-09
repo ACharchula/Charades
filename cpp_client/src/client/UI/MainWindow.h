@@ -14,10 +14,6 @@
 #include "DrawView.h"
 #include "DrawScene.h"
 
-namespace Ui {
-    class MainWindow;
-}
-
 class MainWindow : public QMainWindow {
 Q_OBJECT
 
@@ -28,14 +24,19 @@ public:
 private:
     DrawView* drawView;
     DrawScene drawScene;
+    QTimer *timer;
 
     QThread* threadR;
     QThread* threadW;
     Worker* workerR;
     Worker* workerW;
 
+signals:
+    void sendNextFrame();
+
 private slots:
-    void method();
+    void method(QString);
+    void update();
 };
 
 #endif //CPP_CLIENT_MAINWINDOW_H
