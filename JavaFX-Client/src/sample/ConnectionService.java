@@ -87,7 +87,7 @@ class ConnectionService {
             buff.clear();
             consumed = socketChannel.read(buff);
             if (consumed == -1) {
-                throw new IOException();
+                throw new IOException("Error when reading byte array");
             }
 
             result = concatByteArrays(result, convertByteBufferToByteArray(buff));
@@ -138,7 +138,6 @@ class ConnectionService {
         int length = Integer.parseInt(read(BYTES_TO_READ_LENGTH));
         String userNameAndMessage = read(length);
         Message message = new Message(userNameAndMessage.split("\n")[0], userNameAndMessage.split("\n")[1]);
-        System.out.println(message);
         return message;
     }
 
@@ -152,7 +151,6 @@ class ConnectionService {
 
     public HeaderType readHeader() throws IOException {
         String header = read(HEADER_LENGTH);
-        System.out.println(header);
 
         if (Headers.HEADERS.containsKey(header)) {
             return Headers.HEADERS.get(header);
@@ -197,8 +195,12 @@ class ConnectionService {
         int length = Integer.parseInt(read(BYTES_TO_READ_LENGTH * 2));
         byte[] bitmapByteArray = readByteArray(length);
         ByteArrayInputStream bais = new ByteArrayInputStream(bitmapByteArray);
-        File outputFile = new File("saved.png");
+        System.out.println("Bais is null = ");
+        System.out.println(bais == null);
+//        File outputFile = new File("saved.png");
         BufferedImage image = ImageIO.read(bais);
+        System.out.println("Image is null");
+        System.out.println(image == null);
 //        ImageIO.write(image, "png", outputFile);
         return image;
     }
@@ -219,10 +221,11 @@ class ConnectionService {
     }
 
     public void sendPicture(byte[] picture) throws Exception {
-        String header = "SET___CANVAS" + preparePictureLength(picture.length);
-        byte[] byteHeader = concatByteArrays(header.getBytes(), picture);
-        sendByteArray(byteHeader);
-        System.out.println(byteHeader.toString());
+        if(isConnected()){
+            String header = "SET___CANVAS" + preparePictureLength(picture.length);
+            byte[] byteHeader = concatByteArrays(header.getBytes(), picture);
+            sendByteArray(byteHeader);
+        }
     }
 
     public String preparePictureLength(int length) throws Exception {

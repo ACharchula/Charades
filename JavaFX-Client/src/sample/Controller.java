@@ -9,6 +9,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import sample.Model.HeaderType;
@@ -27,6 +28,7 @@ public class Controller {
     private Thread readingThread;
     private Thread writingThread;
     private DrawingController drawingController;
+    private Timer timer = new Timer();
 
     @FXML
     private ListView messagesBox;
@@ -69,6 +71,8 @@ public class Controller {
             connectionService = new ConnectionService(IP, PORT);
             if (connectionService.isConnected()) {
                 showChatBox();
+            } else {
+                showAlert("CONNECT_ERROR");
             }
         });
 
@@ -95,19 +99,23 @@ public class Controller {
     }
 
     private void runChatReceiverTask() {
+        WritableImage writableImage = new WritableImage((int)canvas.getWidth(),(int)canvas.getHeight());
+
+
         try {
             while (connectionService.isConnected()) {
                 HeaderType header = connectionService.readHeader();
                 if (header == HeaderType.CHAT_MESSAGE) {
                     updateChatBox(connectionService.getMessage());
                 } else if (header == HeaderType.UPDATECANVAS) {
-                    Image image = SwingFXUtils.toFXImage(connectionService.getCanvas(), null);
-                    drawingController.updateImage(image);
+                    SwingFXUtils.toFXImage(connectionService.getCanvas(), writableImage);
+                    drawingController.updateImage(writableImage);
                 } else if (header == HeaderType.GAME_WAITING) {
                     updateChatBox(connectionService.getGameWaiting());
                 } else if (header == HeaderType.GAME_ENDED) {
                     updateChatBox(connectionService.getWinner());
                     drawingController.allowDrawing(false);
+                    drawingController.clearImage();
                     showMessageField();
                 } else if (header == HeaderType.GAME_READY) {
                     updateChatBox(connectionService.getGameReady());
@@ -122,6 +130,7 @@ public class Controller {
                 }
             }
         } catch (IOException e) {
+            timer.cancel();
             Platform.runLater(this::showReconnectButton);
         }
     }
@@ -135,15 +144,18 @@ public class Controller {
             @Override
             public void run() {
                 try {
-                    connectionService.sendPicture(drawingController.getByteArrayFromCanvas());
+                    if(connectionService.isConnected()){
+                        connectionService.sendPicture(drawingController.getByteArrayFromCanvas());
+                        System.out.println("running");
+                    }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    this.cancel();
                 }
             }
         }
 
-        Timer timer = new Timer();
-        timer.schedule(new SendImage(), 0, 10);
+        timer = new Timer();
+        timer.schedule(new SendImage(), 0, 100);
 
     }
 
@@ -219,6 +231,10 @@ public class Controller {
             alert.setTitle("Sending message error");
             alert.setHeaderText("Oops, something went wrong");
             alert.setContentText("Please try to send that message again");
+        } else if (type.equals("CONNECT_ERROR")){
+            alert.setTitle("Connecting error");
+            alert.setHeaderText("Oops, something went wrong");
+            alert.setContentText("Seems like server is not responding");
         }
 
         alert.showAndWait();

@@ -6,17 +6,14 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.image.PixelFormat;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 
 import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.CountDownLatch;
 
 
 public class DrawingController {
@@ -114,4 +111,15 @@ public class DrawingController {
 
         return bos.toByteArray();
     }
+
+    public void clearImage(){
+        graphicsContext.clearRect(0,0,canvas.getWidth(),canvas.getHeight());
+        Platform.runLater(()->{
+            graphicsContext.getCanvas().snapshot(null,writableImage);
+
+        });
+        System.out.println("cleared");
+    }
+
+
 }
