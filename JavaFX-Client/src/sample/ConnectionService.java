@@ -181,7 +181,7 @@ class ConnectionService {
     }
 
     public String getWinner() throws IOException {
-        return "Correct Answer! " + getMessage();
+        return "Correct Answer! " + getMessage().getContent();
     }
 
     public String getGameReady() throws IOException {
@@ -195,12 +195,12 @@ class ConnectionService {
         int length = Integer.parseInt(read(BYTES_TO_READ_LENGTH * 2));
         byte[] bitmapByteArray = readByteArray(length);
         ByteArrayInputStream bais = new ByteArrayInputStream(bitmapByteArray);
-        System.out.println("Bais is null = ");
-        System.out.println(bais == null);
+//        System.out.println("Bais is null = ");
+//        System.out.println(bais == null);
 //        File outputFile = new File("saved.png");
         BufferedImage image = ImageIO.read(bais);
-        System.out.println("Image is null");
-        System.out.println(image == null);
+//        System.out.println("Image is null");
+//        System.out.println(image == null);
 //        ImageIO.write(image, "png", outputFile);
         return image;
     }

@@ -40,9 +40,6 @@ public class Controller {
     private VBox chatBox;
 
     @FXML
-    private VBox gameBoard;
-
-    @FXML
     private ImageView imageView;
 
     @FXML
@@ -68,25 +65,32 @@ public class Controller {
 
         reconnectButton = new Button("reconnect");
         reconnectButton.setOnMouseClicked(event -> {
+            reconnectButton.setDisable(true);
             connectionService = new ConnectionService(IP, PORT);
             if (connectionService.isConnected()) {
                 showChatBox();
             } else {
                 showAlert("CONNECT_ERROR");
             }
+            reconnectButton.setDisable(false);
         });
 
-        if (connectionService.isConnected()) {
-            showChatBox();
-        } else {
-            showReconnectButton();
-        }
+//        showReconnectButton();
 
         drawingController = new DrawingController(canvas, imageView);
+        initConnection();
     }
 
-    public Controller() {
+    public Controller() {}
+
+    private void initConnection() {
         connectionService = new ConnectionService(IP, PORT);
+        System.out.println(connectionService.isConnected());
+        if(!connectionService.isConnected()){
+            showReconnectButton();
+        }else {
+            showChatBox();
+        }
     }
 
     private void startChatReceiverTask() {
@@ -132,6 +136,17 @@ public class Controller {
         } catch (IOException e) {
             timer.cancel();
             Platform.runLater(this::showReconnectButton);
+        } catch(NullPointerException e){
+            timer.cancel();
+            try {
+                connectionService.closeSocket();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+            Platform.runLater(()->{
+                showAlert("IMAGE_ERROR");
+                showReconnectButton();
+            });
         }
     }
 
@@ -146,7 +161,6 @@ public class Controller {
                 try {
                     if(connectionService.isConnected()){
                         connectionService.sendPicture(drawingController.getByteArrayFromCanvas());
-                        System.out.println("running");
                     }
                 } catch (Exception e) {
                     this.cancel();
@@ -249,7 +263,7 @@ public class Controller {
 
     private void showReconnectButton() {
         try {
-            if (connectionService.isConnected()) {
+            if (connectionService != null && connectionService.isConnected()) {
                 connectionService.closeSocket();
             }
         } catch (IOException e) {
