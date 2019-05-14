@@ -83,7 +83,6 @@ void MainWindow::method2(QByteArray byteArray) {
 }
 
 void MainWindow::update() {
-    drawScene.saveNextFrame();
     QByteArray byteArray = drawScene.getScene();
     emit sendNextFrame(byteArray);
 }

@@ -49,17 +49,12 @@ void DrawScene::updateScene(QByteArray byteArray) {
     update();
 }
 
-void DrawScene::saveNextFrame() {
+QByteArray DrawScene::getScene() {
     QImage image(sceneRect().size().toSize(), QImage::Format_ARGB32);
     image.fill(Qt::transparent);
 
     QPainter painter(&image);
     render(&painter);
-    image.save("../data/draw/nextFrame.png");
-}
-
-QByteArray DrawScene::getScene() {
-    QImage image(sceneRect().size().toSize(), QImage::Format_ARGB32);
 
     QByteArray ba;
     QBuffer buffer(&ba);

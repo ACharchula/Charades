@@ -19,7 +19,6 @@ public:
     void mousePressEvent (QGraphicsSceneMouseEvent *event) override;
     void updateScene(QByteArray byteArray);
     QByteArray getScene();
-    void saveNextFrame();
 };
 
 

@@ -35,9 +35,7 @@ void Worker::doMethod2() {
     std::pair<Message*, Message*> data;
     forever {
         data = client->receive();
-//        data.first->print();
         if (data.second != nullptr) {
-//            data.second->print();
             if(data.first->equal(SET) || data.first->equal(UPDATE)){
                 emit valueChangedV2(QByteArray(data.second->getValue().data(), int(data.second->getValue().size())));
             } else if(data.first->equal(DRAW)){
@@ -53,11 +51,6 @@ void Worker::doMethod2() {
 }
 
 void Worker::doMethod3(QByteArray byteArray){
-//    std::ifstream fin("../data/draw/nextFrame.png", std::ios::binary);
-//    std::string data((std::istreambuf_iterator<char>(fin)), std::istreambuf_iterator<char>());
-
     std::string data(byteArray.constData(), byteArray.length());
-    qDebug() << "*" << byteArray.size() << " " << data.size();
     client->send(data, SET);
-//    fin.close();
 }
