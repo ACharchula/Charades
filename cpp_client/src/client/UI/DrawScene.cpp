@@ -7,6 +7,7 @@
 #include <QtGui/QPainter>
 #include <QtWidgets/QGraphicsPixmapItem>
 #include <QDebug>
+#include <QtCore/QBuffer>
 #include "DrawScene.h"
 
 DrawScene::DrawScene() {
@@ -38,11 +39,11 @@ void DrawScene::temp(QGraphicsSceneMouseEvent *event){
    std::cout << x << " " << y << std::endl;
 }
 
-void DrawScene::updateScene() {
+void DrawScene::updateScene(QByteArray byteArray) {
     clear();
 
     QImage image(sceneRect().size().toSize(), QImage::Format_ARGB32);
-    image.load("../data/guess/nextFrame.png");
+    image = QImage::fromData(byteArray, "PNG");
     setSceneRect(image.rect());
     addPixmap(QPixmap::fromImage(image));
     update();
@@ -55,4 +56,15 @@ void DrawScene::saveNextFrame() {
     QPainter painter(&image);
     render(&painter);
     image.save("../data/draw/nextFrame.png");
+}
+
+QByteArray DrawScene::getScene() {
+    QImage image(sceneRect().size().toSize(), QImage::Format_ARGB32);
+
+    QByteArray ba;
+    QBuffer buffer(&ba);
+    buffer.open(QIODevice::WriteOnly);
+    image.save(&buffer, "PNG");
+    buffer.close();
+    return ba;
 }

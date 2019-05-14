@@ -56,7 +56,8 @@ MainWindow::MainWindow(QWidget* parent) :
     threadW->start();
 
     connect(workerW, SIGNAL(valueChanged(QString)), this, SLOT(method(QString)));
-    connect(this, SIGNAL(sendNextFrame()), workerW, SLOT(doMethod3()), Qt::DirectConnection);
+    connect(workerW, SIGNAL(valueChangedV2(QByteArray)), this, SLOT(method2(QByteArray)));
+    connect(this, SIGNAL(sendNextFrame(QByteArray)), workerW, SLOT(doMethod3(QByteArray)), Qt::DirectConnection);
 
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(update()));
@@ -73,14 +74,17 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::method(QString type) {
-    if(type == QString::fromStdString(SET) || type == QString::fromStdString(UPDATE))
-        drawScene.updateScene();
-    else if(type == QString::fromStdString(DRAW))
-        timer->start(100);
+    if(type == QString::fromStdString(DRAW))
+        timer->start(250);
+}
+
+void MainWindow::method2(QByteArray byteArray) {
+    drawScene.updateScene(byteArray);
 }
 
 void MainWindow::update() {
     drawScene.saveNextFrame();
-    emit sendNextFrame();
+    QByteArray byteArray = drawScene.getScene();
+    emit sendNextFrame(byteArray);
 }
 
