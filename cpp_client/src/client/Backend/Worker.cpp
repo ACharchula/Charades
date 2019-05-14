@@ -35,12 +35,9 @@ void Worker::doMethod2() {
     std::pair<Message*, Message*> data;
     forever {
         data = client->receive();
-        data.first->print();
         if (data.second != nullptr) {
-            data.second->print();
             if(data.first->equal(SET) || data.first->equal(UPDATE)){
-                saveToFile(data.second->getValue());
-                emit valueChanged(QString::fromStdString(SET));
+                emit valueChangedV2(QByteArray(data.second->getValue().data(), int(data.second->getValue().size())));
             } else if(data.first->equal(DRAW)){
                 gameState = Draw;
                 emit valueChanged(QString::fromStdString(DRAW));
@@ -53,19 +50,7 @@ void Worker::doMethod2() {
     }
 }
 
-void Worker::doMethod3(){
-    std::ifstream fin("../data/draw/nextFrame.png", std::ios::binary);
-    std::string data((std::istreambuf_iterator<char>(fin)), std::istreambuf_iterator<char>());
-
+void Worker::doMethod3(QByteArray byteArray){
+    std::string data(byteArray.constData(), byteArray.length());
     client->send(data, SET);
-    fin.close();
-}
-
-
-void Worker::saveToFile(const std::string& data){
-    std::string path = "../data/guess/nextFrame.png";
-    std::ofstream output(path.c_str(), std::ios_base::out | std::ios::binary);
-    if (output.is_open())
-        output.write(data.data(), data.length());
-    output.close();
 }
