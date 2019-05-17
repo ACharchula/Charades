@@ -1,4 +1,0 @@
-/home/adam/dev/tin/Charades/cpp_client/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/adam/dev/tin/Charades/cpp_client/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/adam/dev/tin/Charades/cpp_client/cmake-build-debug/CMakeFiles/cpp_client.dir
-/home/adam/dev/tin/Charades/cpp_client/cmake-build-debug/CMakeFiles/cpp_client_autogen.dir
