@@ -6,11 +6,14 @@
 #include "DrawView.h"
 #include <QDebug>
 #include <QTimer>
+#include <QLabel>
 #include <QtWidgets/QDesktopWidget>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QGraphicsScene>
 #include <QtWidgets/QGraphicsView>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QListWidgetItem>
 
 const char* userName = "zetraxus";
 
@@ -25,15 +28,31 @@ MainWindow::MainWindow(QWidget* parent) :
     drawView = new DrawView (0,0);
     drawView->setScene(&drawScene);
 
-    QHBoxLayout* layout = new QHBoxLayout;
-    QWidget* widget = new QWidget;
+    layout = new QHBoxLayout;
+    leftVBox = new QVBoxLayout;
+    rightVBox = new QVBoxLayout;
+    layout->addLayout(leftVBox);
+    layout->addLayout(rightVBox);
 
+    QWidget* widget = new QWidget;
     widget->setLayout(layout);
     setCentralWidget(widget);
     setWindowTitle("Test");
 
-    layout->addWidget(drawView);
-    layout->addWidget(new QPushButton);
+    lineEdit = new QLineEdit;
+    list = new QListWidget;
+    changeTable = new QPushButton ("Change table.");
+    giveUp = new QPushButton ("Give up.");
+    clue = new QLabel;
+    giveUp->setVisible(false);
+    clue->setVisible(false);
+
+    leftVBox->addWidget(clue);
+    leftVBox->addWidget(giveUp);
+    leftVBox->addWidget(drawView);
+    rightVBox->addWidget(changeTable);
+    rightVBox->addWidget(list);
+    rightVBox->addWidget(lineEdit);
 
     resize(QDesktopWidget().availableGeometry(this).size() * 0.4);
 

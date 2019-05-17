@@ -10,6 +10,12 @@
 #include <QThread>
 #include <QtWidgets/QGraphicsScene>
 #include <QtWidgets/QGraphicsView>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QLabel>
 #include "../Backend/Worker.h"
 #include "DrawView.h"
 #include "DrawScene.h"
@@ -22,6 +28,14 @@ public:
     ~MainWindow();
 
 private:
+    QHBoxLayout* layout;
+    QVBoxLayout* leftVBox;
+    QVBoxLayout* rightVBox;
+    QLineEdit* lineEdit;
+    QListWidget* list;
+    QPushButton* changeTable;
+    QPushButton* giveUp;
+    QLabel* clue;
     DrawView* drawView;
     DrawScene drawScene;
     QTimer *timer;
