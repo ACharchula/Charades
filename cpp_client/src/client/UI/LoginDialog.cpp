@@ -30,6 +30,5 @@ void LoginDialog::login() {
 }
 
 void LoginDialog::exit() {
-//    dialog->hide();
     emit close();
 }

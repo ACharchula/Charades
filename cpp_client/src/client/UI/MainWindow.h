@@ -20,6 +20,7 @@
 #include "DrawView.h"
 #include "DrawScene.h"
 #include "LoginDialog.h"
+#include "ChangeTableDialog.h"
 
 class MainWindow : public QMainWindow {
 Q_OBJECT
@@ -31,6 +32,7 @@ public:
 private:
     Client* client;
     LoginDialog* loginDialog;
+    ChangeTableDialog* changeTableDialog = nullptr;
     std::string userName;
 
     QHBoxLayout* layout;
@@ -38,7 +40,7 @@ private:
     QVBoxLayout* rightVBox;
     QLineEdit* textArea;
     QListWidget* list;
-    QPushButton* changeTable;
+    QPushButton* changeTableButton;
     QPushButton* giveUp;
     QLabel* clue;
     DrawView* drawView;
@@ -70,6 +72,7 @@ private slots:
     void login(QString nick);
     void closeApp();
     void sendFrame();
+    void changeTable(QString newTable);
 };
 
 #endif //CPP_CLIENT_MAINWINDOW_H

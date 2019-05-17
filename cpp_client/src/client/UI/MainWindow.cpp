@@ -5,6 +5,7 @@
 #include "MainWindow.h"
 #include "DrawView.h"
 #include "LoginDialog.h"
+#include "ChangeTableDialog.h"
 #include <QDebug>
 #include <QTimer>
 #include <QLabel>
@@ -66,8 +67,10 @@ void MainWindow::receiveTextMessage(QString message) {
 }
 
 void MainWindow::changeTableReleased() {
-    //TODO
-    qDebug() << "test";
+    if (changeTableDialog == nullptr){
+        changeTableDialog = new ChangeTableDialog(this);
+        connect(changeTableDialog, SIGNAL(change(QString)), this, SLOT(changeTable(QString)), Qt::DirectConnection);
+    }
 }
 
 void MainWindow::giveUpReleased() {
@@ -85,6 +88,11 @@ void MainWindow::login(QString nick) {
 
 void MainWindow::closeApp() {
     //TODO
+}
+
+void MainWindow::changeTable(QString newTable){
+    //TODO
+    changeTableDialog = nullptr; // TODO FIX IT!!!
 }
 
 void MainWindow::connectToServer() {
@@ -109,7 +117,7 @@ void MainWindow::prepareUI() {
 
     textArea = new QLineEdit;
     list = new QListWidget;
-    changeTable = new QPushButton ("Change table.");
+    changeTableButton = new QPushButton ("Change table.");
     giveUp = new QPushButton ("Give up.");
     clue = new QLabel;
     giveUp->setVisible(false);
@@ -118,7 +126,7 @@ void MainWindow::prepareUI() {
     leftVBox->addWidget(clue);
     leftVBox->addWidget(giveUp);
     leftVBox->addWidget(drawView);
-    rightVBox->addWidget(changeTable);
+    rightVBox->addWidget(changeTableButton);
     rightVBox->addWidget(list);
     rightVBox->addWidget(textArea);
     resize(QDesktopWidget().availableGeometry(this).size() * 0.4);
@@ -152,7 +160,7 @@ void MainWindow::connectAllSignalsAndSlots() {
 
     connect(timer, SIGNAL(timeout()), this, SLOT(sendFrame()));
 
-    connect(changeTable, SIGNAL (released()), this, SLOT (changeTableReleased()));
+    connect(changeTableButton, SIGNAL (released()), this, SLOT (changeTableReleased()));
     connect(giveUp, SIGNAL (released()), this, SLOT (giveUpReleased()));
     connect(textArea, SIGNAL(returnPressed()), this, SLOT(sendTextMessage()), Qt::DirectConnection);
     connect(this, SIGNAL(sendMessage(QString)), workerW, SLOT(sendTextMessage(QString)), Qt::DirectConnection);

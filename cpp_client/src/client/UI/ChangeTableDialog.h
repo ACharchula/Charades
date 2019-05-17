@@ -2,8 +2,8 @@
 // Created by adam on 17.05.19.
 //
 
-#ifndef CPP_CLIENT_LOGINDIALOG_H
-#define CPP_CLIENT_LOGINDIALOG_H
+#ifndef CPP_CLIENT_CHANGETABLE_H
+#define CPP_CLIENT_CHANGETABLE_H
 
 
 #include <QtWidgets/QDialog>
@@ -12,11 +12,14 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QPushButton>
 
-class LoginDialog : public QDialog {
-    Q_OBJECT
+class ChangeTableDialog : public QDialog {
+Q_OBJECT
 
 public:
-    LoginDialog(QWidget* parent = 0);
+    ChangeTableDialog(QWidget* parent = 0);
+
+public:
+    void show();
 
 private:
     QDialog* dialog;
@@ -25,14 +28,12 @@ private:
     QVBoxLayout* layout;
     QPushButton* accept;
 
-    private slots:
-    void login();
-    void exit();
+private slots:
+    void changeTable();
 
 signals:
-    void login(QString);
-    void close();
+    void change(QString);
 };
 
 
-#endif //CPP_CLIENT_LOGINDIALOG_H
+#endif //CPP_CLIENT_CHANGETABLE_H
