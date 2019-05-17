@@ -5,7 +5,7 @@
 #include "LoginDialog.h"
 
 LoginDialog::LoginDialog(QWidget* parent) {
-    QDialog* dialog = new QDialog;
+    dialog = new QDialog;
     dialog->setWindowTitle("Login");
     dialog->resize(300,100);
 
@@ -21,8 +21,15 @@ LoginDialog::LoginDialog(QWidget* parent) {
     dialog->show();
 
     connect(accept, SIGNAL(clicked()), this, SLOT(login()));
+    connect(dialog, SIGNAL(rejected()), this, SLOT(exit()));
 }
 
 void LoginDialog::login() {
+    dialog->hide();
     emit login(input->text());
+}
+
+void LoginDialog::exit() {
+//    dialog->hide();
+    emit close();
 }

@@ -23,11 +23,14 @@ MainWindow::MainWindow(QWidget* parent) :
 
     LoginDialog* loginDialog = new LoginDialog();
     connect(loginDialog, SIGNAL(login(QString)), this, SLOT(login(QString)));
+    connect(loginDialog, SIGNAL(close()), this, SLOT(closeApp()));
 }
 
 MainWindow::~MainWindow() {
-    threadR->wait();
-    threadW->wait();
+    if(threadR != nullptr){
+        threadR->wait();
+        threadW->wait();
+    }
 
     delete threadR;
     delete workerR;
@@ -44,7 +47,7 @@ void MainWindow::updateScene(QByteArray byteArray) {
     drawScene.updateScene(byteArray);
 }
 
-void MainWindow::update() {
+void MainWindow::sendFrame() {
     QByteArray byteArray = drawScene.getScene();
     emit sendFrame(byteArray);
 }
@@ -77,6 +80,11 @@ void MainWindow::login(QString nick) {
     prepareUI();
     prepareThreads();
     connectAllSignalsAndSlots();
+    show();
+}
+
+void MainWindow::closeApp() {
+    //TODO
 }
 
 void MainWindow::connectToServer() {
@@ -142,7 +150,7 @@ void MainWindow::connectAllSignalsAndSlots() {
     connect(workerW, SIGNAL(updateScene(QByteArray)), this, SLOT(updateScene(QByteArray)));
     connect(this, SIGNAL(sendFrame(QByteArray)), workerW, SLOT(sendFrame(QByteArray)), Qt::DirectConnection);
 
-    connect(timer, SIGNAL(timeout()), this, SLOT(update()));
+    connect(timer, SIGNAL(timeout()), this, SLOT(sendFrame()));
 
     connect(changeTable, SIGNAL (released()), this, SLOT (changeTableReleased()));
     connect(giveUp, SIGNAL (released()), this, SLOT (giveUpReleased()));

@@ -19,16 +19,21 @@ public:
     LoginDialog(QWidget* parent = 0);
 
 private:
+    QDialog* dialog;
     QLabel* description;
     QLineEdit* input;
     QVBoxLayout* layout;
     QPushButton* accept;
 
-private slots:
+//    void reject() override;
+
+    private slots:
     void login();
+    void exit();
 
 signals:
     void login(QString);
+    void close();
 };
 
 

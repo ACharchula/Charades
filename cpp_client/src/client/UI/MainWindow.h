@@ -19,6 +19,7 @@
 #include "../Backend/Worker.h"
 #include "DrawView.h"
 #include "DrawScene.h"
+#include "LoginDialog.h"
 
 class MainWindow : public QMainWindow {
 Q_OBJECT
@@ -29,6 +30,7 @@ public:
 
 private:
     Client* client;
+    LoginDialog* loginDialog;
     std::string userName;
 
     QHBoxLayout* layout;
@@ -43,10 +45,10 @@ private:
     DrawScene drawScene;
     QTimer *timer;
 
-    QThread* threadR;
-    QThread* threadW;
-    Worker* workerR;
-    Worker* workerW;
+    QThread* threadR = nullptr;
+    QThread* threadW = nullptr;
+    Worker* workerR = nullptr;
+    Worker* workerW = nullptr;
 
 private:
     void connectToServer();
@@ -66,7 +68,8 @@ private slots:
     void sendTextMessage();
     void receiveTextMessage(QString message);
     void login(QString nick);
-    void update();
+    void closeApp();
+    void sendFrame();
 };
 
 #endif //CPP_CLIENT_MAINWINDOW_H
