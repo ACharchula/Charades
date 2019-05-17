@@ -20,66 +20,20 @@ const char* userName = "zetraxus";
 MainWindow::MainWindow(QWidget* parent) :
         QMainWindow(parent) {
 
-    //connect
-    Client* client = new Client(userName);
-    client->run("localhost", 44444);
-
-    //prepare ui
-    drawView = new DrawView (0,0);
-    drawView->setScene(&drawScene);
-
-    layout = new QHBoxLayout;
-    leftVBox = new QVBoxLayout;
-    rightVBox = new QVBoxLayout;
-    layout->addLayout(leftVBox);
-    layout->addLayout(rightVBox);
-
-    QWidget* widget = new QWidget;
-    widget->setLayout(layout);
-    setCentralWidget(widget);
-    setWindowTitle("Test");
-
-    lineEdit = new QLineEdit;
-    list = new QListWidget;
-    changeTable = new QPushButton ("Change table.");
-    giveUp = new QPushButton ("Give up.");
-    clue = new QLabel;
-    giveUp->setVisible(false);
-    clue->setVisible(false);
-
-    leftVBox->addWidget(clue);
-    leftVBox->addWidget(giveUp);
-    leftVBox->addWidget(drawView);
-    rightVBox->addWidget(changeTable);
-    rightVBox->addWidget(list);
-    rightVBox->addWidget(lineEdit);
-
-    resize(QDesktopWidget().availableGeometry(this).size() * 0.4);
-
-    //run sending/receiving data threads
-    threadR = new QThread();
-    threadW = new QThread();
-
-    workerR = new Worker(client);
-    workerW = new Worker(client);
-
-    workerR->moveToThread(threadR);
-    connect(threadR, SIGNAL(started()), workerR, SLOT(doMethod1()));
-    connect(workerR, SIGNAL(finished()), threadR, SLOT(quit()), Qt::DirectConnection);
-
-    workerW->moveToThread(threadW);
-    connect(threadW, SIGNAL(started()), workerW, SLOT(doMethod2()));
-    connect(workerW, SIGNAL(finished()), threadW, SLOT(quit()), Qt::DirectConnection);
-
-    threadR->start();
-    threadW->start();
+    connectToServer();
+    prepareUI();
+    prepareThreads();
 
     connect(workerW, SIGNAL(valueChanged(QString)), this, SLOT(method(QString)));
-    connect(workerW, SIGNAL(valueChangedV2(QByteArray)), this, SLOT(method2(QByteArray)));
-    connect(this, SIGNAL(sendNextFrame(QByteArray)), workerW, SLOT(doMethod3(QByteArray)), Qt::DirectConnection);
+    connect(workerW, SIGNAL(valueChangedV2(QByteArray)), this, SLOT(updateScene(QByteArray)));
+    connect(this, SIGNAL(sendFrame(QByteArray)), workerW, SLOT(sendFrame(QByteArray)), Qt::DirectConnection);
 
-    timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(update()));
+
+    connect(changeTable, SIGNAL (released()), this, SLOT (changeTableReleased()));
+    connect(giveUp, SIGNAL (released()), this, SLOT (giveUpReleased()));
+    connect(textArea, SIGNAL(returnPressed()), this, SLOT(sendTextMessage()), Qt::DirectConnection);
+    connect(this, SIGNAL(sendMessage(QString)), workerW, SLOT(sendTextMessage(QString)), Qt::DirectConnection);
 }
 
 MainWindow::~MainWindow() {
@@ -94,15 +48,91 @@ MainWindow::~MainWindow() {
 
 void MainWindow::method(QString type) {
     if(type == QString::fromStdString(DRAW))
-        timer->start(250);
+        timer->start(100);
 }
 
-void MainWindow::method2(QByteArray byteArray) {
+void MainWindow::updateScene(QByteArray byteArray) {
     drawScene.updateScene(byteArray);
 }
 
 void MainWindow::update() {
     QByteArray byteArray = drawScene.getScene();
-    emit sendNextFrame(byteArray);
+    emit sendFrame(byteArray);
 }
+
+void MainWindow::sendTextMessage() {
+    QString message = textArea->text();
+    textArea->clear();
+    emit sendMessage(message);
+}
+
+void MainWindow::changeTableReleased() {
+    //TODO
+    qDebug() << "test";
+}
+
+void MainWindow::giveUpReleased() {
+    //TODO
+}
+
+void MainWindow::connectToServer() {
+    client = new Client(userName);
+    client->run("localhost", 44444);
+}
+
+void MainWindow::prepareUI() {
+    drawView = new DrawView (0,0);
+    drawView->setScene(&drawScene);
+
+    layout = new QHBoxLayout;
+    leftVBox = new QVBoxLayout;
+    rightVBox = new QVBoxLayout;
+    layout->addLayout(leftVBox);
+    layout->addLayout(rightVBox);
+
+    QWidget* widget = new QWidget;
+    widget->setLayout(layout);
+    setCentralWidget(widget);
+    setWindowTitle("Test");
+
+    textArea = new QLineEdit;
+    list = new QListWidget;
+    changeTable = new QPushButton ("Change table.");
+    giveUp = new QPushButton ("Give up.");
+    clue = new QLabel;
+    giveUp->setVisible(false);
+    clue->setVisible(false);
+
+    leftVBox->addWidget(clue);
+    leftVBox->addWidget(giveUp);
+    leftVBox->addWidget(drawView);
+    rightVBox->addWidget(changeTable);
+    rightVBox->addWidget(list);
+    rightVBox->addWidget(textArea);
+
+    resize(QDesktopWidget().availableGeometry(this).size() * 0.4);
+}
+
+void MainWindow::prepareThreads() {
+    threadR = new QThread();
+    threadW = new QThread();
+
+    workerR = new Worker(client);
+    workerW = new Worker(client);
+
+    workerR->moveToThread(threadR);
+    connect(threadR, SIGNAL(started()), workerR, SLOT(writer()));
+    connect(workerR, SIGNAL(finished()), threadR, SLOT(quit()), Qt::DirectConnection);
+
+    workerW->moveToThread(threadW);
+    connect(threadW, SIGNAL(started()), workerW, SLOT(reader()));
+    connect(workerW, SIGNAL(finished()), threadW, SLOT(quit()), Qt::DirectConnection);
+
+    threadR->start();
+    threadW->start();
+
+    timer = new QTimer(this);
+}
+
+
 

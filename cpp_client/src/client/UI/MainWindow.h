@@ -28,10 +28,12 @@ public:
     ~MainWindow();
 
 private:
+    Client* client;
+
     QHBoxLayout* layout;
     QVBoxLayout* leftVBox;
     QVBoxLayout* rightVBox;
-    QLineEdit* lineEdit;
+    QLineEdit* textArea;
     QListWidget* list;
     QPushButton* changeTable;
     QPushButton* giveUp;
@@ -45,12 +47,21 @@ private:
     Worker* workerR;
     Worker* workerW;
 
+private:
+    void connectToServer();
+    void prepareUI();
+    void prepareThreads();
+
 signals:
-    void sendNextFrame(QByteArray);
+    void sendFrame(QByteArray);
+    void sendMessage(QString);
 
 private slots:
     void method(QString);
-    void method2(QByteArray byteArray);
+    void updateScene(QByteArray byteArray);
+    void changeTableReleased();
+    void giveUpReleased();
+    void sendTextMessage();
     void update();
 };
 
