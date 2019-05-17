@@ -4,6 +4,7 @@
 
 #include "MainWindow.h"
 #include "DrawView.h"
+#include "LoginDialog.h"
 #include <QDebug>
 #include <QTimer>
 #include <QLabel>
@@ -15,26 +16,13 @@
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QListWidgetItem>
 
-const char* userName = "zetraxus";
+//const char* userName = "zetraxus";
 
 MainWindow::MainWindow(QWidget* parent) :
         QMainWindow(parent) {
 
-    connectToServer();
-    prepareUI();
-    prepareThreads();
-
-    connect(workerW, SIGNAL(valueChanged(QString)), this, SLOT(method(QString)));
-    connect(workerW, SIGNAL(updateScene(QByteArray)), this, SLOT(updateScene(QByteArray)));
-    connect(this, SIGNAL(sendFrame(QByteArray)), workerW, SLOT(sendFrame(QByteArray)), Qt::DirectConnection);
-
-    connect(timer, SIGNAL(timeout()), this, SLOT(update()));
-
-    connect(changeTable, SIGNAL (released()), this, SLOT (changeTableReleased()));
-    connect(giveUp, SIGNAL (released()), this, SLOT (giveUpReleased()));
-    connect(textArea, SIGNAL(returnPressed()), this, SLOT(sendTextMessage()), Qt::DirectConnection);
-    connect(this, SIGNAL(sendMessage(QString)), workerW, SLOT(sendTextMessage(QString)), Qt::DirectConnection);
-    connect(workerW, SIGNAL(receiveMessage(QString)), this, SLOT(receiveTextMessage(QString)), Qt::DirectConnection);
+    LoginDialog* loginDialog = new LoginDialog();
+    connect(loginDialog, SIGNAL(login(QString)), this, SLOT(login(QString)));
 }
 
 MainWindow::~MainWindow() {
@@ -83,6 +71,14 @@ void MainWindow::giveUpReleased() {
     //TODO
 }
 
+void MainWindow::login(QString nick) {
+    userName = nick.toStdString();
+    connectToServer();
+    prepareUI();
+    prepareThreads();
+    connectAllSignalsAndSlots();
+}
+
 void MainWindow::connectToServer() {
     client = new Client(userName);
     client->run("localhost", 44444);
@@ -117,7 +113,6 @@ void MainWindow::prepareUI() {
     rightVBox->addWidget(changeTable);
     rightVBox->addWidget(list);
     rightVBox->addWidget(textArea);
-
     resize(QDesktopWidget().availableGeometry(this).size() * 0.4);
 }
 
@@ -140,4 +135,18 @@ void MainWindow::prepareThreads() {
     threadW->start();
 
     timer = new QTimer(this);
+}
+
+void MainWindow::connectAllSignalsAndSlots() {
+    connect(workerW, SIGNAL(valueChanged(QString)), this, SLOT(method(QString)));
+    connect(workerW, SIGNAL(updateScene(QByteArray)), this, SLOT(updateScene(QByteArray)));
+    connect(this, SIGNAL(sendFrame(QByteArray)), workerW, SLOT(sendFrame(QByteArray)), Qt::DirectConnection);
+
+    connect(timer, SIGNAL(timeout()), this, SLOT(update()));
+
+    connect(changeTable, SIGNAL (released()), this, SLOT (changeTableReleased()));
+    connect(giveUp, SIGNAL (released()), this, SLOT (giveUpReleased()));
+    connect(textArea, SIGNAL(returnPressed()), this, SLOT(sendTextMessage()), Qt::DirectConnection);
+    connect(this, SIGNAL(sendMessage(QString)), workerW, SLOT(sendTextMessage(QString)), Qt::DirectConnection);
+    connect(workerW, SIGNAL(receiveMessage(QString)), this, SLOT(receiveTextMessage(QString)), Qt::DirectConnection);
 }

@@ -29,6 +29,7 @@ public:
 
 private:
     Client* client;
+    std::string userName;
 
     QHBoxLayout* layout;
     QVBoxLayout* leftVBox;
@@ -51,6 +52,7 @@ private:
     void connectToServer();
     void prepareUI();
     void prepareThreads();
+    void connectAllSignalsAndSlots();
 
 signals:
     void sendFrame(QByteArray);
@@ -63,6 +65,7 @@ private slots:
     void giveUpReleased();
     void sendTextMessage();
     void receiveTextMessage(QString message);
+    void login(QString nick);
     void update();
 };
 
