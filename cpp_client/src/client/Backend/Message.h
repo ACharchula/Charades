@@ -23,6 +23,8 @@ public:
 
     const std::string& getValue() const;
 
+    const std::string getTextMessage() const;
+
     const size_t getSize() const;
 
     void print() const;

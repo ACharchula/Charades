@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget* parent) :
     prepareThreads();
 
     connect(workerW, SIGNAL(valueChanged(QString)), this, SLOT(method(QString)));
-    connect(workerW, SIGNAL(valueChangedV2(QByteArray)), this, SLOT(updateScene(QByteArray)));
+    connect(workerW, SIGNAL(updateScene(QByteArray)), this, SLOT(updateScene(QByteArray)));
     connect(this, SIGNAL(sendFrame(QByteArray)), workerW, SLOT(sendFrame(QByteArray)), Qt::DirectConnection);
 
     connect(timer, SIGNAL(timeout()), this, SLOT(update()));
@@ -34,6 +34,7 @@ MainWindow::MainWindow(QWidget* parent) :
     connect(giveUp, SIGNAL (released()), this, SLOT (giveUpReleased()));
     connect(textArea, SIGNAL(returnPressed()), this, SLOT(sendTextMessage()), Qt::DirectConnection);
     connect(this, SIGNAL(sendMessage(QString)), workerW, SLOT(sendTextMessage(QString)), Qt::DirectConnection);
+    connect(workerW, SIGNAL(receiveMessage(QString)), this, SLOT(receiveTextMessage(QString)), Qt::DirectConnection);
 }
 
 MainWindow::~MainWindow() {
@@ -62,8 +63,15 @@ void MainWindow::update() {
 
 void MainWindow::sendTextMessage() {
     QString message = textArea->text();
+    QString messageToShow = QString::fromStdString(std::string(userName).append(": ").append(message.toStdString()));
     textArea->clear();
+    list->addItem(messageToShow);
     emit sendMessage(message);
+}
+
+void MainWindow::receiveTextMessage(QString message) {
+    auto* msg = new QListWidgetItem(message);
+    list->addItem(msg);
 }
 
 void MainWindow::changeTableReleased() {
@@ -133,6 +141,3 @@ void MainWindow::prepareThreads() {
 
     timer = new QTimer(this);
 }
-
-
-

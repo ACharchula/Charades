@@ -30,3 +30,16 @@ bool Message::equal (std::string other) const {
 const std::string& Message::getValue() const {
     return value;
 }
+
+const std::string Message::getTextMessage() const {
+    size_t i;
+    for(i = 0; value[i] != '\n'; ++i){
+        ;
+    }
+
+    std::string textMessage = value.substr(0, i);
+    textMessage.append(": ");
+    textMessage.append(value.substr(i+1, value.size()));
+
+    return textMessage;
+}

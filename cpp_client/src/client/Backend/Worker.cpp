@@ -35,12 +35,13 @@ void Worker::reader() {
         data = client->receive();
         if (data.second != nullptr) {
             if(data.first->equal(SET) || data.first->equal(UPDATE)){
-                emit valueChangedV2(QByteArray(data.second->getValue().data(), int(data.second->getValue().size())));
+                emit updateScene(QByteArray(data.second->getValue().data(), int(data.second->getValue().size())));
             } else if(data.first->equal(DRAW)){
                 gameState = Draw;
                 emit valueChanged(QString::fromStdString(DRAW));
             } else if(data.first->equal(CHAT)){
-                data.second->print();
+                QString message = QString::fromStdString(data.second->getTextMessage());
+                emit receiveMessage(message);
             }
             else if(data.first->equal(END))
                 gameState = Guess;

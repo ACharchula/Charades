@@ -62,6 +62,7 @@ private slots:
     void changeTableReleased();
     void giveUpReleased();
     void sendTextMessage();
+    void receiveTextMessage(QString message);
     void update();
 };
 

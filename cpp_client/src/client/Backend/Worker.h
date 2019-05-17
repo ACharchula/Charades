@@ -29,7 +29,9 @@ signals:
 
     void valueChanged(QString);
 
-    void valueChangedV2(QByteArray);
+    void receiveMessage(QString);
+
+    void updateScene(QByteArray);
 
     void finished();
 
