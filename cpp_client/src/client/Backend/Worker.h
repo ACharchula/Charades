@@ -29,6 +29,8 @@ signals:
 
     void valueChanged(QString);
 
+    void valueChangedV2(QByteArray);
+
     void finished();
 
 public slots:
@@ -37,7 +39,7 @@ public slots:
 
     void doMethod2();
 
-    void doMethod3();
+    void doMethod3(QByteArray byteArray);
 
 private:
     void saveToFile(const std::string& data);

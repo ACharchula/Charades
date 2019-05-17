@@ -46,10 +46,11 @@ private:
     Worker* workerW;
 
 signals:
-    void sendNextFrame();
+    void sendNextFrame(QByteArray);
 
 private slots:
     void method(QString);
+    void method2(QByteArray byteArray);
     void update();
 };
 
