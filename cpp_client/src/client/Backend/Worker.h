@@ -29,21 +29,21 @@ signals:
 
     void valueChanged(QString);
 
-    void valueChangedV2(QByteArray);
+    void receiveMessage(QString);
+
+    void updateScene(QByteArray);
 
     void finished();
 
 public slots:
 
-    void doMethod1();
+    void reader();
 
-    void doMethod2();
+    void writer();
 
-    void doMethod3(QByteArray byteArray);
+    void sendFrame(QByteArray byteArray);
 
-private:
-    void saveToFile(const std::string& data);
-    void sendNextFrame();
+    void sendTextMessage(QString message);
 };
 
 #endif // WINDOW_H

@@ -37,7 +37,7 @@ class Client {
     int sock;
     struct sockaddr_in server;
     struct hostent* hp;
-    const char* userName;
+    const std::string userName;
 
     void _createSocket();
 
@@ -54,7 +54,7 @@ class Client {
     Message* _receiveMessage(size_t expectedDataSize);
 
 public:
-    Client(const char* userName);
+    Client(const std::string userName);
 
     ~Client();
 

@@ -9,7 +9,7 @@
 #include <cstring>
 #include "client.h"
 
-Client::Client(const char* userName) : userName(userName) {}
+Client::Client(const std::string userName) : userName(userName) {}
 
 Client::~Client() {
     if (sock >= 0)

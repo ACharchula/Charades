@@ -12,8 +12,7 @@ extern const std::string TEXT;
 
 Worker::Worker(Client* client, QObject* parent) : client(client), QObject(parent), gameState(Other) {}
 
-void Worker::doMethod1() {
-//    qDebug() << "Starting Method1 in Thread " << thread()->currentThreadId();
+void Worker::writer() {
     int nextChar;
     forever {
         std::string message;
@@ -30,17 +29,19 @@ void Worker::doMethod1() {
     }
 }
 
-void Worker::doMethod2() {
-//    qDebug() << "Starting Method2 in Thread " << thread()->currentThreadId();
+void Worker::reader() {
     std::pair<Message*, Message*> data;
     forever {
         data = client->receive();
         if (data.second != nullptr) {
             if(data.first->equal(SET) || data.first->equal(UPDATE)){
-                emit valueChangedV2(QByteArray(data.second->getValue().data(), int(data.second->getValue().size())));
+                emit updateScene(QByteArray(data.second->getValue().data(), int(data.second->getValue().size())));
             } else if(data.first->equal(DRAW)){
                 gameState = Draw;
                 emit valueChanged(QString::fromStdString(DRAW));
+            } else if(data.first->equal(CHAT)){
+                QString message = QString::fromStdString(data.second->getTextMessage());
+                emit receiveMessage(message);
             }
             else if(data.first->equal(END))
                 gameState = Guess;
@@ -50,7 +51,12 @@ void Worker::doMethod2() {
     }
 }
 
-void Worker::doMethod3(QByteArray byteArray){
+void Worker::sendFrame(QByteArray byteArray){
     std::string data(byteArray.constData(), byteArray.length());
     client->send(data, SET);
+}
+
+void Worker::sendTextMessage(QString message) {
+    std::string data = message.toStdString();
+    client->send(data, TEXT);
 }
