@@ -37,10 +37,8 @@ class GameActivity : AppCompatActivity() {
 
                 if (header == HeaderType.CHAT_MESSAGE)
                     updateMessageList(ConnectionService.getMessage())
-                else if (header == HeaderType.UPDATECANVAS) {
-                    Thread.sleep(50)
+                else if (header == HeaderType.UPDATECANVAS)
                     updateCanvas(ConnectionService.getCanvas())
-                }
                 else if (header == HeaderType.GAME_WAITING)
                     updateMessageList(ConnectionService.getGameWaiting())
                 else if (header == HeaderType.GAME_ENDED) {

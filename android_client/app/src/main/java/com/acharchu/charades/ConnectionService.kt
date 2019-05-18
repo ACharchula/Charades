@@ -116,21 +116,18 @@ class ConnectionService {
         private fun readByteArray(bytesToRead: Int): ByteArray {
             var amountOfCharacters = 0
             var consumedCharacters = 0
-            var result: ByteArray = ByteArray(0)
+            val result = ByteArray(bytesToRead)
 
-            while (amountOfCharacters != bytesToRead && consumedCharacters != -1) {
+            while (amountOfCharacters != bytesToRead && consumedCharacters != -1) {  // read z offsetem
                 val buffer = ByteBuffer.allocate(bytesToRead - amountOfCharacters)
-                buffer.clear()
                 consumedCharacters = socketChannel?.read(buffer)!!
 
                 if (consumedCharacters != 0) {
-                    result += buffer.array()
+                    System.arraycopy(buffer.array(), 0, result, amountOfCharacters, consumedCharacters)
                     amountOfCharacters += consumedCharacters
-                }
+                } else if (consumedCharacters == -1)
+                    throw Throwable("CONNECTION CLOSED")
             }
-
-            if (consumedCharacters == -1)
-                throw Throwable("CONNECTION CLOSED")
 
             return result
         }
