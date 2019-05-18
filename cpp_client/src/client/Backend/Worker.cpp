@@ -33,20 +33,33 @@ void Worker::reader() {
     std::pair<Message*, Message*> data;
     forever {
         data = client->receive();
-        if (data.second != nullptr) {
-            if(data.first->equal(SET) || data.first->equal(UPDATE)){
-                emit updateScene(QByteArray(data.second->getValue().data(), int(data.second->getValue().size())));
-            } else if(data.first->equal(DRAW)){
-                gameState = Draw;
-                emit valueChanged(QString::fromStdString(DRAW));
-            } else if(data.first->equal(CHAT)){
-                QString message = QString::fromStdString(data.second->getTextMessage());
-                emit receiveMessage(message);
-            }
-            else if(data.first->equal(END))
-                gameState = Guess;
+        data.first->print();
+
+        if (data.first->equal(WELCOME)){
+
+        } else if (data.first->equal(CHAT)){
+            QString message = QString::fromStdString(data.second->getTextMessage());
+            emit receiveMessage(message);
+        } else if (data.first->equal(WAIT)){
+
+        } else if (data.first->equal(END)){
+
+        } else if (data.first->equal(READY)){
+
+        } else if (data.first->equal(DRAW)){
+            emit draw(QString::fromStdString(data.second->getValue()));
+        } else if (data.first->equal(CORRECT)){
+            emit statement(QString::fromStdString(CORRECT));
+        } else if (data.first->equal(INCORRECT)){
+            emit statement(QString::fromStdString(INCORRECT));
+        } else if (data.first->equal(SET) || data.first->equal(UPDATE)){
+            emit updateScene(QByteArray(data.second->getValue().data(), int(data.second->getValue().size())));
+        }
+
+        if(data.first->equal(SET) || data.first->equal(UPDATE) || data.first->equal(DRAW) || data.first->equal(CHAT) || data.first->equal(END) || data.first->equal(READY)){
             delete data.second;
         }
+
         delete data.first;
     }
 }

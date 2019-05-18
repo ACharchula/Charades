@@ -39,9 +39,20 @@ MainWindow::~MainWindow() {
     delete workerW;
 }
 
-void MainWindow::method(QString type) {
-    if(type == QString::fromStdString(DRAW))
-        timer->start(100);
+void MainWindow::analyseStatement(QString state) {
+    if (state == QString::fromStdString(CORRECT)) {
+        QString message = "LOG: CORRECT CLUE!";
+        auto* msg = new QListWidgetItem(message);
+        list->addItem(msg);
+    } else if (state == QString::fromStdString(INCORRECT)) {
+        //TODO
+    }
+}
+
+void MainWindow::draw(QString word){
+    timer->start(100);
+    clue->setText(word);
+    clue->show();
 }
 
 void MainWindow::updateScene(QByteArray byteArray) {
@@ -154,7 +165,8 @@ void MainWindow::prepareThreads() {
 }
 
 void MainWindow::connectAllSignalsAndSlots() {
-    connect(workerW, SIGNAL(valueChanged(QString)), this, SLOT(method(QString)));
+    connect(workerW, SIGNAL(statement(QString)), this, SLOT(analyseStatement(QString)));
+    connect(workerW, SIGNAL(draw(QString)), this, SLOT(draw(QString)));
     connect(workerW, SIGNAL(updateScene(QByteArray)), this, SLOT(updateScene(QByteArray)));
     connect(this, SIGNAL(sendFrame(QByteArray)), workerW, SLOT(sendFrame(QByteArray)), Qt::DirectConnection);
 

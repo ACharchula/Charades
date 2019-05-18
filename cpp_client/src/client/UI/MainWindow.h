@@ -63,7 +63,8 @@ signals:
     void sendMessage(QString);
 
 private slots:
-    void method(QString);
+    void draw(QString word);
+    void analyseStatement(QString state);
     void updateScene(QByteArray byteArray);
     void changeTableReleased();
     void giveUpReleased();

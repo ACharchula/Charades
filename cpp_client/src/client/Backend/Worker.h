@@ -27,6 +27,10 @@ public:
 
 signals:
 
+    void statement(QString);
+
+    void draw(QString);
+
     void valueChanged(QString);
 
     void receiveMessage(QString);
