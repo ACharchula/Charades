@@ -2,7 +2,7 @@
 
 #include "Server.h"
 
-Server::Server(int port) : tmgmt(TableMgmt(gdata.getTable(), gdata)) {
+Server::Server(int port) : tables(users) {
   address.sin_family = AF_INET;
   address.sin_addr.s_addr = INADDR_ANY;
   address.sin_port = htons(port);
@@ -55,8 +55,9 @@ void Server::run() {
       } else if (msgsock > 0) {
         nfds = std::max(nfds, msgsock + 1);
         sockets.push_back(msgsock);
-        interpreters.insert(std::make_pair(msgsock, Interpreter(msgsock)));
-        gdata.addUser(msgsock);
+        users.addUser(msgsock);
+        interpreters.insert(std::make_pair(
+            msgsock, Interpreter(users.getUser(msgsock), &users, &tables)));
         log("Accepted connection", msgsock);
       }
     }
@@ -75,7 +76,7 @@ void Server::run() {
         } else {
           try {
             for (int i = 0; i < recived; ++i)
-              interpreters[msgsock].interpretChar(buff[i], &gdata);
+              interpreters[msgsock].interpretChar(buff[i]);
           } catch (const std::exception &e) {
             log("Error on interpreting", msgsock);
             disconnect(msgsock);
@@ -87,12 +88,13 @@ void Server::run() {
       ++sock_it;
     }
 
-    tmgmt.proceed();
+    tables.proceedAll();
 
     for (auto msgsock : sockets) {
-      while (gdata.isMessageToSend(msgsock)) {
-        auto msg = gdata.popMessage(msgsock);
-        if (msg.type == GlobalData::message::MsgType::String) {
+      auto user = users.getUser(msgsock);
+      while (user->isMessageToSend()) {
+        auto msg = user->popMessage();
+        if (msg.type == User::message::MsgType::String) {
           if (write(msgsock, msg.str.c_str(), msg.str.size()) == -1)
             log("Sending string error", msgsock);
         } else {
@@ -116,7 +118,7 @@ void Server::log(const std::string &msg, int sock) {
 void Server::disconnect(int usersock) {
   close(usersock);
   interpreters.erase(usersock);
-  gdata.removeUser(usersock);
+  users.removeUser(usersock);
   log("Client disconnected", usersock);
 }
 

@@ -5,10 +5,12 @@
 const char EnterTableCmd::HEADER[] = "ENTER__TABLE";
 const char EnterTableCmd::update_header[] = "UPDATECANVAS";
 
-void EnterTableCmd::pushInput(std::string input, GlobalData *gdata) {
-  TableMgmt tmgmt(gdata->getTable(), *gdata);
+void EnterTableCmd::pushInput(std::string input) {
+  auto& table = tables->getTable(0);  // get from user
+  // TableMgmt tmgmt(gdata->getTable(), *gdata);
 
-  tmgmt.addPlayer(userid);
-  tmgmt.sendCurrentStatus(userid);
-  tmgmt.sendCurrentCanvas(userid);
+  table.addPlayer(current_user);
+  table.sendCurrentStatus(current_user);
+  table.sendCurrentCanvas(current_user);
+  current_user->setTableId(table.getId());
 }

@@ -9,8 +9,9 @@
 
 class EnterTableCmd : public Command {
  public:
-  explicit EnterTableCmd(int userid) : Command(userid) {}
-  void pushInput(std::string input, GlobalData *gdata) override;
+  using Command::Command;
+  // explicit EnterTableCmd(int userid) : Command(userid) {}
+  void pushInput(std::string input) override;
 
   static const char HEADER[];
 

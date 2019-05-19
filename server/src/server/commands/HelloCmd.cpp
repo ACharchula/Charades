@@ -5,9 +5,9 @@
 const char HelloCmd::HEADER[] = "HELLO_SERVER";
 const char HelloCmd::output_packet[] = "WELCOME_USER0000";
 
-void HelloCmd::pushInput(std::string input, GlobalData *gdata) {
+void HelloCmd::pushInput(std::string input) {
   helpers::log("Welcome user: " + input);
-  gdata->login(userid);
-  gdata->setUsername(userid, input);
-  gdata->addMessageToQueue(userid, output_packet);
+  current_user->login();
+  current_user->setUsername(input);
+  current_user->addMessageToQueue(output_packet);
 }

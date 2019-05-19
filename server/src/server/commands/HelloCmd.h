@@ -9,8 +9,9 @@
 
 class HelloCmd : public Command {
  public:
-  explicit HelloCmd(int userid) : Command(userid) {}
-  void pushInput(std::string input, GlobalData *gdata) override;
+  using Command::Command;
+  // explicit HelloCmd(int userid) : Command(userid) {}
+  void pushInput(std::string input) override;
 
   static const char HEADER[];
 

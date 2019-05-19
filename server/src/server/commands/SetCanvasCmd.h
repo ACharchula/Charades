@@ -9,8 +9,9 @@
 
 class SetCanvasCmd : public Command {
  public:
-  explicit SetCanvasCmd(int userid) : Command(userid) {}
-  void pushInput(std::string input, GlobalData *gdata) override;
+  using Command::Command;
+  // explicit SetCanvasCmd(int userid) : Command(userid) {}
+  void pushInput(std::string input) override;
   int lengthSize() override { return data_length_size; }
 
   static const char HEADER[];
