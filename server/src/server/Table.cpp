@@ -12,6 +12,7 @@ const buffer_ptr Table::CLUE_CORRECT_PACKET =
 const buffer_ptr Table::CLUE_INCORRECT_PACKET =
     helpers::to_buf("CLUEINCORECT0000");
 const buffer_ptr Table::YOU_ARE_DRAWER = helpers::to_buf("YOUAREDRAWER");
+const buffer_ptr Table::CHAT_MESSAGE = helpers::to_buf("CHAT_MESSAGE");
 
 const char Table::INITIAL_PICTURE_FILE[] = "data/start_canvas.png";
 
@@ -39,13 +40,28 @@ void Table::checkClue(buffer_ptr propose, User* user) {
                  ::tolower);
   if (user == drawer) {
     helpers::log("Drawer try to send message, ignored", user->getId());
-  } else if (clue.compare(propose_str) != 0 || state == ENDED) {
+    return;
+  }
+
+  sendUserMessage(propose, user);
+
+  if (clue.compare(propose_str) != 0 || state == ENDED) {
     user->addMessageToQueue(CLUE_INCORRECT_PACKET);
   } else {
     helpers::log("User won: " + user->getUsername(), user->getId());
     user->addMessageToQueue(CLUE_CORRECT_PACKET);
     setGameEnd(user);
   }
+}
+
+void Table::sendUserMessage(buffer_ptr msg, User* author) {
+  std::string user = author->getUsername() + "\n";
+  int data_size = user.size() + msg->size();
+
+  sendToAllExcept(CHAT_MESSAGE, author);
+  sendToAllExcept(helpers::get_zero_width_size(data_size), author);
+  sendToAllExcept(helpers::to_buf(user), author);
+  sendToAllExcept(msg, author);
 }
 
 void Table::sendToAllExcept(buffer_ptr buff, User* except_user) {
@@ -56,9 +72,9 @@ void Table::sendToAllExcept(buffer_ptr buff, User* except_user) {
   }
 }
 
-void Table::setGameEnd(User* winner_id) {
+void Table::setGameEnd(User* winner_ptr) {
   state = ENDED;
-  winner = winner_id;
+  winner = winner_ptr;
 }
 
 void Table::sendUpdateCanvasIfNeeded() {
@@ -158,5 +174,17 @@ bool Table::isUserInTable(User* user) {
 
 void Table::addPlayer(User* user) {
   players.insert(user);
+
+  sendCurrentStatus(user);
+  sendCurrentCanvas(user);
+  user->setTableId(getId());
+
   helpers::log("User entered to table", user->getId());
+}
+
+void Table::removePlayer(User* user) {
+  players.erase(user);
+  if (drawer == user) {
+    setGameEnd(user);  // TD: maybe another?
+  }
 }

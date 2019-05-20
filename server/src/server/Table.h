@@ -21,11 +21,7 @@ class Table {
   void proceed();
   void checkClue(buffer_ptr propose, User *user);
   void addPlayer(User *user);
-  void removePlayer(User *user) { players.erase(user); }
-  // void sendToAllExcept(std::string msg, User *user);
-  void sendToAllExcept(buffer_ptr buff_ptr, User *user);
-  void sendCurrentCanvas(User *user);
-  void sendCurrentStatus(User *user);
+  void removePlayer(User *user);
   void setCanvas(buffer_ptr input, User *user);
   bool isUserInTable(User *user);
 
@@ -48,10 +44,14 @@ class Table {
   void loadStartCanvas();
 
   void setGameEnd(User *user);
+  void sendToAllExcept(buffer_ptr buff_ptr, User *user);
   void sendToAll(std::string msg) {
     sendToAllExcept(helpers::to_buf(msg), nullptr);
   }
   void sendToAll(buffer_ptr buff) { sendToAllExcept(buff, nullptr); }
+  void sendCurrentCanvas(User *user);
+  void sendCurrentStatus(User *user);
+  void sendUserMessage(buffer_ptr msg, User* author);
 
   void sendUpdateCanvasIfNeeded();
   void proceedGameEndIfNeeded();
@@ -68,6 +68,7 @@ class Table {
   static const buffer_ptr CLUE_CORRECT_PACKET;
   static const buffer_ptr CLUE_INCORRECT_PACKET;
   static const buffer_ptr YOU_ARE_DRAWER;
+  static const buffer_ptr CHAT_MESSAGE;
 
   static const int CANVAS_LENGTH_SIZE = 8;
 

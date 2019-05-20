@@ -13,9 +13,6 @@ class SendMessageCmd : public Command {
   void pushInput(buffer_ptr input) override;
 
   static const buffer_ptr HEADER;
-
- private:
-  static const buffer_ptr output_header;
 };
 
 #endif  // SRC_SERVER_COMMANDS_SENDMESSAGECMD_H_
