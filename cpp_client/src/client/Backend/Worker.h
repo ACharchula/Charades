@@ -33,6 +33,10 @@ signals:
 
     void valueChanged(QString);
 
+    void solution(QString);
+
+    void ready(QString);
+
     void receiveMessage(QString);
 
     void updateScene(QByteArray);

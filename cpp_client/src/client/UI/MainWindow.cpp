@@ -50,9 +50,13 @@ void MainWindow::analyseStatement(QString state) {
 }
 
 void MainWindow::draw(QString word){
+    QString message = "LOG: You are drawer.";
+    list->addItem(message);
+    gameState = GameState::Draw;
     timer->start(100);
     clue->setText(word);
     clue->show();
+    textArea->hide();
 }
 
 void MainWindow::updateScene(QByteArray byteArray) {
@@ -70,6 +74,20 @@ void MainWindow::sendTextMessage() {
     textArea->clear();
     list->addItem(messageToShow);
     emit sendMessage(message);
+}
+
+void MainWindow::solution(QString info) {
+    receiveTextMessage(info);
+    if(gameState == GameState::Draw){
+        clue->hide();
+        textArea->show();
+        timer->stop();
+        gameState = GameState::Guess;
+    }
+}
+
+void MainWindow::ready(QString info) {
+
 }
 
 void MainWindow::receiveTextMessage(QString message) {
@@ -177,4 +195,6 @@ void MainWindow::connectAllSignalsAndSlots() {
     connect(textArea, SIGNAL(returnPressed()), this, SLOT(sendTextMessage()), Qt::DirectConnection);
     connect(this, SIGNAL(sendMessage(QString)), workerW, SLOT(sendTextMessage(QString)), Qt::DirectConnection);
     connect(workerW, SIGNAL(receiveMessage(QString)), this, SLOT(receiveTextMessage(QString)), Qt::DirectConnection);
+    connect(workerW, SIGNAL(solution(QString)), this, SLOT(solution(QString)), Qt::DirectConnection);
+    connect(workerW, SIGNAL(ready(QString)), this, SLOT(ready(QString)), Qt::DirectConnection);
 }

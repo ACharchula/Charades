@@ -34,18 +34,21 @@ void Worker::reader() {
     forever {
         data = client->receive();
         data.first->print();
-
         if (data.first->equal(WELCOME)){
-
+            emit statement(QString::fromStdString(WELCOME));
         } else if (data.first->equal(CHAT)){
             QString message = QString::fromStdString(data.second->getTextMessage());
             emit receiveMessage(message);
         } else if (data.first->equal(WAIT)){
-
+            emit statement(QString::fromStdString(WAIT));
         } else if (data.first->equal(END)){
-
+            QString message = QString::fromStdString(data.second->getWinnerTextMessage());
+            emit solution(message);
         } else if (data.first->equal(READY)){
-
+            if(data.second != nullptr){
+                emit ready(QString::fromStdString(data.second->getValue()));
+                delete data.second;
+            }
         } else if (data.first->equal(DRAW)){
             emit draw(QString::fromStdString(data.second->getValue()));
         } else if (data.first->equal(CORRECT)){
@@ -56,7 +59,7 @@ void Worker::reader() {
             emit updateScene(QByteArray(data.second->getValue().data(), int(data.second->getValue().size())));
         }
 
-        if(data.first->equal(SET) || data.first->equal(UPDATE) || data.first->equal(DRAW) || data.first->equal(CHAT) || data.first->equal(END) || data.first->equal(READY)){
+        if(data.first->equal(SET) || data.first->equal(UPDATE) || data.first->equal(DRAW) || data.first->equal(CHAT) || data.first->equal(END)){
             delete data.second;
         }
 

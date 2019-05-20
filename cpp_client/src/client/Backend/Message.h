@@ -25,6 +25,8 @@ public:
 
     const std::string getTextMessage() const;
 
+    const std::string getWinnerTextMessage() const;
+
     const size_t getSize() const;
 
     void print() const;

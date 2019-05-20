@@ -30,6 +30,12 @@ public:
     ~MainWindow();
 
 private:
+    enum GameState{
+        Draw,
+        Guess
+    };
+
+    GameState gameState;
     Client* client;
     LoginDialog* loginDialog;
     ChangeTableDialog* changeTableDialog = nullptr;
@@ -74,6 +80,8 @@ private slots:
     void closeApp();
     void sendFrame();
     void changeTable(QString newTable);
+    void solution(QString info);
+    void ready(QString info);
 };
 
 #endif //CPP_CLIENT_MAINWINDOW_H
