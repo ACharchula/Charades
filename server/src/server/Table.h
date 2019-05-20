@@ -31,19 +31,19 @@ class Table {
 
   int getId() { return id; }
 
-  // make private:
+ private:
+  int id;
+  bool canvasUpdated = false;
+
   std::vector<char> canvas;
   std::string clue = "kogut";
-  enum State { WAITING, READY, ENDED } state = WAITING;
 
   std::set<User *> players;
   User *drawer;
   User *winner;
 
-  bool canvasUpdated = false;
+  enum State { WAITING, READY, ENDED } state = WAITING;
 
- private:
-  int id;
   Users *users;
   void loadStartCanvas();
 

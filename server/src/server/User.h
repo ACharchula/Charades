@@ -6,9 +6,13 @@
 #include <algorithm>
 #include <list>
 #include <map>
+#include <memory>
 #include <queue>
 #include <string>
 #include <vector>
+
+class User;
+using user_ptr = std::shared_ptr<User>;
 
 class User {
  public:
