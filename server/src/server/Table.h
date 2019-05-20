@@ -18,15 +18,15 @@ class Table {
   Table() {}
   Table(Users *users, int id);
 
-  // use User& or ptr instead of id
   void proceed();
-  void checkClue(std::string propose, User *user);
+  void checkClue(buffer_ptr propose, User *user);
   void addPlayer(User *user);
   void removePlayer(User *user) { players.erase(user); }
-  void sendToAllExcept(std::string msg, User *user);
+  // void sendToAllExcept(std::string msg, User *user);
+  void sendToAllExcept(buffer_ptr buff_ptr, User *user);
   void sendCurrentCanvas(User *user);
   void sendCurrentStatus(User *user);
-  void setCanvas(std::string input, User *user);
+  void setCanvas(buffer_ptr input, User *user);
   bool isUserInTable(User *user);
 
   int getId() { return id; }
@@ -35,7 +35,7 @@ class Table {
   int id;
   bool canvasUpdated = false;
 
-  std::vector<char> canvas;
+  buffer_ptr canvas;
   std::string clue = "kogut";
 
   std::set<User *> players;
@@ -48,11 +48,10 @@ class Table {
   void loadStartCanvas();
 
   void setGameEnd(User *user);
-  void sendToAllExcept(std::vector<char> *buff_ptr, User *user);
-  void sendToAll(std::string msg) { sendToAllExcept(msg, nullptr); }
-  void sendToAll(std::vector<char> *buff_ptr) {
-    sendToAllExcept(buff_ptr, nullptr);
+  void sendToAll(std::string msg) {
+    sendToAllExcept(helpers::to_buf(msg), nullptr);
   }
+  void sendToAll(buffer_ptr buff) { sendToAllExcept(buff, nullptr); }
 
   void sendUpdateCanvasIfNeeded();
   void proceedGameEndIfNeeded();
@@ -62,21 +61,23 @@ class Table {
 
   std::string getRandomClue() { return "kurczak"; }  // make static
 
-  static const char GAME_WAITING_PACKET[];
-  static const char GAME_READY[];
-  static const char GAME_ENDED[];
-  static const char UPDATE_CANVAS[];
-  static const char CLUE_CORRECT_PACKET[];
-  static const char CLUE_INCORRECT_PACKET[];
-  static const char YOU_ARE_DRAWER[];
+  static const buffer_ptr GAME_WAITING_PACKET;
+  static const buffer_ptr GAME_READY;
+  static const buffer_ptr GAME_ENDED;
+  static const buffer_ptr UPDATE_CANVAS;
+  static const buffer_ptr CLUE_CORRECT_PACKET;
+  static const buffer_ptr CLUE_INCORRECT_PACKET;
+  static const buffer_ptr YOU_ARE_DRAWER;
 
   static const int CANVAS_LENGTH_SIZE = 8;
+
+  static const char INITIAL_PICTURE_FILE[];
 };
 
 class Tables {
  public:
   explicit Tables(Users &users) : users(users) {}
-  Table &getTable(int id) { return tables[id]; }
+  Table &getTable(int id) { return tables.at(id); }
   int createTable() {
     tables.insert(std::make_pair(nextId, Table(&users, nextId)));
     return nextId++;

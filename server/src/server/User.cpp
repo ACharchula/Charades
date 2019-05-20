@@ -2,17 +2,17 @@
 
 #include "User.h"
 
-User::message User::popMessage() {
+buffer_ptr User::popMessage() {
   if (!isMessageToSend()) {
-    return {message::MsgType::String, "", nullptr};
+    return helpers::to_buf("");
   }
   auto tmp = messeges.front();
   messeges.pop();
   return tmp;
 }
 
-void Users::addUser(int userid) {
-  users.insert(std::make_pair(userid, User(userid)));
+void Users::addUser(int userid, int socket) {
+  users.insert(std::make_pair(userid, User(userid, socket)));
   userids.push_back(userid);
 }
 

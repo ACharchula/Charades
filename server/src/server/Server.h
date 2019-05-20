@@ -28,10 +28,11 @@ class Server {
 
   static const int MAX_CONNECTIONS = 100;
   static const int BUFFER_SIZE = 1024;
+  static const int MAX_WAITING_CONN = 55;
 
  private:
   bool run_srv = false;
-  int sockid = -1;  // TODO(kamman): rename to server_socket
+  int server_socket = -1;
   int nfds = 0;
   socklen_t length;
   struct sockaddr_in address;
@@ -43,6 +44,10 @@ class Server {
   fd_set ready_sockets;
 
   timeval select_timeout = {5, 0};
+
+  void accept_connections();
+  void recive_datas();
+  void send_messages();
 
   void log(const std::string &msg, int sock = -1);
   void disconnect(int usersock);

@@ -4,6 +4,8 @@
 #define SRC_SERVER_INTERPRETER_H_
 
 #include <exception>
+#include <memory>
+#include <utility>
 #include <string>
 
 #include "commands/Command.h"
@@ -18,11 +20,7 @@
 class Interpreter {
  public:
   Interpreter() {}
-  explicit Interpreter(User *current_user, Users *users, Tables *tables)
-      : current_user(current_user), users(users), tables(tables) {
-    setSelectCommandState();
-  }
-  ~Interpreter();
+  Interpreter(User *current_user, Users *users, Tables *tables);
 
   void interpretChar(char c);
 
@@ -31,17 +29,21 @@ class Interpreter {
   Users *users;
   Tables *tables;
   // int userid = -1;
-  std::string tmp = "";
+  buffer_ptr tmp;
 
   int bytesToRead;
   enum ActionState { SelectCommand, ReadLength, PushToCommand } actionState;
-  Command *currentCommand = nullptr;
+  command_ptr currentCommand = nullptr;
 
   void proceedInput();
 
   void setLengthState();
   void setPushState();
   void setSelectCommandState();
+
+  bool equal(buffer_ptr left, buffer_ptr right) {
+    return std::equal(left->begin(), left->end(), right->begin());
+  }
 };
 
 #endif  // SRC_SERVER_INTERPRETER_H_

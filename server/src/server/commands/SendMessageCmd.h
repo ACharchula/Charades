@@ -10,13 +10,12 @@
 class SendMessageCmd : public Command {
  public:
   using Command::Command;
-  // explicit SendMessageCmd(int userid) : Command(userid) {}
-  void pushInput(std::string input) override;
+  void pushInput(buffer_ptr input) override;
 
-  static const char HEADER[];
+  static const buffer_ptr HEADER;
 
  private:
-  static const char output_header[];
+  static const buffer_ptr output_header;
 };
 
 #endif  // SRC_SERVER_COMMANDS_SENDMESSAGECMD_H_

@@ -11,31 +11,26 @@
 #include <string>
 #include <vector>
 
+#include "commands/Helpers.h"
+
 class User;
 using user_ptr = std::shared_ptr<User>;
 
 class User {
  public:
   User() {}
-  explicit User(int id) : id(id) {}
+  explicit User(int id, int socket) : id(id), socket(socket) {}
 
-  struct message {
-    enum MsgType { String, Pointer } type;
-    std::string str;
-    std::vector<char>* point;
-  };
-
-  User::message popMessage();
-  void addMessageToQueue(std::string msg) {
-    messeges.push({message::MsgType::String, msg, nullptr});
+  buffer_ptr popMessage();
+  void addMessageToQueue(const std::string &msg) {
+    messeges.push(helpers::to_buf(msg));
   }
-  void addMessageToQueue(std::vector<char>* msg) {
-    messeges.push({message::MsgType::Pointer, "", msg});
-  }
+  void addMessageToQueue(buffer_ptr msg) { messeges.push(msg); }
   bool isMessageToSend() { return !messeges.empty(); }
 
   void login() { logged = true; }
   bool isLogged() { return logged; }
+  int sock() { return socket; }
 
   void setUsername(const std::string& name) { username = name; }
   std::string getUsername() { return username; }
@@ -45,8 +40,9 @@ class User {
 
  private:
   int id;
+  int socket;
   int table_id;
-  std::queue<message> messeges;
+  std::queue<buffer_ptr> messeges;
   bool logged;
   std::string username;
 };
@@ -54,7 +50,7 @@ class User {
 class Users {
  public:
   const std::list<int>& getAllUsersIds() { return userids; }
-  void addUser(int userid);
+  void addUser(int userid, int socket);
   void removeUser(int userid);
   User* getUser(int id) { return &users[id]; }
 

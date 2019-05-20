@@ -2,36 +2,44 @@
 
 #include "Table.h"
 
-const char Table::GAME_WAITING_PACKET[] = "GAME_WAITING0000";
-const char Table::GAME_READY[] = "GAME___READY";
-const char Table::GAME_ENDED[] = "GAME___ENDED";
-const char Table::UPDATE_CANVAS[] = "UPDATECANVAS";
-const char Table::CLUE_CORRECT_PACKET[] = "CLUE_CORRECT0000";
-const char Table::CLUE_INCORRECT_PACKET[] = "CLUEINCORECT0000";
-const char Table::YOU_ARE_DRAWER[] = "YOUAREDRAWER";
+const buffer_ptr Table::GAME_WAITING_PACKET =
+    helpers::to_buf("GAME_WAITING0000");
+const buffer_ptr Table::GAME_READY = helpers::to_buf("GAME___READY");
+const buffer_ptr Table::GAME_ENDED = helpers::to_buf("GAME___ENDED");
+const buffer_ptr Table::UPDATE_CANVAS = helpers::to_buf("UPDATECANVAS");
+const buffer_ptr Table::CLUE_CORRECT_PACKET =
+    helpers::to_buf("CLUE_CORRECT0000");
+const buffer_ptr Table::CLUE_INCORRECT_PACKET =
+    helpers::to_buf("CLUEINCORECT0000");
+const buffer_ptr Table::YOU_ARE_DRAWER = helpers::to_buf("YOUAREDRAWER");
 
-Table::Table(Users* users, int id) : users(users), id(id) { loadStartCanvas(); }
+const char Table::INITIAL_PICTURE_FILE[] = "data/start_canvas.png";
+
+Table::Table(Users* users, int id) : users(users), id(id) {
+  canvas = std::make_shared<buffer_t>();
+  loadStartCanvas();
+}
 
 void Table::loadStartCanvas() {
-  std::string filename =
-      "data/start_canvas.png";  // TODO: this have to be configured!
-  std::ifstream start_canvas(filename,
+  std::ifstream start_canvas(INITIAL_PICTURE_FILE,
                              std::ifstream::binary | std::ifstream::ate);
   int size = start_canvas.tellg();
   start_canvas.seekg(0);
   std::istreambuf_iterator<char> start(start_canvas), end;
 
-  canvas.reserve(size);
-  canvas.assign(start, end);
+  canvas->reserve(size);
+  canvas->assign(start, end);
 
   start_canvas.clear();
 }
 
-void Table::checkClue(std::string propose, User* user) {
-  std::transform(propose.begin(), propose.end(), propose.begin(), ::tolower);
+void Table::checkClue(buffer_ptr propose, User* user) {
+  auto propose_str = helpers::to_str(propose);
+  std::transform(propose_str.begin(), propose_str.end(), propose_str.begin(),
+                 ::tolower);
   if (user == drawer) {
     helpers::log("Drawer try to send message, ignored", user->getId());
-  } else if (clue.compare(propose) != 0 || state == ENDED) {
+  } else if (clue.compare(propose_str) != 0 || state == ENDED) {
     user->addMessageToQueue(CLUE_INCORRECT_PACKET);
   } else {
     helpers::log("User won: " + user->getUsername(), user->getId());
@@ -40,18 +48,10 @@ void Table::checkClue(std::string propose, User* user) {
   }
 }
 
-void Table::sendToAllExcept(std::string msg, User* except_user) {
+void Table::sendToAllExcept(buffer_ptr buff, User* except_user) {
   for (auto player : players) {
     if (player != except_user) {
-      player->addMessageToQueue(msg);
-    }
-  }
-}
-
-void Table::sendToAllExcept(std::vector<char>* buff_ptr, User* except_user) {
-  for (auto player : players) {
-    if (player != except_user) {
-      player->addMessageToQueue(buff_ptr);
+      player->addMessageToQueue(buff);
     }
   }
 }
@@ -65,9 +65,9 @@ void Table::sendUpdateCanvasIfNeeded() {
   if (canvasUpdated) {
     sendToAllExcept(UPDATE_CANVAS, drawer);
     sendToAllExcept(
-        helpers::get_zero_width_size(canvas.size(), CANVAS_LENGTH_SIZE),
+        helpers::get_zero_width_size(canvas->size(), CANVAS_LENGTH_SIZE),
         drawer);
-    sendToAllExcept(&canvas, drawer);
+    sendToAllExcept(canvas, drawer);
 
     canvasUpdated = false;
   }
@@ -113,8 +113,8 @@ void Table::proceed() {
 void Table::sendCurrentCanvas(User* user) {
   user->addMessageToQueue(UPDATE_CANVAS);
   user->addMessageToQueue(
-      helpers::get_zero_width_size(canvas.size(), CANVAS_LENGTH_SIZE));
-  user->addMessageToQueue(&canvas);
+      helpers::get_zero_width_size(canvas->size(), CANVAS_LENGTH_SIZE));
+  user->addMessageToQueue(canvas);
 }
 
 void Table::sendCurrentStatus(User* user) {
@@ -135,18 +135,17 @@ User* Table::getRandomPlayer() {
   return *it;
 }
 
-void Table::setCanvas(std::string input, User* user) {
+void Table::setCanvas(buffer_ptr input, User* user) {
   if (user != drawer) {
     helpers::log("Not a drawer try to draw");
-    return;  // TODO: exception or send error packet
+    return;
   }
-  canvas.reserve(input.size());
-  canvas.assign(input.begin(), input.end());
+  canvas = input;
   canvasUpdated = true;
 
   // THIS IS DEBUG ONLY AND WILL BE REMOVED
   std::ofstream debug_picture("data/debug_out.png", std::ofstream::binary);
-  debug_picture.write(canvas.data(), canvas.size());
+  debug_picture.write(canvas->data(), canvas->size());
   debug_picture.close();
 }
 

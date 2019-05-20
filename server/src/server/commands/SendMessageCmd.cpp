@@ -2,18 +2,22 @@
 
 #include "SendMessageCmd.h"
 
-const char SendMessageCmd::HEADER[] = "SEND_MESSAGE";
-const char SendMessageCmd::output_header[] = "CHAT_MESSAGE";
+const buffer_ptr SendMessageCmd::HEADER = helpers::to_buf("SEND_MESSAGE");
+const buffer_ptr SendMessageCmd::output_header =
+    helpers::to_buf("CHAT_MESSAGE");
 
-void SendMessageCmd::pushInput(std::string input) {
+void SendMessageCmd::pushInput(buffer_ptr input) {
   auto table = tables->getTable(0);
 
   if (!table.isUserInTable(current_user)) return;
 
-  std::string data = current_user->getUsername() + "\n" + input;
-  std::string header =
-      output_header + helpers::get_zero_width_size(data.size());
+  std::string user = current_user->getUsername() + "\n";
+  int data_size = user.size() + input->size();
 
-  table.sendToAllExcept(header + data, current_user); // td: move inside table
+  table.sendToAllExcept(output_header, current_user);
+  table.sendToAllExcept(helpers::get_zero_width_size(data_size), current_user);
+  table.sendToAllExcept(helpers::to_buf(user), current_user);
+  table.sendToAllExcept(input, current_user);
+
   table.checkClue(input, current_user);
 }
