@@ -17,7 +17,6 @@ const buffer_ptr Table::CHAT_MESSAGE = helpers::to_buf("CHAT_MESSAGE");
 const char Table::INITIAL_PICTURE_FILE[] = "data/start_canvas.png";
 
 Table::Table(Users* users, int id) : users(users), id(id) {
-  canvas = std::make_shared<buffer_t>();
   loadStartCanvas();
 }
 
@@ -28,6 +27,7 @@ void Table::loadStartCanvas() {
   start_canvas.seekg(0);
   std::istreambuf_iterator<char> start(start_canvas), end;
 
+  canvas = std::make_shared<buffer_t>();
   canvas->reserve(size);
   canvas->assign(start, end);
 
@@ -103,6 +103,7 @@ void Table::proceedGameEndIfNeeded() {
 
 void Table::startGameIfNeeded() {
   if (state == WAITING && players.size() > 1) {
+    loadStartCanvas();
     clue = getRandomClue();
     drawer = getRandomPlayer();
     state = READY;
