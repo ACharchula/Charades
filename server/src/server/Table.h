@@ -71,6 +71,7 @@ class Table {
   static const buffer_ptr CHAT_MESSAGE;
 
   static const int CANVAS_LENGTH_SIZE = 8;
+  static const int MINIMUM_PLAYERS = 2;
 
   static const char INITIAL_PICTURE_FILE[];
 };

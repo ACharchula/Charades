@@ -23,12 +23,12 @@ class Interpreter {
   Interpreter(User *current_user, Users *users, Tables *tables);
 
   void interpretChar(char c);
+  void disconnect();
 
  private:
   User *current_user = nullptr;
   Users *users;
   Tables *tables;
-  // int userid = -1;
   buffer_ptr tmp;
 
   int bytesToRead;

@@ -63,3 +63,9 @@ void Interpreter::setSelectCommandState() {
   actionState = ActionState::SelectCommand;
   bytesToRead = Command::HEADER_SIZE;
 }
+
+void Interpreter::disconnect() {
+  int table_id = current_user->getTableId();
+  if (current_user->getTableId() != User::NO_TABLE)
+    tables->getTable(table_id).removePlayer(current_user);
+}

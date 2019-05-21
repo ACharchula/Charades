@@ -16,9 +16,7 @@ const buffer_ptr Table::CHAT_MESSAGE = helpers::to_buf("CHAT_MESSAGE");
 
 const char Table::INITIAL_PICTURE_FILE[] = "data/start_canvas.png";
 
-Table::Table(Users* users, int id) : users(users), id(id) {
-  loadStartCanvas();
-}
+Table::Table(Users* users, int id) : users(users), id(id) { loadStartCanvas(); }
 
 void Table::loadStartCanvas() {
   std::ifstream start_canvas(INITIAL_PICTURE_FILE,
@@ -91,18 +89,20 @@ void Table::sendUpdateCanvasIfNeeded() {
 
 void Table::proceedGameEndIfNeeded() {
   if (state == ENDED) {
-    std::string data = winner->getUsername() + "\n" + clue;
+    std::string data = "NO_ONE\n";
+    if (winner != nullptr) data = winner->getUsername() + "\n" + clue;
 
     sendToAll(GAME_ENDED);
     sendToAll(helpers::get_zero_width_size(data.size()));
     sendToAll(data);
 
     state = WAITING;
+    helpers::log("Game ended.");
   }
 }
 
 void Table::startGameIfNeeded() {
-  if (state == WAITING && players.size() > 1) {
+  if (state == WAITING && players.size() >= MINIMUM_PLAYERS) {
     loadStartCanvas();
     clue = getRandomClue();
     drawer = getRandomPlayer();
@@ -184,8 +184,13 @@ void Table::addPlayer(User* user) {
 }
 
 void Table::removePlayer(User* user) {
+  helpers::log("User left the table", user->sock());
   players.erase(user);
   if (drawer == user) {
-    setGameEnd(user);  // TD: maybe another?
+    helpers::log("Drawer left the table.");
+    setGameEnd(nullptr);
+  } else if (players.size() < MINIMUM_PLAYERS) {
+    helpers::log("Number of players on table is less that minimum.");
+    setGameEnd(nullptr);
   }
 }

@@ -38,10 +38,12 @@ class User {
   int getTableId() { return table_id; }
   int getId() { return id; }
 
+  static const int NO_TABLE = -1;
+
  private:
   int id;
   int socket;
-  int table_id;
+  int table_id = NO_TABLE;
   std::queue<buffer_ptr> messeges;
   bool logged;
   std::string username;

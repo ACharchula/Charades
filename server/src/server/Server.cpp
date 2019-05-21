@@ -129,6 +129,7 @@ void Server::log(const std::string &msg, int sock) {
 
 void Server::disconnect(int usersock) {
   close(usersock);
+  interpreters[usersock].disconnect();
   interpreters.erase(usersock);
   users.removeUser(usersock);
   log("Client disconnected", usersock);
