@@ -22,6 +22,11 @@
 #include "LoginDialog.h"
 #include "ChangeTableDialog.h"
 
+enum GameState{
+    Draw,
+    Guess
+};
+
 class MainWindow : public QMainWindow {
 Q_OBJECT
 
@@ -30,10 +35,6 @@ public:
     ~MainWindow();
 
 private:
-    enum GameState{
-        Draw,
-        Guess
-    };
 
     GameState gameState;
     Client* client;

@@ -51,12 +51,14 @@ void MainWindow::analyseStatement(QString state) {
 
 void MainWindow::draw(QString word){
     QString message = "LOG: You are drawer.";
-    list->addItem(message);
+    auto* msg = new QListWidgetItem(message);
+    list->addItem(msg);
     gameState = GameState::Draw;
     timer->start(100);
     clue->setText(word);
     clue->show();
     textArea->hide();
+    drawScene.setDraw(true);
 }
 
 void MainWindow::updateScene(QByteArray byteArray) {
@@ -81,13 +83,16 @@ void MainWindow::solution(QString info) {
     if(gameState == GameState::Draw){
         clue->hide();
         textArea->show();
-        timer->stop();
+//        timer->stop();
         gameState = GameState::Guess;
+        drawScene.setDraw(false);
     }
 }
 
 void MainWindow::ready(QString info) {
-
+    QString message = "LOG: New drawer is: " + info;
+    auto* msg = new QListWidgetItem(message);
+    list->addItem(msg);
 }
 
 void MainWindow::receiveTextMessage(QString message) {

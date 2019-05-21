@@ -33,7 +33,6 @@ void Worker::reader() {
     std::pair<Message*, Message*> data;
     forever {
         data = client->receive();
-        data.first->print();
         if (data.first->equal(WELCOME)){
             emit statement(QString::fromStdString(WELCOME));
         } else if (data.first->equal(CHAT)){
