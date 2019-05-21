@@ -78,23 +78,26 @@ class ConnectionService {
     }
 
     private byte[] readByteArray(int expectedLength) throws IOException {
-        ByteBuffer buff = ByteBuffer.allocate(expectedLength);
         int read = 0;
         int consumed;
-        byte[] result = new byte[0];
+        byte[] result = new byte[expectedLength];
 
+        System.out.println("start read");
         do {
+            ByteBuffer buff = ByteBuffer.allocate(expectedLength - read);
             buff.clear();
             consumed = socketChannel.read(buff);
-            if (consumed == -1) {
+            if(consumed > 0) {
+                System.arraycopy(buff.array(), 0, result, read, consumed);
+                read += consumed;
+            }
+            else if (consumed == -1) {
                 throw new IOException("Error when reading byte array");
             }
 
-            result = concatByteArrays(result, convertByteBufferToByteArray(buff));
-            read += consumed;
-
         } while (read != expectedLength);
 
+        System.out.println("read");
         return result;
     }
 
@@ -195,12 +198,12 @@ class ConnectionService {
         int length = Integer.parseInt(read(BYTES_TO_READ_LENGTH * 2));
         byte[] bitmapByteArray = readByteArray(length);
         ByteArrayInputStream bais = new ByteArrayInputStream(bitmapByteArray);
-//        System.out.println("Bais is null = ");
-//        System.out.println(bais == null);
+        System.out.println("Bais is null = ");
+        System.out.println(bais == null);
 //        File outputFile = new File("saved.png");
         BufferedImage image = ImageIO.read(bais);
-//        System.out.println("Image is null");
-//        System.out.println(image == null);
+        System.out.println("Image is null");
+        System.out.println(image == null);
 //        ImageIO.write(image, "png", outputFile);
         return image;
     }
