@@ -5,6 +5,7 @@
 
 #include <fstream>
 #include <map>
+#include <random>
 #include <set>
 #include <string>
 #include <utility>
@@ -42,6 +43,7 @@ class Table {
 
   Users *users;
   void loadStartCanvas();
+  void loadWords();
 
   void setGameEnd(User *user);
   void sendToAllExcept(buffer_ptr buff_ptr, User *user);
@@ -51,7 +53,7 @@ class Table {
   void sendToAll(buffer_ptr buff) { sendToAllExcept(buff, nullptr); }
   void sendCurrentCanvas(User *user);
   void sendCurrentStatus(User *user);
-  void sendUserMessage(buffer_ptr msg, User* author);
+  void sendUserMessage(buffer_ptr msg, User *author);
 
   void sendUpdateCanvasIfNeeded();
   void proceedGameEndIfNeeded();
@@ -59,7 +61,9 @@ class Table {
 
   User *getRandomPlayer();
 
-  std::string getRandomClue() { return "kurczak"; }  // make static
+  std::string getRandomClue();
+
+  static std::vector<std::string> WORDS;
 
   static const buffer_ptr GAME_WAITING_PACKET;
   static const buffer_ptr GAME_READY;
@@ -74,6 +78,7 @@ class Table {
   static const int MINIMUM_PLAYERS = 2;
 
   static const char INITIAL_PICTURE_FILE[];
+  static const char WORDS_FILE[];
 };
 
 class Tables {

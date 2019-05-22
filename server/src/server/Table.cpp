@@ -15,6 +15,9 @@ const buffer_ptr Table::YOU_ARE_DRAWER = helpers::to_buf("YOUAREDRAWER");
 const buffer_ptr Table::CHAT_MESSAGE = helpers::to_buf("CHAT_MESSAGE");
 
 const char Table::INITIAL_PICTURE_FILE[] = "data/start_canvas.png";
+const char Table::WORDS_FILE[] = "data/words.txt";
+
+std::vector<std::string> Table::WORDS;
 
 Table::Table(Users* users, int id) : users(users), id(id) { loadStartCanvas(); }
 
@@ -30,6 +33,42 @@ void Table::loadStartCanvas() {
   canvas->assign(start, end);
 
   start_canvas.clear();
+}
+
+void Table::loadWords() {
+  std::ifstream words_db(WORDS_FILE);
+  std::string word;
+
+  WORDS.clear();
+  while (!words_db.eof()) {
+    words_db >> word;
+    if (word.size() > 0) {
+      std::transform(word.begin(), word.end(), word.begin(), ::tolower);
+      WORDS.push_back(word);
+    }
+  }
+
+  helpers::log("Words DB loaded.");
+  if (WORDS.size() == 0) {
+    helpers::log("Words DB is empty, add 'kurczak'.");
+    WORDS.push_back("kurczak");
+  }
+}
+
+std::string Table::getRandomClue() {
+  if (WORDS.size() == 0) loadWords();
+
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> dist(0, WORDS.size() - 1);
+
+  int random = dist(gen);
+  auto str = WORDS[random];
+
+  helpers::log(std::to_string(random));
+  helpers::log(str);
+
+  return WORDS[random];
 }
 
 void Table::checkClue(buffer_ptr propose, User* user) {
@@ -89,8 +128,9 @@ void Table::sendUpdateCanvasIfNeeded() {
 
 void Table::proceedGameEndIfNeeded() {
   if (state == ENDED) {
-    std::string data = "NO_ONE\n";
-    if (winner != nullptr) data = winner->getUsername() + "\n" + clue;
+    std::string data = "NO_ONE";
+    if (winner != nullptr) data = winner->getUsername();
+    data += "\n" + clue;
 
     sendToAll(GAME_ENDED);
     sendToAll(helpers::get_zero_width_size(data.size()));
