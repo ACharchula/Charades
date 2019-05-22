@@ -10,7 +10,7 @@
 #include <zconf.h>
 #include <cstring>
 #include "client.h"
-#include "Consts.h"
+#include "../Consts.h"
 
 Client::Client(std::string userName) : userName(std::move(userName)) {}
 

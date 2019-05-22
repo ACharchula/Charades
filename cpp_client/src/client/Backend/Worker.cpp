@@ -5,7 +5,7 @@
 #include <fstream>
 #include "Worker.h"
 #include "client.h"
-#include "Consts.h"
+#include "../Consts.h"
 
 const int lineFeed = 10;
 const size_t MAXMESSAGESIZE = 1000 * 1000 - 20;

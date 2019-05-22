@@ -6,7 +6,7 @@
 #include "DrawView.h"
 #include "LoginDialog.h"
 #include "ChangeTableDialog.h"
-#include "../Backend/Consts.h"
+#include "../Consts.h"
 #include <QDebug>
 #include <QTimer>
 #include <QLabel>
