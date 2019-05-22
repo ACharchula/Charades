@@ -6,6 +6,7 @@
 #include "DrawView.h"
 #include "LoginDialog.h"
 #include "ChangeTableDialog.h"
+#include "../Backend/Consts.h"
 #include <QDebug>
 #include <QTimer>
 #include <QLabel>
@@ -16,8 +17,6 @@
 #include <QtWidgets/QGraphicsView>
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QListWidgetItem>
-
-//const char* userName = "zetraxus";
 
 MainWindow::MainWindow(QWidget* parent) :
         QMainWindow(parent) {
