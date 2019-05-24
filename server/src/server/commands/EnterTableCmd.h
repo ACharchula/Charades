@@ -9,13 +9,10 @@
 
 class EnterTableCmd : public Command {
  public:
-  explicit EnterTableCmd(int userid) : Command(userid) {}
-  void pushInput(std::string input, GlobalData *gdata) override;
+  using Command::Command;
+  void pushInput(buffer_ptr input) override;
 
-  static const char HEADER[];
-
- private:
-  static const char update_header[];
+  static const buffer_ptr HEADER;
 };
 
 #endif  // SRC_SERVER_COMMANDS_ENTERTABLECMD_H_

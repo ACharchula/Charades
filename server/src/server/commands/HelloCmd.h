@@ -9,13 +9,13 @@
 
 class HelloCmd : public Command {
  public:
-  explicit HelloCmd(int userid) : Command(userid) {}
-  void pushInput(std::string input, GlobalData *gdata) override;
+  using Command::Command;
+  void pushInput(buffer_ptr input) override;
 
-  static const char HEADER[];
+  static const buffer_ptr HEADER;
 
  private:
-  static const char output_packet[];
+  static const buffer_ptr output_packet;
 };
 
 #endif  // SRC_SERVER_COMMANDS_HELLOCMD_H_

@@ -2,12 +2,12 @@
 
 #include "SetCanvasCmd.h"
 
-const char SetCanvasCmd::HEADER[] = "SET___CANVAS";
+const buffer_ptr SetCanvasCmd::HEADER = helpers::to_buf("SET___CANVAS");
 
-void SetCanvasCmd::pushInput(std::string input, GlobalData *gdata) {
-  TableMgmt tmgmt(gdata->getTable(), *gdata);
+void SetCanvasCmd::pushInput(buffer_ptr input) {
+  auto &table = tables->getTable(0);
 
-  if (!tmgmt.isUserInTable(userid)) return;
+  if (!table.isUserInTable(current_user)) return;
 
-  tmgmt.setCanvas(input, userid);
+  table.setCanvas(input, current_user);
 }
