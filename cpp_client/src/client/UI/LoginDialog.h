@@ -16,7 +16,7 @@ class LoginDialog : public QDialog {
     Q_OBJECT
 
 public:
-    LoginDialog(QWidget* parent = 0);
+    explicit LoginDialog(QWidget* parent = 0);
 
 private:
     QDialog* dialog;

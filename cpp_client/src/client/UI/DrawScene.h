@@ -15,7 +15,7 @@ private:
     bool draw;
 
 public:
-    DrawScene();
+    explicit DrawScene();
     void temp(QGraphicsSceneMouseEvent *event);
     void mouseReleaseEvent (QGraphicsSceneMouseEvent *event) override;
     void mouseMoveEvent (QGraphicsSceneMouseEvent *event) override;

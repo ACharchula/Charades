@@ -31,5 +31,6 @@ const std::string ERRORUKNOWNSERVER = "Uknown server.";
 const std::string ERRORCONNECT = "Connection failed.";
 const std::string ERRORWRITING = "Error writing to socket.";
 const std::string ERRORREADING = "Error reading from socket.";
+const std::string ERRORRECEAVING = "Error in receiving data.";
 
 #endif //CPP_CLIENT_Consts_H

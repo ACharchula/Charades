@@ -25,7 +25,7 @@ void Client::_createSocket() {
         throw std::runtime_error(ERROROPEN);
 }
 
-void Client::_connect(const char* serverName, unsigned port) {
+void Client::_connect(const char* serverName, uint16_t port) {
     server.sin_family = AF_INET;
     hp = gethostbyname(serverName);
     if (hp == (struct hostent*) 0)
@@ -55,15 +55,12 @@ std::pair<char*, ssize_t> Client::_receive(size_t expectedDataSize) {
 
 Message* Client::_receiveMessage(size_t expectedDataSize) {
     auto* message = new Message(expectedDataSize);
-    try {
-        do {
-            std::pair<char*, ssize_t> nextData = _receive(expectedDataSize);
-            expectedDataSize -= nextData.second;
-            message->append(nextData);
-        } while (expectedDataSize);
-    } catch (const std::runtime_error& error) {
-        std::cerr << error.what() << std::endl;
-    }
+
+    do {
+        std::pair<char*, ssize_t> nextData = _receive(expectedDataSize);
+        expectedDataSize -= nextData.second;
+        message->append(nextData);
+    } while (expectedDataSize);
 
     return message;
 }
@@ -73,9 +70,9 @@ std::string Client::_getMessageSize(size_t size, std::string messageType) {
 
     int i;
     if(messageType == SET || messageType == UPDATE)
-      i = 1000 * 1000 * 10;
+        i = 1000 * 1000 * 10;
     else
-      i = 1000;
+        i = 1000;
     for (; i > 0; i /= 10) {
         result += std::to_string((size / i));
         if (size / i > 0)
@@ -94,7 +91,7 @@ std::pair<const char*, size_t> Client::_preparedMessage(std::string message, std
     return std::make_pair(ret, result.size());
 }
 
-void Client::run(const char* serverName, unsigned port) {
+void Client::run(const char* serverName, uint16_t port) {
     _createSocket();
     _connect(serverName, port);
     send(userName, HELLO);
@@ -102,12 +99,8 @@ void Client::run(const char* serverName, unsigned port) {
 }
 
 void Client::send(std::string message, std::string messageType) {
-    try {
-        std::pair<const char*, size_t> messageToSend = _preparedMessage(std::move(message), std::move(messageType));
-        _send(messageToSend.first, messageToSend.second);
-    } catch (const std::runtime_error& error) {
-        std::cerr << error.what() << std::endl;
-    }
+    std::pair<const char*, size_t> messageToSend = _preparedMessage(std::move(message), std::move(messageType));
+    _send(messageToSend.first, messageToSend.second);
 }
 
 std::pair<Message*, Message*> Client::receive() {
@@ -124,4 +117,3 @@ std::pair<Message*, Message*> Client::receive() {
 
     return std::make_pair(header, body);
 }
-

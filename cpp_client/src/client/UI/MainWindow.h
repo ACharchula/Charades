@@ -16,31 +16,20 @@
 #include <QtWidgets/QListWidget>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QLabel>
-#include "../Backend/Worker.h"
+#include "../Connection/Worker.h"
 #include "DrawView.h"
 #include "DrawScene.h"
 #include "LoginDialog.h"
 #include "ChangeTableDialog.h"
 
-enum GameState{
-    Draw,
-    Guess
-};
-
 class MainWindow : public QMainWindow {
-Q_OBJECT
+    Q_OBJECT
 
 public:
     explicit MainWindow(QWidget* parent = 0);
-    ~MainWindow();
 
-private:
-
-    GameState gameState;
-    Client* client;
-    LoginDialog* loginDialog;
+public:
     ChangeTableDialog* changeTableDialog = nullptr;
-    std::string userName;
 
     QHBoxLayout* layout;
     QVBoxLayout* leftVBox;
@@ -52,37 +41,18 @@ private:
     QLabel* clue;
     DrawView* drawView;
     DrawScene drawScene;
-    QTimer *timer;
 
-    QThread* threadR = nullptr;
-    QThread* threadW = nullptr;
-    Worker* workerR = nullptr;
-    Worker* workerW = nullptr;
-
-private:
-    void connectToServer();
-    void prepareUI();
-    void prepareThreads();
-    void connectAllSignalsAndSlots();
-
-signals:
-    void sendFrame(QByteArray);
-    void sendMessage(QString);
-
-private slots:
+public:
+    void addChatMessage(QString message);
+    void addPlayerChatMessage(QString message);
     void draw(QString word);
-    void analyseStatement(QString state);
+    void guess();
     void updateScene(QByteArray byteArray);
-    void changeTableReleased();
-    void giveUpReleased();
-    void sendTextMessage();
-    void receiveTextMessage(QString message);
-    void login(QString nick);
-    void closeApp();
-    void sendFrame();
-    void changeTable(QString newTable);
-    void solution(QString info);
-    void ready(QString info);
+
+    QString getTextMessage();
+    QByteArray getScene();
+
+    void prepareUI();
 };
 
 #endif //CPP_CLIENT_MAINWINDOW_H
