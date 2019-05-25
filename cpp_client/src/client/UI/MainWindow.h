@@ -22,6 +22,11 @@
 #include "LoginDialog.h"
 #include "ChangeTableDialog.h"
 
+enum GameState{
+    Draw,
+    Guess
+};
+
 class MainWindow : public QMainWindow {
 Q_OBJECT
 
@@ -30,6 +35,8 @@ public:
     ~MainWindow();
 
 private:
+
+    GameState gameState;
     Client* client;
     LoginDialog* loginDialog;
     ChangeTableDialog* changeTableDialog = nullptr;
@@ -63,7 +70,8 @@ signals:
     void sendMessage(QString);
 
 private slots:
-    void method(QString);
+    void draw(QString word);
+    void analyseStatement(QString state);
     void updateScene(QByteArray byteArray);
     void changeTableReleased();
     void giveUpReleased();
@@ -73,6 +81,8 @@ private slots:
     void closeApp();
     void sendFrame();
     void changeTable(QString newTable);
+    void solution(QString info);
+    void ready(QString info);
 };
 
 #endif //CPP_CLIENT_MAINWINDOW_H

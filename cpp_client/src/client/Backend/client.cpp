@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 // Created by adam on 11.04.19.
 //
@@ -8,8 +10,9 @@
 #include <zconf.h>
 #include <cstring>
 #include "client.h"
+#include "../Consts.h"
 
-Client::Client(const std::string userName) : userName(userName) {}
+Client::Client(std::string userName) : userName(std::move(userName)) {}
 
 Client::~Client() {
     if (sock >= 0)
@@ -19,25 +22,25 @@ Client::~Client() {
 void Client::_createSocket() {
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0)
-        throw std::runtime_error("Opening stream socket failed");
+        throw std::runtime_error(ERROROPEN);
 }
 
 void Client::_connect(const char* serverName, unsigned port) {
     server.sin_family = AF_INET;
     hp = gethostbyname(serverName);
     if (hp == (struct hostent*) 0)
-        throw std::runtime_error("Uknown server.");
+        throw std::runtime_error(ERRORUKNOWNSERVER);
 
     memcpy((char*) &server.sin_addr, hp->h_addr, (size_t) hp->h_length);
     server.sin_port = htons(port);
 
     if (connect(sock, (struct sockaddr*) &server, sizeof server) < 0)
-        throw std::runtime_error("Connection failed.");
+        throw std::runtime_error(ERRORCONNECT);
 }
 
 void Client::_send(const char* message, size_t messageSize) {
     if (write(sock, message, messageSize) < 0)
-        throw std::runtime_error("Error writing to socket.");
+        throw std::runtime_error(ERRORWRITING);
 }
 
 std::pair<char*, ssize_t> Client::_receive(size_t expectedDataSize) {
@@ -45,13 +48,13 @@ std::pair<char*, ssize_t> Client::_receive(size_t expectedDataSize) {
 
     ssize_t result;
     if ((result = read(sock, buffer, expectedDataSize)) < 0)
-        throw std::runtime_error("Error reading from socket.");
+        throw std::runtime_error(ERRORREADING);
 
     return std::make_pair(buffer, result);
 }
 
 Message* Client::_receiveMessage(size_t expectedDataSize) {
-    Message* message = new Message(expectedDataSize);
+    auto* message = new Message(expectedDataSize);
     try {
         do {
             std::pair<char*, ssize_t> nextData = _receive(expectedDataSize);
@@ -65,7 +68,7 @@ Message* Client::_receiveMessage(size_t expectedDataSize) {
     return message;
 }
 
-std::string Client::_getMessageSize(size_t size, const std::string messageType) {
+std::string Client::_getMessageSize(size_t size, std::string messageType) {
     std::string result;
 
     int i;
@@ -81,7 +84,7 @@ std::string Client::_getMessageSize(size_t size, const std::string messageType) 
     return result;
 }
 
-std::pair<const char*, size_t> Client::_preparedMessage(const std::string message, const std::string messageType) {
+std::pair<const char*, size_t> Client::_preparedMessage(std::string message, std::string messageType) {
     std::string result;
     result += messageType;
     result += _getMessageSize(message.size(), messageType);
@@ -92,19 +95,15 @@ std::pair<const char*, size_t> Client::_preparedMessage(const std::string messag
 }
 
 void Client::run(const char* serverName, unsigned port) {
-    try {
-        _createSocket();
-        _connect(serverName, port);
-        send(userName, HELLO);
-        send("", ENTER);
-    } catch (const std::runtime_error& error) {
-        std::cerr << error.what() << std::endl;
-    }
+    _createSocket();
+    _connect(serverName, port);
+    send(userName, HELLO);
+    send("", ENTER);
 }
 
-void Client::send(const std::string message, const std::string messageType) {
+void Client::send(std::string message, std::string messageType) {
     try {
-        std::pair<const char*, size_t> messageToSend = _preparedMessage(message, messageType);
+        std::pair<const char*, size_t> messageToSend = _preparedMessage(std::move(message), std::move(messageType));
         _send(messageToSend.first, messageToSend.second);
     } catch (const std::runtime_error& error) {
         std::cerr << error.what() << std::endl;

@@ -12,18 +12,22 @@
 
 DrawScene::DrawScene() {
    setSceneRect(0,0,400,400);
+   draw = false;
 }
 
 void DrawScene::mousePressEvent (QGraphicsSceneMouseEvent *event){
-    temp(event);
+    if(draw)
+        temp(event);
 }
 
 void DrawScene::mouseMoveEvent (QGraphicsSceneMouseEvent *event){
-   temp(event);
+    if(draw)
+        temp(event);
 }
 
 void DrawScene::mouseReleaseEvent (QGraphicsSceneMouseEvent *event){
-    temp(event);
+    if(draw)
+        temp(event);
 }
 
 void DrawScene::temp(QGraphicsSceneMouseEvent *event){
@@ -36,7 +40,8 @@ void DrawScene::temp(QGraphicsSceneMouseEvent *event){
    addEllipse(x-rad, y-rad, rad*2.0, rad*2.0,
               QPen(), QBrush(Qt::SolidPattern));
 
-   std::cout << x << " " << y << std::endl;
+   //TODO QpainterPath
+//   std::cout << x << " " << y << std::endl;
 }
 
 void DrawScene::updateScene(QByteArray byteArray) {
@@ -46,6 +51,7 @@ void DrawScene::updateScene(QByteArray byteArray) {
     image = QImage::fromData(byteArray, "PNG");
     setSceneRect(image.rect());
     addPixmap(QPixmap::fromImage(image));
+
     update();
 }
 
@@ -55,6 +61,7 @@ QByteArray DrawScene::getScene() {
 
     QPainter painter(&image);
     render(&painter);
+    painter.setRenderHint(QPainter::Antialiasing);
 
     QByteArray ba;
     QBuffer buffer(&ba);
@@ -62,4 +69,9 @@ QByteArray DrawScene::getScene() {
     image.save(&buffer, "PNG");
     buffer.close();
     return ba;
+}
+
+void DrawScene::setDraw(bool draw) {
+    DrawScene::draw = draw;
+    clear();
 }

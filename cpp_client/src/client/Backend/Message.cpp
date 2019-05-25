@@ -31,6 +31,12 @@ const std::string& Message::getValue() const {
     return value;
 }
 
+const std::string Message::getWinnerTextMessage() const {
+    std::string msg = "Correct answer-> ";
+    msg.append(getTextMessage());
+    return msg;
+}
+
 const std::string Message::getTextMessage() const {
     size_t i;
     for(i = 0; value[i] != '\n'; ++i){

@@ -11,6 +11,9 @@
 class DrawScene : public QGraphicsScene {
     Q_OBJECT
 
+private:
+    bool draw;
+
 public:
     DrawScene();
     void temp(QGraphicsSceneMouseEvent *event);
@@ -19,6 +22,8 @@ public:
     void mousePressEvent (QGraphicsSceneMouseEvent *event) override;
     void updateScene(QByteArray byteArray);
     QByteArray getScene();
+
+    void setDraw(bool draw);
 };
 
 
