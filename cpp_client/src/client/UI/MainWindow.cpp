@@ -20,124 +20,18 @@
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QListWidgetItem>
 
-MainWindow::MainWindow(QWidget* parent) :
-        QMainWindow(parent) {
+MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
 
-    LoginDialog* loginDialog = new LoginDialog();
-    connect(loginDialog, SIGNAL(login(QString)), this, SLOT(login(QString)));
-    connect(loginDialog, SIGNAL(close()), this, SLOT(closeApp()));
 }
 
-MainWindow::~MainWindow() {
-    if(threadR != nullptr){
-        threadR->wait();
-        threadW->wait();
-    }
 
-    delete threadR;
-    delete workerR;
-    delete threadW;
-    delete workerW;
-}
-
-void MainWindow::analyseStatement(QString state) {
-    if (state == QString::fromStdString(CORRECT)) {
-        QString message = "LOG: CORRECT CLUE!";
-        auto* msg = new QListWidgetItem(message);
-        list->addItem(msg);
-    } else if (state == QString::fromStdString(INCORRECT)) {
-        //TODO
-    }
-}
-
-void MainWindow::draw(QString word){
-    QString message = "LOG: You are drawer.";
-    auto* msg = new QListWidgetItem(message);
-    list->addItem(msg);
-    gameState = GameState::Draw;
-    clue->setText(word);
-    clue->show();
-    textArea->hide();
-    drawScene.setDraw(true);
-}
 
 void MainWindow::updateScene(QByteArray byteArray) {
     drawScene.updateScene(std::move(byteArray));
 }
 
-void MainWindow::sendFrame() {
-    if(gameState == GameState::Draw){
-        QByteArray byteArray = drawScene.getScene();
-        emit sendFrame(byteArray);
-    }
-}
-
-void MainWindow::sendTextMessage() {
-    QString message = textArea->text();
-    QString messageToShow = QString::fromStdString(std::string(userName).append(": ").append(message.toStdString()));
-    textArea->clear();
-    list->addItem(messageToShow);
-    emit sendMessage(message);
-}
-
-void MainWindow::solution(QString info) {
-    receiveTextMessage(std::move(info));
-    if(gameState == GameState::Draw){
-        clue->hide();
-        textArea->show();
-        gameState = GameState::Guess;
-        drawScene.setDraw(false);
-    }
-}
-
-void MainWindow::ready(QString info) {
-    QString message = "LOG: New drawer is: " + info;
-    auto* msg = new QListWidgetItem(message);
-    list->addItem(msg);
-}
-
-void MainWindow::receiveTextMessage(QString message) {
-    auto* msg = new QListWidgetItem(message);
-    list->addItem(msg);
-}
-
-void MainWindow::changeTableReleased() {
-    if (changeTableDialog == nullptr){
-        changeTableDialog = new ChangeTableDialog(this);
-        connect(changeTableDialog, SIGNAL(change(QString)), this, SLOT(changeTable(QString)), Qt::DirectConnection);
-    }
-}
-
-void MainWindow::giveUpReleased() {
-    //TODO
-}
-
-void MainWindow::login(QString nick) {
-    userName = nick.toStdString();
-    connectToServer();
-    prepareUI();
-    prepareThreads();
-    connectAllSignalsAndSlots();
-    show();
-}
-
-void MainWindow::closeApp() {
-    //TODO
-}
-
-void MainWindow::changeTable(QString newTable){
-    //TODO
-    changeTableDialog = nullptr; // TODO FIX IT!!!
-}
-
-void MainWindow::connectToServer() {
-    client = new Client(userName);
-
-    try{
-        client->run("localhost", 44444);
-    } catch (const std::runtime_error& error) {
-        std::cerr << error.what() << std::endl;
-    }
+QString MainWindow::getTextMessage(){
+    return textArea->text();
 }
 
 void MainWindow::prepareUI() {
@@ -172,41 +66,29 @@ void MainWindow::prepareUI() {
     resize(QDesktopWidget().availableGeometry(this).size() * 0.4);
 }
 
-void MainWindow::prepareThreads() {
-    threadR = new QThread();
-    threadW = new QThread();
-
-    workerR = new Worker(client);
-    workerW = new Worker(client);
-
-    workerR->moveToThread(threadR);
-    connect(threadR, SIGNAL(started()), workerR, SLOT(writer()));
-    connect(workerR, SIGNAL(finished()), threadR, SLOT(quit()), Qt::DirectConnection);
-
-    workerW->moveToThread(threadW);
-    connect(threadW, SIGNAL(started()), workerW, SLOT(reader()));
-    connect(workerW, SIGNAL(finished()), threadW, SLOT(quit()), Qt::DirectConnection);
-
-    threadR->start();
-    threadW->start();
-
-    timer = new QTimer();
-    timer->start(100);
+void MainWindow::addChatMessage(QString message) {
+    auto *msg  = new QListWidgetItem(message);
+    list->addItem(msg);
 }
 
-void MainWindow::connectAllSignalsAndSlots() {
-    connect(workerW, SIGNAL(statement(QString)), this, SLOT(analyseStatement(QString)));
-    connect(workerW, SIGNAL(draw(QString)), this, SLOT(draw(QString)));
-    connect(workerW, SIGNAL(updateScene(QByteArray)), this, SLOT(updateScene(QByteArray)));
-    connect(this, SIGNAL(sendFrame(QByteArray)), workerW, SLOT(sendFrame(QByteArray)), Qt::DirectConnection);
+void MainWindow::addPlayerChatMessage(QString message) {
+    addChatMessage(std::move(message));
+    textArea->clear();
+}
 
-    connect(timer, SIGNAL(timeout()), this, SLOT(sendFrame()));
+void MainWindow::draw(QString word) {
+    clue->setText(word);
+    clue->show();
+    textArea->hide();
+    drawScene.setDraw(true);
+}
 
-    connect(changeTableButton, SIGNAL (released()), this, SLOT (changeTableReleased()));
-    connect(giveUp, SIGNAL (released()), this, SLOT (giveUpReleased()));
-    connect(textArea, SIGNAL(returnPressed()), this, SLOT(sendTextMessage()), Qt::DirectConnection);
-    connect(this, SIGNAL(sendMessage(QString)), workerW, SLOT(sendTextMessage(QString)), Qt::DirectConnection);
-    connect(workerW, SIGNAL(receiveMessage(QString)), this, SLOT(receiveTextMessage(QString)), Qt::DirectConnection);
-    connect(workerW, SIGNAL(solution(QString)), this, SLOT(solution(QString)), Qt::DirectConnection);
-    connect(workerW, SIGNAL(ready(QString)), this, SLOT(ready(QString)), Qt::DirectConnection);
+void MainWindow::guess() {
+    clue->hide();
+    textArea->show();
+    drawScene.setDraw(false);
+}
+
+QByteArray MainWindow::getScene() {
+    return drawScene.getScene();
 }

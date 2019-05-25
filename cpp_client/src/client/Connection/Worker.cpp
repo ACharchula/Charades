@@ -72,7 +72,6 @@ void Worker::reader() {
 }
 
 void Worker::sendFrame(QByteArray byteArray){
-    qDebug() << "test";
     std::string data(byteArray.constData(), static_cast<unsigned long>(byteArray.length()));
     client->send(data, SET);
 }

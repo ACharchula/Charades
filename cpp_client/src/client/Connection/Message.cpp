@@ -16,7 +16,7 @@ void Message::append(std::pair<char*, ssize_t> nextData) {
 }
 
 const size_t Message::getSize() const {
-    return stoi(value.substr(0, value.size()));
+    return static_cast<const size_t>(stoi(value.substr(0, value.size())));
 }
 
 void Message::print() const {
