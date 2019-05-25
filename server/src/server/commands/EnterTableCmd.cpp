@@ -2,13 +2,10 @@
 
 #include "EnterTableCmd.h"
 
-const char EnterTableCmd::HEADER[] = "ENTER__TABLE";
-const char EnterTableCmd::update_header[] = "UPDATECANVAS";
+const buffer_ptr EnterTableCmd::HEADER = helpers::to_buf("ENTER__TABLE");
 
-void EnterTableCmd::pushInput(std::string input, GlobalData *gdata) {
-  TableMgmt tmgmt(gdata->getTable(), *gdata);
+void EnterTableCmd::pushInput(buffer_ptr input) {
+  auto& table = tables->getTable(0);  // get from user
 
-  tmgmt.addPlayer(userid);
-  tmgmt.sendCurrentStatus(userid);
-  tmgmt.sendCurrentCanvas(userid);
+  table.addPlayer(current_user);
 }

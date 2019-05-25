@@ -2,27 +2,36 @@
 
 #include "Interpreter.h"
 
-void Interpreter::interpretChar(char c, GlobalData *gdata) {
-  tmp += c;
-  while (tmp.size() == bytesToRead) {
-    proceedInput(gdata);
-    tmp = "";
+Interpreter::Interpreter(User *current_user, Users *users, Tables *tables)
+    : current_user(current_user), users(users), tables(tables) {
+  setSelectCommandState();
+  tmp = std::make_shared<buffer_t>();
+}
+
+void Interpreter::interpretChar(char c) {
+  tmp->push_back(c);
+  while (tmp->size() == bytesToRead) {
+    proceedInput();
+    tmp = std::make_shared<buffer_t>();
   }
 }
 
-void Interpreter::proceedInput(GlobalData *gdata) {
+void Interpreter::proceedInput() {
   if (actionState == ActionState::SelectCommand) {
-    if (tmp.compare(HelloCmd::HEADER) == 0) {
-      currentCommand = new HelloCmd(userid);
-    } else if (!gdata->isLogged(userid)) {
+    if (equal(tmp, HelloCmd::HEADER)) {
+      currentCommand = std::make_unique<HelloCmd>(current_user, tables, users);
+    } else if (!current_user->isLogged()) {
       helpers::log("Not logged user try to execute non-hello command");
       throw std::exception();
-    } else if (tmp.compare(SendMessageCmd::HEADER) == 0) {
-      currentCommand = new SendMessageCmd(userid);
-    } else if (tmp.compare(EnterTableCmd::HEADER) == 0) {
-      currentCommand = new EnterTableCmd(userid);
-    } else if (tmp.compare(SetCanvasCmd::HEADER) == 0) {
-      currentCommand = new SetCanvasCmd(userid);
+    } else if (equal(tmp, SendMessageCmd::HEADER)) {
+      currentCommand =
+          std::make_unique<SendMessageCmd>(current_user, tables, users);
+    } else if (equal(tmp, EnterTableCmd::HEADER)) {
+      currentCommand =
+          std::make_unique<EnterTableCmd>(current_user, tables, users);
+    } else if (equal(tmp, SetCanvasCmd::HEADER)) {
+      currentCommand =
+          std::make_unique<SetCanvasCmd>(current_user, tables, users);
     } else {
       throw std::exception();
     }
@@ -31,8 +40,7 @@ void Interpreter::proceedInput(GlobalData *gdata) {
   } else if (actionState == ActionState::ReadLength) {
     setPushState();
   } else {
-    currentCommand->pushInput(tmp, gdata);
-    delete currentCommand;
+    currentCommand->pushInput(tmp);
     currentCommand = nullptr;
     setSelectCommandState();
   }
@@ -47,7 +55,7 @@ void Interpreter::setPushState() {
   size_t interpreted_chars;
 
   actionState = ActionState::PushToCommand;
-  bytesToRead = std::stoi(tmp, &interpreted_chars);
+  bytesToRead = std::stoi(helpers::to_str(tmp), &interpreted_chars);
   if (interpreted_chars != currentCommand->lengthSize()) throw std::exception();
 }
 
@@ -56,4 +64,8 @@ void Interpreter::setSelectCommandState() {
   bytesToRead = Command::HEADER_SIZE;
 }
 
-Interpreter::~Interpreter() { delete currentCommand; }
+void Interpreter::disconnect() {
+  int table_id = current_user->getTableId();
+  if (current_user->getTableId() != User::NO_TABLE)
+    tables->getTable(table_id).removePlayer(current_user);
+}

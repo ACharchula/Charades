@@ -4,39 +4,46 @@
 #define SRC_SERVER_INTERPRETER_H_
 
 #include <exception>
+#include <memory>
+#include <utility>
 #include <string>
 
 #include "commands/Command.h"
+#include "commands/EnterTableCmd.h"
 #include "commands/HelloCmd.h"
 #include "commands/SendMessageCmd.h"
-#include "commands/EnterTableCmd.h"
 #include "commands/SetCanvasCmd.h"
+
+#include "Table.h"
+#include "User.h"
 
 class Interpreter {
  public:
   Interpreter() {}
-  explicit Interpreter(int userid) : userid(userid) { setSelectCommandState(); }
-  ~Interpreter();
+  Interpreter(User *current_user, Users *users, Tables *tables);
 
-  void interpretChar(char c, GlobalData *gdata);
+  void interpretChar(char c);
+  void disconnect();
 
  private:
-  int userid = -1;
-  std::string tmp = "";
+  User *current_user = nullptr;
+  Users *users;
+  Tables *tables;
+  buffer_ptr tmp;
 
   int bytesToRead;
-  enum ActionState {
-    SelectCommand,
-    ReadLength,
-    PushToCommand
-  } actionState;
-  Command *currentCommand = nullptr;
+  enum ActionState { SelectCommand, ReadLength, PushToCommand } actionState;
+  command_ptr currentCommand = nullptr;
 
-  void proceedInput(GlobalData *gdata);
+  void proceedInput();
 
   void setLengthState();
   void setPushState();
   void setSelectCommandState();
+
+  bool equal(buffer_ptr left, buffer_ptr right) {
+    return std::equal(left->begin(), left->end(), right->begin());
+  }
 };
 
 #endif  // SRC_SERVER_INTERPRETER_H_

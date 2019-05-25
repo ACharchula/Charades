@@ -70,9 +70,9 @@ std::string Client::_getMessageSize(size_t size, std::string messageType) {
 
     int i;
     if(messageType == SET || messageType == UPDATE)
-      i = 1000 * 1000 * 10;
+        i = 1000 * 1000 * 10;
     else
-      i = 1000;
+        i = 1000;
     for (; i > 0; i /= 10) {
         result += std::to_string((size / i));
         if (size / i > 0)
@@ -117,4 +117,3 @@ std::pair<Message*, Message*> Client::receive() {
 
     return std::make_pair(header, body);
 }
-

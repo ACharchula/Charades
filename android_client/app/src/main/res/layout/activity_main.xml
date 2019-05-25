@@ -5,36 +5,13 @@
                                              android:layout_width="match_parent"
                                              android:layout_height="match_parent"
                                              tools:context=".MainActivity">
+
     <Button
-            android:text="Reconnect"
+            android:text="START GAME!"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/reconnectButton" android:visibility="gone" app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="8dp" app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="8dp" android:layout_marginTop="8dp" app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginBottom="8dp" app:layout_constraintBottom_toBottomOf="parent"/>
-    <EditText
-            android:layout_width="0dp"
-            android:layout_height="41dp"
-            android:inputType="text"
-            android:ems="10"
-            android:id="@+id/messageContent"
+            android:id="@+id/startButton" app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" android:layout_marginStart="8dp"
-            android:layout_marginBottom="8dp" android:layout_marginEnd="8dp"
-            app:layout_constraintEnd_toStartOf="@+id/sendButton" android:hint="Message"/>
-    <Button
-            android:text="Send"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/sendButton" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp" app:layout_constraintBottom_toBottomOf="parent"/>
-    <ListView
-            android:id="@+id/messagesListView"
-            android:layout_width="0dp"
-            android:layout_height="0dp" android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toTopOf="@+id/messageContent" android:layout_marginTop="8dp"
-            app:layout_constraintTop_toTopOf="parent" app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="8dp" app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="8dp"/>
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 </android.support.constraint.ConstraintLayout>
