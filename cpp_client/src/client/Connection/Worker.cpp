@@ -26,18 +26,23 @@ void Worker::writer() {
             message += '\0';
         if (message[message.size() - 1] == lineFeed)
             message = message.substr(0, message.size() - 1);
-        client->send(message, TEXT);
+
+        try{
+            client->send(message, TEXT);
+        }catch(const std::runtime_error& error){
+            throwException(QString::fromStdString(error.what()));
+        }
     }
 }
 
 void Worker::reader() {
     std::pair<Message*, Message*> data;
     forever {
-//        try{
+        try{
             data = client->receive();
-//        }catch(){
-//
-//        }
+        }catch(const std::runtime_error& error){
+            throwException(QString::fromStdString(error.what()));
+        }
         if (data.first->equal(WELCOME)){
             emit statement(QString::fromStdString(WELCOME));
         } else if (data.first->equal(CHAT)){

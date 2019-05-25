@@ -24,7 +24,7 @@ class Client {
 
     void _createSocket();
 
-    void _connect(const char* serverName, unsigned port);
+    void _connect(const char* serverName, uint16_t port);
 
     void _send(const char* message, size_t messageSize);
 
@@ -41,7 +41,7 @@ public:
 
     ~Client();
 
-    void run(const char* serverName, unsigned port);
+    void run(const char* serverName, uint16_t port);
 
     void send(std::string message, std::string messageType);
 

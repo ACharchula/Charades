@@ -27,7 +27,3 @@ void ChangeTableDialog::changeTable() {
     dialog->hide();
     emit change(input->text());
 }
-
-void ChangeTableDialog::show() {
-    dialog->show();
-}

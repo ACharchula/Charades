@@ -43,6 +43,8 @@ signals:
 
     void finished();
 
+    void throwException(QString message);
+
 public slots:
 
     void reader();

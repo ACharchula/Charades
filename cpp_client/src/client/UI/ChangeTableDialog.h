@@ -16,10 +16,7 @@ class ChangeTableDialog : public QDialog {
 Q_OBJECT
 
 public:
-    ChangeTableDialog(QWidget* parent = 0);
-
-public:
-    void show();
+    explicit ChangeTableDialog(QWidget* parent = 0);
 
 private:
     QDialog* dialog;

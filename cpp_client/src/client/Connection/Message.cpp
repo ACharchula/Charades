@@ -5,13 +5,14 @@
 #include <stdexcept>
 #include <iostream>
 #include "Message.h"
+#include "../Consts.h"
 
 Message::Message(size_t size) : size(size) {}
 
 void Message::append(std::pair<char*, ssize_t> nextData) {
     if (currentSize + nextData.second > size)
-      throw std::runtime_error("Error in receiving data.");
-    value.append(nextData.first, nextData.second);
+      throw std::runtime_error(ERRORRECEAVING);
+    value.append(nextData.first, static_cast<unsigned long>(nextData.second));
     currentSize += nextData.second - 1;
 }
 

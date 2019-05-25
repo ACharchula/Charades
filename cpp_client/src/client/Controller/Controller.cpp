@@ -36,7 +36,15 @@ void Controller::connectToServer() {
     try{
         client->run("localhost", 44444);
     } catch (const std::runtime_error& error) {
-        std::cerr << error.what() << std::endl;
+        if(error.what() == ERROROPEN){
+
+        } else if(error.what() == ERRORUKNOWNSERVER){
+
+        } else if(error.what() == ERRORCONNECT){
+
+        }else if(error.what() == ERRORWRITING){
+
+        }
     }
 }
 
@@ -150,4 +158,22 @@ void Controller::ready(QString info) {
 
 void Controller::receiveTextMessage(QString message) {
     mainWindow->addChatMessage(std::move(message));
+}
+
+void Controller::catchException(QString info) {
+    qDebug() << "%" << info;
+    std::string message = info.toStdString();
+
+    if(message == ERRORWRITING){
+
+    } else if(message == ERRORREADING){
+
+    } else if(message == ERRORREADING){
+
+    } else if(message == ERRORRECEAVING){
+
+    } else{
+        QString msg = QString::fromStdString("Unexpected" + message);
+        qDebug() << msg;
+    }
 }

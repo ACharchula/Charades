@@ -59,6 +59,7 @@ private slots:
     void sendFrame();
     void solution(QString info);
     void ready(QString info);
+    void catchException(QString info);
 
     void login(QString nick);
     void closeApp();

@@ -16,7 +16,7 @@ private:
     const size_t width;
 
 public:
-    DrawView(size_t height, size_t width);
+    explicit DrawView(size_t height, size_t width);
 };
 
 
