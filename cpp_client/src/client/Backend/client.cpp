@@ -54,7 +54,7 @@ std::pair<char*, ssize_t> Client::_receive(size_t expectedDataSize) {
 }
 
 Message* Client::_receiveMessage(size_t expectedDataSize) {
-    Message* message = new Message(expectedDataSize);
+    auto* message = new Message(expectedDataSize);
     try {
         do {
             std::pair<char*, ssize_t> nextData = _receive(expectedDataSize);
@@ -95,14 +95,10 @@ std::pair<const char*, size_t> Client::_preparedMessage(std::string message, std
 }
 
 void Client::run(const char* serverName, unsigned port) {
-    try {
-        _createSocket();
-        _connect(serverName, port);
-        send(userName, HELLO);
-        send("", ENTER);
-    } catch (const std::runtime_error& error) {
-        std::cerr << error.what() << std::endl;
-    }
+    _createSocket();
+    _connect(serverName, port);
+    send(userName, HELLO);
+    send("", ENTER);
 }
 
 void Client::send(std::string message, std::string messageType) {

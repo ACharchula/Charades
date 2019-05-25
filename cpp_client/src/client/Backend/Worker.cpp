@@ -33,7 +33,11 @@ void Worker::writer() {
 void Worker::reader() {
     std::pair<Message*, Message*> data;
     forever {
-        data = client->receive();
+//        try{
+            data = client->receive();
+//        }catch(){
+//
+//        }
         if (data.first->equal(WELCOME)){
             emit statement(QString::fromStdString(WELCOME));
         } else if (data.first->equal(CHAT)){
@@ -68,7 +72,8 @@ void Worker::reader() {
 }
 
 void Worker::sendFrame(QByteArray byteArray){
-    std::string data(byteArray.constData(), byteArray.length());
+    qDebug() << "test";
+    std::string data(byteArray.constData(), static_cast<unsigned long>(byteArray.length()));
     client->send(data, SET);
 }
 

@@ -40,6 +40,7 @@ void DrawScene::temp(QGraphicsSceneMouseEvent *event){
    addEllipse(x-rad, y-rad, rad*2.0, rad*2.0,
               QPen(), QBrush(Qt::SolidPattern));
 
+   //TODO QpainterPath
 //   std::cout << x << " " << y << std::endl;
 }
 

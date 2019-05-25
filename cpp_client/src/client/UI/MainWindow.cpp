@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 // Created by adam on 13.04.19.
 //
@@ -53,7 +55,6 @@ void MainWindow::draw(QString word){
     auto* msg = new QListWidgetItem(message);
     list->addItem(msg);
     gameState = GameState::Draw;
-    timer->start(100);
     clue->setText(word);
     clue->show();
     textArea->hide();
@@ -61,12 +62,14 @@ void MainWindow::draw(QString word){
 }
 
 void MainWindow::updateScene(QByteArray byteArray) {
-    drawScene.updateScene(byteArray);
+    drawScene.updateScene(std::move(byteArray));
 }
 
 void MainWindow::sendFrame() {
-    QByteArray byteArray = drawScene.getScene();
-    emit sendFrame(byteArray);
+    if(gameState == GameState::Draw){
+        QByteArray byteArray = drawScene.getScene();
+        emit sendFrame(byteArray);
+    }
 }
 
 void MainWindow::sendTextMessage() {
@@ -78,11 +81,10 @@ void MainWindow::sendTextMessage() {
 }
 
 void MainWindow::solution(QString info) {
-    receiveTextMessage(info);
+    receiveTextMessage(std::move(info));
     if(gameState == GameState::Draw){
         clue->hide();
         textArea->show();
-//        timer->stop();
         gameState = GameState::Guess;
         drawScene.setDraw(false);
     }
@@ -130,7 +132,12 @@ void MainWindow::changeTable(QString newTable){
 
 void MainWindow::connectToServer() {
     client = new Client(userName);
-    client->run("localhost", 44444);
+
+    try{
+        client->run("localhost", 44444);
+    } catch (const std::runtime_error& error) {
+        std::cerr << error.what() << std::endl;
+    }
 }
 
 void MainWindow::prepareUI() {
@@ -183,7 +190,8 @@ void MainWindow::prepareThreads() {
     threadR->start();
     threadW->start();
 
-    timer = new QTimer(this);
+    timer = new QTimer();
+    timer->start(100);
 }
 
 void MainWindow::connectAllSignalsAndSlots() {
