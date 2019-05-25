@@ -9,6 +9,7 @@ class TableSelectionActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        supportActionBar!!.hide()
         setContentView(R.layout.activity_table_selection)
 
         joinTableButton.setOnClickListener {
@@ -16,9 +17,14 @@ class TableSelectionActivity : AppCompatActivity() {
         }
     }
 
-    private fun startGame() {
-        val intent = Intent(this, GameActivity::class.java)
+    override fun onBackPressed() {
+        ConnectionService.closeSocket()
+        super.onBackPressed()
+    }
 
+    private fun startGame() {
+        ConnectionService.joinToTable()
+        val intent = Intent(this, GameActivity::class.java)
         startActivity(intent)
     }
 }

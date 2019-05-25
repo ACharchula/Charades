@@ -11,7 +11,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        supportActionBar!!.hide()
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
 
@@ -23,6 +23,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun start() {
+        ConnectionService.connectToServer()
+        ConnectionService.setId(nameTextInput.text.toString())
+        ConnectionService.performServerHandshake()
+
+        //while if not connected
+
         val intent = Intent(this, TableSelectionActivity::class.java)
         startActivity(intent)
     }

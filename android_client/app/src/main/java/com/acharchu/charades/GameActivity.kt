@@ -15,6 +15,7 @@ class GameActivity : AppCompatActivity() {
 
     private var sendPicture = false
     private var pictureByteArray = ByteArray(0)
+    private var IN_GAME = true
 
     private val outputThread = Thread {
         sendButton.setOnClickListener {
@@ -31,7 +32,7 @@ class GameActivity : AppCompatActivity() {
 
     private val inputThread = Thread {
 
-        while(ConnectionService.status == State.CONNECTED) {
+        while(ConnectionService.status == State.CONNECTED && IN_GAME) {
             try{
                 val header : HeaderType? = ConnectionService.getHeader()
 
@@ -74,9 +75,14 @@ class GameActivity : AppCompatActivity() {
         }
     }
 
+    override fun onBackPressed() {
+        IN_GAME = false
+        super.onBackPressed()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        supportActionBar!!.hide()
         setContentView(R.layout.activity_game)
 
         reconnectButton.setOnClickListener {
@@ -122,13 +128,11 @@ class GameActivity : AppCompatActivity() {
 
     private fun connectToServer() {
         try {
-            ConnectionService.connectToServer()
             if(!inputThread.isAlive)
                 inputThread.start()
 
             if(!outputThread.isAlive)
                 outputThread.start()
-            ConnectionService.joinToTable()
         } catch (e: Throwable) {
             messagesListView.visibility = GONE
             sendButton.visibility = GONE

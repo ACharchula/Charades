@@ -11,17 +11,17 @@ import java.nio.channels.SocketChannel
 class ConnectionService {
 
     companion object {
-        private val serverHost = "10.0.2.2" //has to be changed if u want to run on real smartphone
-        private val serverPort = 44444
+        private const val serverHost = "10.0.2.2" //has to be changed if u want to run on real smartphone
+        private const val serverPort = 44444
         private var socketChannel: SocketChannel? = null
         var messages = arrayListOf<String>() // needs to be moved
 
-        private val HEADER_LENGTH = 12
-        private val BYTES_TO_READ_LENGTH = 4
+        private const val HEADER_LENGTH = 12
+        private const val BYTES_TO_READ_LENGTH = 4
 
         var status = State.DISCONNECTED
 
-        private val id: Int = (10..99).random()
+        private lateinit var id: String
 
         fun connectToServer() {
             try {
@@ -29,7 +29,6 @@ class ConnectionService {
 
                 socketChannel = SocketChannel.open(address)
                 socketChannel!!.configureBlocking(false)
-                performServerHandshake()
 
             } catch (exception: Exception) {
                 throw exception
@@ -59,8 +58,12 @@ class ConnectionService {
             }
         }
 
-        private fun performServerHandshake() {
-            sendString("HELLO_SERVER0015AndroidClient$id")
+        fun setId(name: String) {
+            id = name
+        }
+
+        fun performServerHandshake() {
+            sendString("HELLO_SERVER${prepareMessageLength(id.length)}$id")
             val handshakeResult = read(16) //check if result is ok
 
             if (handshakeResult == "WELCOME_USER0000")
@@ -134,6 +137,7 @@ class ConnectionService {
 
         fun closeSocket() {
             socketChannel!!.close()
+            status = State.DISCONNECTED
         }
 
         fun getCanvas() : Bitmap {
