@@ -46,6 +46,7 @@ private:
 signals:
     void sendFrame(QByteArray);
     void sendMessage(QString);
+    void sendRequest(QString);
 
 private slots:
     void draw(QString word);
@@ -60,10 +61,11 @@ private slots:
     void solution(QString info);
     void ready(QString info);
     void catchException(QString info);
+    void tableCreated(QString);
+    void abort(QString);
+    void exit();
 
     void login(QString nick);
     void closeApp();
 };
-
-
 #endif //CPP_CLIENT_CONTROLLER_H

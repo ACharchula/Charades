@@ -45,6 +45,12 @@ signals:
 
     void throwException(QString message);
 
+    void tableCreated(QString);
+
+    void listTable(QString);
+
+    void abort(QString);
+
 public slots:
 
     void reader();
@@ -54,6 +60,8 @@ public slots:
     void sendFrame(QByteArray byteArray);
 
     void sendTextMessage(QString message);
+
+    void sendRequest(QString request);
 };
 
 #endif // WINDOW_H
