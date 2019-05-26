@@ -40,7 +40,7 @@ void Table::loadWords() {
   std::string word;
 
   WORDS.clear();
-  while (!words_db.eof()) {
+  while (words_db && !words_db.eof()) {
     words_db >> word;
     if (word.size() > 0) {
       std::transform(word.begin(), word.end(), word.begin(), ::tolower);
@@ -63,10 +63,6 @@ std::string Table::getRandomClue() {
   std::uniform_int_distribution<> dist(0, WORDS.size() - 1);
 
   int random = dist(gen);
-  auto str = WORDS[random];
-
-  helpers::log(std::to_string(random));
-  helpers::log(str);
 
   return WORDS[random];
 }
