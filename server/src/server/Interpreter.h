@@ -14,6 +14,7 @@
 #include "commands/SendMessageCmd.h"
 #include "commands/SetCanvasCmd.h"
 #include "commands/ComeOutTableCmd.h"
+#include "commands/GiveUpCmd.h"
 
 #include "Table.h"
 #include "User.h"

@@ -200,8 +200,8 @@ User* Table::getRandomPlayer() {
 }
 
 void Table::setCanvas(buffer_ptr input, User* user) {
-  if (user != drawer) {
-    helpers::log("Not a drawer try to draw");
+  if (user != drawer || state != READY) {
+    helpers::log("Not the drawer try to draw or game is not READY, ignored.");
     return;
   }
   canvas = input;
@@ -240,4 +240,13 @@ void Table::removePlayer(User* user) {
     helpers::log("Number of players on table is less than minimum.");
     state = ABORTED;
   }
+}
+
+void Table::tryGiveUp(User* requester) {
+  if (requester != drawer) {
+    helpers::log("Try to GIVE UP, but requester is not the drawer, ignored.");
+    return;
+  }
+  state = ABORTED;
+  helpers::log("Drawer gave up the game.");
 }

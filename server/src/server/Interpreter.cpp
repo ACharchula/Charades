@@ -39,6 +39,8 @@ void Interpreter::proceedInput() {
     } else if (equal(tmp, ComeOutTableCmd::HEADER)) {
       currentCommand =
           std::make_unique<ComeOutTableCmd>(current_user, tables, users);
+    } else if (equal(tmp, GiveUpCmd::HEADER)) {
+      currentCommand = std::make_unique<GiveUpCmd>(current_user, tables, users);
     } else {
       throw std::exception();
     }

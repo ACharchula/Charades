@@ -24,6 +24,7 @@ class Table {
   void addPlayer(User *user);
   void removePlayer(User *user);
   void setCanvas(buffer_ptr input, User *user);
+  void tryGiveUp(User *requester);
   bool isUserInTable(User *user);
 
   int getId() { return id; }
