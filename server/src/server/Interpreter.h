@@ -18,7 +18,7 @@
 #include "commands/CreateTableCmd.h"
 #include "commands/ListTablesCmd.h"
 
-#include "Table.h"
+#include "Tables.h"
 #include "User.h"
 
 class Interpreter {

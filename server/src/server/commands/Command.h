@@ -6,7 +6,7 @@
 #include <memory>
 #include <string>
 
-#include "../Table.h"
+#include "../Tables.h"
 #include "../User.h"
 #include "Helpers.h"
 

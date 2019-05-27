@@ -9,6 +9,7 @@ const buffer_ptr CreateTableCmd::TABLE_CREATED =
 void CreateTableCmd::pushInput(buffer_ptr input) {
   int table_id = tables->createTable();
   auto data = std::to_string(table_id);
+  helpers::log("Created table " + data, current_user->getId());
 
   current_user->addMessageToQueue(TABLE_CREATED);
   current_user->addMessageToQueue(helpers::get_zero_width_size(data.size()));

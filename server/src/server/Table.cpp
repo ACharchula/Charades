@@ -45,9 +45,9 @@ void Table::loadWords() {
     }
   }
 
-  helpers::log("Words DB loaded.");
+  log("Words DB loaded.");
   if (WORDS.size() == 0) {
-    helpers::log("Words DB is empty, add 'kurczak'.");
+    log("Words DB is empty, add 'kurczak'.");
     WORDS.push_back("kurczak");
   }
 }
@@ -66,7 +66,7 @@ std::string Table::getRandomClue() {
 
 void Table::checkClue(buffer_ptr propose, User* user) {
   if (user == drawer) {
-    helpers::log("Drawer try to send message, ignored", user->getId());
+    log("Drawer try to send message, ignored", user->getId());
     return;
   }
 
@@ -76,7 +76,7 @@ void Table::checkClue(buffer_ptr propose, User* user) {
   sendUserMessage(propose, user);
 
   if (clue.compare(propose_str) == 0 && state == READY) {
-    helpers::log("User won: " + user->getUsername(), user->getId());
+    log("User won: " + user->getUsername(), user->getId());
     setGameEnd(user);
   }
 }
@@ -125,7 +125,7 @@ void Table::proceedGameEndIfNeeded() {
     sendToAll(data);
 
     state = WAITING;
-    helpers::log("Game ended.");
+    log("Game ended.");
   }
 }
 
@@ -136,7 +136,7 @@ void Table::proceedGameAbortIfNeeded() {
     sendToAll(clue);
 
     state = WAITING;
-    helpers::log("Game aborted.");
+    log("Game aborted.");
   }
 }
 
@@ -155,8 +155,8 @@ void Table::startGameIfNeeded() {
     drawer->addMessageToQueue(helpers::get_zero_width_size(clue.size()));
     drawer->addMessageToQueue(clue);
 
-    helpers::log("Game started, clue: " + clue);
-    helpers::log("Drawer is " + drawer->getUsername(), drawer->getId());
+    log("Game started, clue: " + clue);
+    log("Drawer is " + drawer->getUsername(), drawer->getId());
   }
 }
 
@@ -194,7 +194,7 @@ User* Table::getRandomPlayer() {
 
 void Table::setCanvas(buffer_ptr input, User* user) {
   if (user != drawer || state != READY) {
-    helpers::log("Not the drawer try to draw or game is not READY, ignored.");
+    log("Not the drawer try to draw or game is not READY, ignored.");
     return;
   }
   canvas = input;
@@ -208,8 +208,7 @@ void Table::setCanvas(buffer_ptr input, User* user) {
 
 bool Table::isUserInTable(User* user) {
   auto find_player = players.find(user);
-  if (find_player == players.end())
-    helpers::log("Player not on table", user->getId());
+  if (find_player == players.end()) log("Player not on table", user->getId());
   return !(find_player == players.end());
 }
 
@@ -220,26 +219,31 @@ void Table::addPlayer(User* user) {
   sendCurrentCanvas(user);
   user->setTableId(getId());
 
-  helpers::log("User entered to table", user->getId());
+  log("User entered to table", user->getId());
 }
 
 void Table::removePlayer(User* user) {
-  helpers::log("User left the table", user->sock());
+  log("User left the table", user->sock());
   players.erase(user);
   if (drawer == user) {
-    helpers::log("Drawer left the table.");
+    log("Drawer left the table.");
     state = ABORTED;
   } else if (players.size() < MINIMUM_PLAYERS) {
-    helpers::log("Number of players on table is less than minimum.");
+    log("Number of players on table is less than minimum.");
     state = ABORTED;
   }
 }
 
 void Table::tryGiveUp(User* requester) {
   if (requester != drawer) {
-    helpers::log("Try to GIVE UP, but requester is not the drawer, ignored.");
+    log("Try to GIVE UP, but requester is not the drawer, ignored.");
     return;
   }
   state = ABORTED;
-  helpers::log("Drawer gave up the game.");
+  log("Drawer gave up the game.");
+}
+
+void Table::log(std::string msg, int user) {
+  std::string tabid = "[Tab:" + std::to_string(id) + "] ";
+  helpers::log(tabid + msg, user);
 }

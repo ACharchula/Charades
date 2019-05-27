@@ -100,8 +100,6 @@ void Server::run() {
   if (server_socket < 0) return;
   run_srv = true;
 
-  tables.createTable();
-
   listen(server_socket, MAX_WAITING_CONN);
   while (run_srv) {
     FD_ZERO(&ready_sockets);
