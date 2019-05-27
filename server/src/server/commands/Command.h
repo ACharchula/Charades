@@ -1,7 +1,7 @@
 // Copyright 2019 Kamil Mankowski
 
-#ifndef SRC_SERVER_COMMAND_H_
-#define SRC_SERVER_COMMAND_H_
+#ifndef SRC_SERVER_COMMANDS_COMMAND_H_
+#define SRC_SERVER_COMMANDS_COMMAND_H_
 
 #include <memory>
 #include <string>
@@ -30,4 +30,4 @@ class Command {
   Users *users;
 };
 
-#endif  // SRC_SERVER_COMMAND_H_
+#endif  // SRC_SERVER_COMMANDS_COMMAND_H_

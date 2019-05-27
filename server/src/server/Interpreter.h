@@ -13,6 +13,7 @@
 #include "commands/HelloCmd.h"
 #include "commands/SendMessageCmd.h"
 #include "commands/SetCanvasCmd.h"
+#include "commands/ComeOutTableCmd.h"
 
 #include "Table.h"
 #include "User.h"

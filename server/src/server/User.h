@@ -22,7 +22,7 @@ class User {
   explicit User(int id, int socket) : id(id), socket(socket) {}
 
   buffer_ptr popMessage();
-  void addMessageToQueue(const std::string &msg) {
+  void addMessageToQueue(const std::string& msg) {
     messeges.push(helpers::to_buf(msg));
   }
   void addMessageToQueue(buffer_ptr msg) { messeges.push(msg); }
@@ -36,6 +36,7 @@ class User {
   std::string getUsername() { return username; }
   void setTableId(int id) { table_id = id; }
   int getTableId() { return table_id; }
+  bool isInTable() { return table_id != NO_TABLE; }
   int getId() { return id; }
 
   static const int NO_TABLE = -1;

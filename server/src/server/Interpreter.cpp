@@ -23,15 +23,22 @@ void Interpreter::proceedInput() {
     } else if (!current_user->isLogged()) {
       helpers::log("Not logged user try to execute non-hello command");
       throw std::exception();
-    } else if (equal(tmp, SendMessageCmd::HEADER)) {
-      currentCommand =
-          std::make_unique<SendMessageCmd>(current_user, tables, users);
     } else if (equal(tmp, EnterTableCmd::HEADER)) {
       currentCommand =
           std::make_unique<EnterTableCmd>(current_user, tables, users);
+    } else if (!current_user->isInTable()) {
+      helpers::log(
+          "User is not in table, but try to execute table-specific command;");
+      throw std::exception();
+    } else if (equal(tmp, SendMessageCmd::HEADER)) {
+      currentCommand =
+          std::make_unique<SendMessageCmd>(current_user, tables, users);
     } else if (equal(tmp, SetCanvasCmd::HEADER)) {
       currentCommand =
           std::make_unique<SetCanvasCmd>(current_user, tables, users);
+    } else if (equal(tmp, ComeOutTableCmd::HEADER)) {
+      currentCommand =
+          std::make_unique<ComeOutTableCmd>(current_user, tables, users);
     } else {
       throw std::exception();
     }
