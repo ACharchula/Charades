@@ -8,10 +8,6 @@ const buffer_ptr Table::GAME_READY = helpers::to_buf("GAME___READY");
 const buffer_ptr Table::GAME_ENDED = helpers::to_buf("GAME___ENDED");
 const buffer_ptr Table::GAME_ABORTED = helpers::to_buf("GAME_ABORTED");
 const buffer_ptr Table::UPDATE_CANVAS = helpers::to_buf("UPDATECANVAS");
-const buffer_ptr Table::CLUE_CORRECT_PACKET =
-    helpers::to_buf("CLUE_CORRECT0000");
-const buffer_ptr Table::CLUE_INCORRECT_PACKET =
-    helpers::to_buf("CLUEINCORECT0000");
 const buffer_ptr Table::YOU_ARE_DRAWER = helpers::to_buf("YOUAREDRAWER");
 const buffer_ptr Table::CHAT_MESSAGE = helpers::to_buf("CHAT_MESSAGE");
 
@@ -69,21 +65,18 @@ std::string Table::getRandomClue() {
 }
 
 void Table::checkClue(buffer_ptr propose, User* user) {
-  auto propose_str = helpers::to_str(propose);
-  std::transform(propose_str.begin(), propose_str.end(), propose_str.begin(),
-                 ::tolower);
   if (user == drawer) {
     helpers::log("Drawer try to send message, ignored", user->getId());
     return;
   }
 
+  auto propose_str = helpers::to_str(propose);
+  std::transform(propose_str.begin(), propose_str.end(), propose_str.begin(),
+                 ::tolower);
   sendUserMessage(propose, user);
 
-  if (clue.compare(propose_str) != 0 || state == ENDED) {
-    user->addMessageToQueue(CLUE_INCORRECT_PACKET);
-  } else {
+  if (clue.compare(propose_str) == 0 && state == READY) {
     helpers::log("User won: " + user->getUsername(), user->getId());
-    user->addMessageToQueue(CLUE_CORRECT_PACKET);
     setGameEnd(user);
   }
 }

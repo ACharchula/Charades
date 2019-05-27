@@ -72,8 +72,6 @@ class Table {
   static const buffer_ptr GAME_ENDED;
   static const buffer_ptr GAME_ABORTED;
   static const buffer_ptr UPDATE_CANVAS;
-  static const buffer_ptr CLUE_CORRECT_PACKET;
-  static const buffer_ptr CLUE_INCORRECT_PACKET;
   static const buffer_ptr YOU_ARE_DRAWER;
   static const buffer_ptr CHAT_MESSAGE;
 
