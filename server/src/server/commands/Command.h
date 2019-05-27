@@ -22,6 +22,7 @@ class Command {
   virtual int lengthSize() { return data_length_size; }
 
   static const int HEADER_SIZE = 12;
+  static const buffer_ptr INVALID_COMMAND_PACKET;
 
  protected:
   User *current_user = nullptr;

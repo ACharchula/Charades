@@ -23,6 +23,12 @@ void Interpreter::proceedInput() {
     } else if (!current_user->isLogged()) {
       helpers::log("Not logged user try to execute non-hello command");
       throw std::exception();
+    } else if (equal(tmp, CreateTableCmd::HEADER)) {
+      currentCommand =
+          std::make_unique<CreateTableCmd>(current_user, tables, users);
+    } else if (equal(tmp, ListTablesCmd::HEADER)) {
+      currentCommand =
+          std::make_unique<ListTablesCmd>(current_user, tables, users);
     } else if (equal(tmp, EnterTableCmd::HEADER)) {
       currentCommand =
           std::make_unique<EnterTableCmd>(current_user, tables, users);

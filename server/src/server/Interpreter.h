@@ -15,6 +15,8 @@
 #include "commands/SetCanvasCmd.h"
 #include "commands/ComeOutTableCmd.h"
 #include "commands/GiveUpCmd.h"
+#include "commands/CreateTableCmd.h"
+#include "commands/ListTablesCmd.h"
 
 #include "Table.h"
 #include "User.h"

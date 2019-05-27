@@ -93,6 +93,12 @@ class Tables {
   void proceedAll() {
     for (auto &table : tables) table.second.proceed();
   }
+  std::vector<int> getTablesIds() {
+    std::vector<int> ids;
+    for (auto &table : tables) ids.push_back(table.first);
+    return ids;
+  }
+  bool isTable(int id) { return tables.count(id) == 1; }
   // int removeTable(int id);
  private:
   Users &users;
