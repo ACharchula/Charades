@@ -6,6 +6,7 @@ const buffer_ptr Table::GAME_WAITING_PACKET =
     helpers::to_buf("GAME_WAITING0000");
 const buffer_ptr Table::GAME_READY = helpers::to_buf("GAME___READY");
 const buffer_ptr Table::GAME_ENDED = helpers::to_buf("GAME___ENDED");
+const buffer_ptr Table::GAME_ABORTED = helpers::to_buf("GAME_ABORTED");
 const buffer_ptr Table::UPDATE_CANVAS = helpers::to_buf("UPDATECANVAS");
 const buffer_ptr Table::CLUE_CORRECT_PACKET =
     helpers::to_buf("CLUE_CORRECT0000");
@@ -124,9 +125,7 @@ void Table::sendUpdateCanvasIfNeeded() {
 
 void Table::proceedGameEndIfNeeded() {
   if (state == ENDED) {
-    std::string data = "NO_ONE";
-    if (winner != nullptr) data = winner->getUsername();
-    data += "\n" + clue;
+    std::string data = winner->getUsername() + "\n" + clue;
 
     sendToAll(GAME_ENDED);
     sendToAll(helpers::get_zero_width_size(data.size()));
@@ -134,6 +133,17 @@ void Table::proceedGameEndIfNeeded() {
 
     state = WAITING;
     helpers::log("Game ended.");
+  }
+}
+
+void Table::proceedGameAbortIfNeeded() {
+  if (state == ABORTED) {
+    sendToAll(GAME_ABORTED);
+    sendToAll(helpers::get_zero_width_size(clue.size()));
+    sendToAll(clue);
+
+    state = WAITING;
+    helpers::log("Game aborted.");
   }
 }
 
@@ -159,6 +169,7 @@ void Table::startGameIfNeeded() {
 
 void Table::proceed() {
   sendUpdateCanvasIfNeeded();
+  proceedGameAbortIfNeeded();
   proceedGameEndIfNeeded();
   startGameIfNeeded();
 }
@@ -224,9 +235,9 @@ void Table::removePlayer(User* user) {
   players.erase(user);
   if (drawer == user) {
     helpers::log("Drawer left the table.");
-    setGameEnd(nullptr);
+    state = ABORTED;
   } else if (players.size() < MINIMUM_PLAYERS) {
-    helpers::log("Number of players on table is less that minimum.");
-    setGameEnd(nullptr);
+    helpers::log("Number of players on table is less than minimum.");
+    state = ABORTED;
   }
 }

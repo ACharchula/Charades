@@ -39,7 +39,7 @@ class Table {
   User *drawer;
   User *winner;
 
-  enum State { WAITING, READY, ENDED } state = WAITING;
+  enum State { WAITING, READY, ABORTED, ENDED } state = WAITING;
 
   Users *users;
   void loadStartCanvas();
@@ -58,6 +58,7 @@ class Table {
   void sendUpdateCanvasIfNeeded();
   void proceedGameEndIfNeeded();
   void startGameIfNeeded();
+  void proceedGameAbortIfNeeded();
 
   User *getRandomPlayer();
 
@@ -68,6 +69,7 @@ class Table {
   static const buffer_ptr GAME_WAITING_PACKET;
   static const buffer_ptr GAME_READY;
   static const buffer_ptr GAME_ENDED;
+  static const buffer_ptr GAME_ABORTED;
   static const buffer_ptr UPDATE_CANVAS;
   static const buffer_ptr CLUE_CORRECT_PACKET;
   static const buffer_ptr CLUE_INCORRECT_PACKET;
