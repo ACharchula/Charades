@@ -14,10 +14,11 @@ class ConnectionService {
         private const val serverHost = "10.0.2.2" //has to be changed if u want to run on real smartphone
         private const val serverPort = 44444
         private var socketChannel: SocketChannel? = null
-        var messages = arrayListOf<String>() // needs to be moved
 
         private const val HEADER_LENGTH = 12
         private const val BYTES_TO_READ_LENGTH = 4
+
+        public var INTERRUPT = false
 
         var status = State.DISCONNECTED
 
@@ -72,9 +73,52 @@ class ConnectionService {
                 throw Throwable("CANNOT CONNECT TO SERVER")
         }
 
-        fun joinToTable() {
-            sendString("ENTER__TABLE0000")
+        fun joinToTable(table_number: Int) {
+            sendString("ENTER__TABLE${prepareMessageLength(table_number.toString().length)}$table_number")
         }
+
+        fun comeOutFromTable() {
+            sendString("COMEOUTTABLE0000")
+        }
+
+        fun giveUpAGame() {
+            sendString("GIVE_UP_GAME0000")
+        }
+
+        fun getIdOfCreatedTable() : Int {
+            val length = read(BYTES_TO_READ_LENGTH)
+            val id = read(length.toInt())
+            return id.toInt()
+        }
+
+        fun gameAborted() : String {
+            val length = read(BYTES_TO_READ_LENGTH)
+            val answer = read(length.toInt())
+            return "Game aborted! The right answer - $answer"
+        }
+
+        fun commandFailed() {
+            read(BYTES_TO_READ_LENGTH)
+        }
+
+        fun createTable() {
+            sendString("CREATE_TABLE0000")
+        }
+
+        fun listAvailableTables() {
+            sendString("LIST__TABLES0000")
+        }
+
+        fun getTableList(): List<Int>? {
+            val length = read(BYTES_TO_READ_LENGTH)
+
+            return if(length.toInt() != 0) {
+                val tableStringList = read(length.toInt()).split('\n')
+                tableStringList.subList(0, tableStringList.size-1).map { it.toInt() }
+            } else
+                null
+        }
+
 
         fun sendMessage(msg: String) {
             sendString("SEND_MESSAGE${prepareMessageLength(msg.length)}$msg")
@@ -121,7 +165,7 @@ class ConnectionService {
             var consumedCharacters = 0
             val result = ByteArray(bytesToRead)
 
-            while (amountOfCharacters != bytesToRead && consumedCharacters != -1) {  // read z offsetem
+            while (amountOfCharacters != bytesToRead && consumedCharacters != -1 && !INTERRUPT) {  // read z offsetem
                 val buffer = ByteBuffer.allocate(bytesToRead - amountOfCharacters)
                 consumedCharacters = socketChannel?.read(buffer)!!
 
@@ -131,6 +175,7 @@ class ConnectionService {
                 } else if (consumedCharacters == -1)
                     throw Throwable("CONNECTION CLOSED")
             }
+            INTERRUPT = false
 
             return result
         }
@@ -167,14 +212,6 @@ class ConnectionService {
             val length = read(BYTES_TO_READ_LENGTH)
             val result = read(length.toInt())
             return "Your turn! Draw - $result"
-        }
-
-        fun clueCorrect() {
-            read(BYTES_TO_READ_LENGTH)
-        }
-
-        fun clueIncorrect() {
-            read(BYTES_TO_READ_LENGTH)
         }
 
         fun sendPicture(picture: ByteArray) {

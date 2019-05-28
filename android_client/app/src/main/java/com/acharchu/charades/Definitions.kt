@@ -14,6 +14,8 @@ enum class HeaderType {
     GAME_ENDED,
     GAME_READY,
     YOU_ARE_DRAWER,
-    CLUE_INCORRECT,
-    CLUE_CORRECT
+    TABLE_CREATED,
+    SEE_TABLES,
+    GAME_ABORTED,
+    COMMAND_FAILED
 }

@@ -3,12 +3,10 @@ package com.acharchu.charades
 import android.graphics.Bitmap
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.os.StrictMode
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.ArrayAdapter
 import kotlinx.android.synthetic.main.activity_game.*
-import kotlinx.android.synthetic.main.activity_table_selection.*
 import kotlin.concurrent.fixedRateTimer
 
 class GameActivity : AppCompatActivity() {
@@ -16,6 +14,7 @@ class GameActivity : AppCompatActivity() {
     private var sendPicture = false
     private var pictureByteArray = ByteArray(0)
     private var IN_GAME = true
+    var messages = arrayListOf<String>()
 
     private val outputThread = Thread {
         sendButton.setOnClickListener {
@@ -51,11 +50,9 @@ class GameActivity : AppCompatActivity() {
                 else if (header == HeaderType.YOU_ARE_DRAWER) {
                     updateMessageList(ConnectionService.getThingToDraw())
                     drawerView()
+                } else if (header == HeaderType.GAME_ABORTED) {
+                    updateMessageList(ConnectionService.gameAborted())
                 }
-                else if (header == HeaderType.CLUE_CORRECT)
-                    ConnectionService.clueCorrect()
-                else if (header == HeaderType.CLUE_INCORRECT)
-                    ConnectionService.clueIncorrect()
 
             } catch (e : Throwable) {
                 if (e.message == "CONNECTION CLOSED") {
@@ -77,6 +74,8 @@ class GameActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         IN_GAME = false
+        ConnectionService.INTERRUPT = true
+        ConnectionService.comeOutFromTable()
         super.onBackPressed()
     }
 
@@ -90,7 +89,13 @@ class GameActivity : AppCompatActivity() {
             messagesListView.visibility = VISIBLE
             sendButton.visibility = VISIBLE
             messageContent.visibility = VISIBLE
+            giveUpButton.visibility = GONE
             connectToServer()
+        }
+
+        giveUpButton.setOnClickListener {
+            ConnectionService.giveUpAGame()
+            guessingPlayerView()
         }
 
         connectToServer()
@@ -103,6 +108,7 @@ class GameActivity : AppCompatActivity() {
             imageView.visibility = GONE
             draw_view.clearCanvas()
             draw_view.visibility = VISIBLE
+            giveUpButton.visibility = VISIBLE
         }
 
         sendPicture = true
@@ -121,6 +127,7 @@ class GameActivity : AppCompatActivity() {
             messageContent.visibility = VISIBLE
             imageView.visibility = VISIBLE
             draw_view.visibility = GONE
+            giveUpButton.visibility = GONE
         }
 
         sendPicture = false
@@ -142,14 +149,16 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun printMessages() {
-        val adapter = ArrayAdapter(this, R.layout.message, ConnectionService.messages)
+        val adapter = ArrayAdapter(this, R.layout.message, messages)
         messagesListView.adapter = adapter
         messagesListView.setSelection(adapter.count - 1)
     }
 
+
+
     private fun updateMessageList(msg : String?) {
         runOnUiThread {
-            ConnectionService.messages.add(msg!!)
+            messages.add(msg!!)
             printMessages()
         }
     }
