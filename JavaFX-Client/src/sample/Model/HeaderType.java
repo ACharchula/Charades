@@ -10,8 +10,6 @@ public enum HeaderType {
     GAME_WAITING,
     GAME_READY,
     YOU_ARE_DRAWER,
-    CLUE_INCORRECT,
-    CLUE_CORRECT,
     PONG____PONG,
     COMEOUTTABLE,
     GIVE_UP_GAME,

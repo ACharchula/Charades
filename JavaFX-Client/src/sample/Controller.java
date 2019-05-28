@@ -5,6 +5,7 @@ import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -27,6 +28,7 @@ public class Controller {
     private int PORT = 44444;
     private Button reconnectButton;
     private Button addTableButton;
+    private Button refreshButton;
     private ScrollPane tablesPane;
     private VBox tablesVBox;
     private Thread readingThread;
@@ -54,7 +56,14 @@ public class Controller {
     private StackPane stackPane;
 
     @FXML
+    public Button surrenderButton;
+
+    @FXML
+    private Button leaveTableButton;
+
+    @FXML
     public void initialize() {
+        drawingController = new DrawingController(canvas, imageView);
 
         messagesBox.setCellFactory(param -> new ListCell<String>() {
             @Override
@@ -79,7 +88,6 @@ public class Controller {
             if (connectionIsActive()) {
                 startChatReceiverTask();
                 startChatWriterTask();
-//                showChatBox();
                 showTablesButton();
             } else {
                 showAlert("CONNECT_ERROR");
@@ -105,11 +113,49 @@ public class Controller {
             addTableButton.setDisable(false);
         });
 
-        drawingController = new DrawingController(canvas, imageView);
-
-        Platform.runLater(()->{
-            prepareNotOnTableView();
+        leaveTableButton.setOnMouseClicked(event -> {
+            leaveTableButton.setDisable(true);
+            if(connectionIsActive()){
+                try {
+                    connectionService.leaveTable();
+                    showMainMenu();
+                } catch (IOException e) {
+                    showAlert("TABLE_ERROR");
+                }
+            }
+            leaveTableButton.setDisable(false);
         });
+
+        surrenderButton.setOnMouseClicked(event -> {
+            surrenderButton.setDisable(true);
+            if(connectionIsActive()){
+                try {
+                    connectionService.surrender();
+                    showMessageField();
+                    drawingController.allowDrawing(false);
+                    drawingController.clearImage();
+                } catch (IOException e) {
+                    showAlert("TABLE_ERROR");
+                }
+            }
+            surrenderButton.setDisable(false);
+        });
+
+        refreshButton = new Button("Refresh");
+        refreshButton.setOnMouseClicked(event -> {
+            refreshButton.setDisable(true);
+            if(connectionIsActive()){
+                try {
+                    connectionService.requestTablesInfo();
+                } catch (IOException e) {
+                    showAlert("TABLE_ERROR");
+                }
+            }
+            refreshButton.setDisable(false);
+        });
+
+
+        Platform.runLater(this::prepareNotOnTableView);
 
         if(!connectionIsActive()){
             showReconnectButton();
@@ -118,9 +164,17 @@ public class Controller {
         }
     }
 
+    private void showMainMenu() {
+        prepareNotOnTableView();
+        showTablesButton();
+        showActiveTables();
+        timer.cancel();
+    }
+
     private void showTablesButton() {
         chatBox.getChildren().forEach(child -> child.setVisible(false));
         chatBox.getChildren().add(addTableButton);
+        chatBox.getChildren().add(refreshButton);
     }
 
     public Controller() {}
@@ -171,6 +225,7 @@ public class Controller {
                         updateChatBox(connectionService.getGameWaiting());
                         break;
                     case GAME_ENDED:
+                        timer.cancel();
                         updateChatBox(connectionService.getWinner());
                         drawingController.allowDrawing(false);
                         drawingController.clearImage();
@@ -192,11 +247,12 @@ public class Controller {
                         connectionService.getTableID();
                         connectionService.requestTablesInfo();
                         break;
-                    case CLUE_CORRECT:
-                        connectionService.clueCorrect();
+                    case GAME_ABORTED:
+                        connectionService.handleAbortion();
                         break;
-                    case CLUE_INCORRECT:
-                        connectionService.clueIncorrect();
+                    case COMMANDFAILD:
+                        connectionService.handleFail();
+                        showAlert("ERROR");
                         break;
                 }
             }
@@ -236,7 +292,6 @@ public class Controller {
                 }
             });
             tablesPane.setVisible(true);
-//            stackPane.getChildren().add(tablesPane);
         });
     }
 
@@ -259,7 +314,8 @@ public class Controller {
 
     private void hideMessageField() {
         Platform.runLater(() -> {
-            chatBox.getChildren().remove(messageField);
+            messageField.setVisible(false);
+            surrenderButton.setVisible(true);
         });
 
         class SendImage extends TimerTask {
@@ -282,10 +338,10 @@ public class Controller {
 
     private void showMessageField() {
         Platform.runLater(() -> {
-            if (!chatBox.getChildren().contains(messageField)) {
-                chatBox.getChildren().add(messageField);
-            }
+            messageField.setVisible(true);
+            surrenderButton.setVisible(false);
         });
+        timer.cancel();
     }
 
     private void updateChatBox(Message message) throws IOException {
@@ -368,6 +424,10 @@ public class Controller {
             alert.setTitle("Entering table error");
             alert.setHeaderText("Oops, entering table finished unsuccesfully");
             alert.setContentText("There was a problem while entering table,\nPlease try again");
+        } else if (type.equals("ERROR")){
+            alert.setTitle("ERROR");
+            alert.setHeaderText("Oops, something went wrong");
+            alert.setContentText("Something went wrong :( Please try again");
         }
 
         alert.showAndWait();
@@ -376,8 +436,10 @@ public class Controller {
     private void showChatBox() {
         Platform.runLater(()->{
             chatBox.getChildren().forEach(child -> child.setVisible(true));
+            surrenderButton.setVisible(false);
             chatBox.getChildren().remove(reconnectButton);
             chatBox.getChildren().remove(addTableButton);
+            chatBox.getChildren().remove(refreshButton);
         });
     }
 

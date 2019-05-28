@@ -13,8 +13,6 @@ public class Headers {
         put("GAME_WAITING", HeaderType.GAME_WAITING);
         put("GAME___READY", HeaderType.GAME_READY);
         put("YOUAREDRAWER", HeaderType.YOU_ARE_DRAWER);
-        put("CLUEINCORECT", HeaderType.CLUE_INCORRECT);
-        put("CLUE_CORRECT", HeaderType.CLUE_CORRECT);
         put("PONG____PONG", HeaderType.PONG____PONG);
         put("COMEOUTTABLE", HeaderType.COMEOUTTABLE);
         put("GIVE_UP_GAME", HeaderType.GIVE_UP_GAME);

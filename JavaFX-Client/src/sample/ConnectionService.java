@@ -113,18 +113,6 @@ class ConnectionService {
         return result;
     }
 
-    private byte[] convertByteBufferToByteArray(ByteBuffer buffer) {
-
-        byte[] bytes = new byte[buffer.remaining()];
-        buffer.get(bytes, 0, bytes.length);
-
-        buffer.clear();
-        bytes = new byte[buffer.capacity()];
-        buffer.get(bytes, 0, bytes.length);
-
-        return bytes;
-    }
-
     private void sendWelcomePackage() throws IOException {
         StringBuilder welcomePackage = new StringBuilder("HELLO_SERVER");
         welcomePackage.append(String.format("%04d", this.loggedUser.length()));
@@ -146,8 +134,8 @@ class ConnectionService {
     }
 
     public Message getMessage() throws IOException {
-        int length = Integer.parseInt(read(BYTES_TO_READ_LENGTH));
-        String userNameAndMessage = read(length);
+        int length = Integer.parseInt(read1(BYTES_TO_READ_LENGTH));
+        String userNameAndMessage = read1(length);
         Message message = new Message(userNameAndMessage.split("\n")[0], userNameAndMessage.split("\n")[1]);
         return message;
     }
@@ -267,5 +255,23 @@ class ConnectionService {
         String message = "ENTER__TABLE" + String.format("%04d", table.length()) +
                 table;
         send(message);
+    }
+
+    public void leaveTable() throws IOException {
+        send("COMEOUTTABLE0000");
+        isOnTable = false;
+    }
+
+    public void surrender() throws IOException {
+        send("GIVE_UP_GAME0000");
+    }
+
+    public void handleAbortion() throws IOException {
+        int length = Integer.parseInt(read1(BYTES_TO_READ_LENGTH));
+        String pass = read1(length);
+    }
+
+    public void handleFail() throws IOException {
+        read1(BYTES_TO_READ_LENGTH);
     }
 }

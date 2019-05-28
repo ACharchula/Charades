@@ -116,7 +116,6 @@ public class DrawingController {
         graphicsContext.clearRect(0,0,canvas.getWidth(),canvas.getHeight());
         Platform.runLater(()->{
             graphicsContext.getCanvas().snapshot(null,writableImage);
-
         });
         System.out.println("cleared");
     }
