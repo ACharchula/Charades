@@ -4,7 +4,7 @@
 
 const buffer_ptr CreateTableCmd::HEADER = helpers::to_buf("CREATE_TABLE");
 const buffer_ptr CreateTableCmd::TABLE_CREATED =
-    helpers::to_buf("TABLE_CREATED");
+    helpers::to_buf("TABLECREATED");
 
 void CreateTableCmd::pushInput(buffer_ptr input) {
   int table_id = tables->createTable();
