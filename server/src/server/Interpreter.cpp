@@ -2,10 +2,14 @@
 
 #include "Interpreter.h"
 
+const buffer_ptr Interpreter::PING_PACKET = helpers::to_buf("PING____PING0000");
+const std::chrono::seconds Interpreter::INACTIVE_PING_SEC(3);
+
 Interpreter::Interpreter(User *current_user, Users *users, Tables *tables)
     : current_user(current_user), users(users), tables(tables) {
   setSelectCommandState();
   tmp = std::make_shared<buffer_t>();
+  setActive();
 }
 
 void Interpreter::interpretChar(char c) {
@@ -14,11 +18,32 @@ void Interpreter::interpretChar(char c) {
     proceedInput();
     tmp = std::make_shared<buffer_t>();
   }
+  setActive();
+}
+
+void Interpreter::setActive() {
+  last_active = std::chrono::system_clock::now();
+  waitForPong = false;
+}
+
+bool Interpreter::isActive() {
+  auto timeDiff = std::chrono::system_clock::now() - last_active;
+  auto secDiff = std::chrono::duration_cast<std::chrono::seconds>(timeDiff);
+
+  if (secDiff > 2 * INACTIVE_PING_SEC) return false;
+
+  if (secDiff > INACTIVE_PING_SEC && !waitForPong) {
+    current_user->addMessageToQueue(PING_PACKET);
+    waitForPong = true;
+  }
+  return true;
 }
 
 void Interpreter::proceedInput() {
   if (actionState == ActionState::SelectCommand) {
-    if (equal(tmp, HelloCmd::HEADER)) {
+    if (equal(tmp, PongCmd::HEADER)) {
+      currentCommand = std::make_unique<PongCmd>(current_user, tables, users);
+    } else if (equal(tmp, HelloCmd::HEADER)) {
       currentCommand = std::make_unique<HelloCmd>(current_user, tables, users);
     } else if (!current_user->isLogged()) {
       helpers::log("Not logged user try to execute non-hello command");

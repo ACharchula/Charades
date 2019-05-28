@@ -48,6 +48,7 @@ class Server {
   void accept_connections();
   void recive_datas();
   void send_messages();
+  void check_active();
 
   void log(const std::string &msg, int sock = -1);
   void disconnect(int usersock);

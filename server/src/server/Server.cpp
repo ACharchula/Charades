@@ -85,6 +85,19 @@ void Server::recive_datas() {
   }
 }
 
+void Server::check_active() {
+  std::vector<int> socksToDisconnect;
+  for (auto id : users.getAllUsersIds()) {
+    auto user = users.getUser(id);
+    if (!interpreters[user->sock()].isActive())
+      socksToDisconnect.push_back(user->sock());
+  }
+  for (auto sock : socksToDisconnect) {
+    disconnect(sock);
+    sockets.remove(sock);
+  }
+}
+
 void Server::send_messages() {
   for (auto id : users.getAllUsersIds()) {
     auto user = users.getUser(id);
@@ -112,6 +125,7 @@ void Server::run() {
     accept_connections();
     recive_datas();
     tables.proceedAll();
+    check_active();
     send_messages();
   }
 
