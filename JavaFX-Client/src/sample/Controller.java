@@ -16,6 +16,7 @@ import sample.Model.HeaderType;
 import sample.Model.Message;
 
 import java.io.*;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -66,7 +67,8 @@ public class Controller {
         reconnectButton = new Button("reconnect");
         reconnectButton.setOnMouseClicked(event -> {
             reconnectButton.setDisable(true);
-            connectionService = new ConnectionService(IP, PORT);
+            initConnection();
+//            connectionService = new ConnectionService(IP, PORT);
             if (connectionService.isConnected()) {
                 showChatBox();
             } else {
@@ -78,19 +80,29 @@ public class Controller {
 //        showReconnectButton();
 
         drawingController = new DrawingController(canvas, imageView);
-        initConnection();
+        //initConnection();
+        if(connectionService == null || !connectionService.isConnected()){
+            System.out.println("Disconnected");
+            showReconnectButton();
+        }else {
+            showChatBox();
+        }
     }
 
     public Controller() {}
 
     private void initConnection() {
-        connectionService = new ConnectionService(IP, PORT);
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Login Dialog");
+        dialog.setHeaderText("Please give us your login");
+        dialog.setContentText("Please enter your login:");
+        Optional<String> result = dialog.showAndWait();
+        result.ifPresent(name -> {
+            connectionService = new ConnectionService(IP, PORT, name);
+        });
+
         System.out.println(connectionService.isConnected());
-        if(!connectionService.isConnected()){
-            showReconnectButton();
-        }else {
-            showChatBox();
-        }
+
     }
 
     private void startChatReceiverTask() {
@@ -107,7 +119,7 @@ public class Controller {
 
 
         try {
-            while (connectionService.isConnected()) {
+            while (connectionService != null && connectionService.isConnected()) {
                 HeaderType header = connectionService.readHeader();
                 System.out.println(header);
                 if (header == HeaderType.CHAT_MESSAGE) {

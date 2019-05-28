@@ -15,5 +15,17 @@ public class Headers {
         put("YOUAREDRAWER", HeaderType.YOU_ARE_DRAWER);
         put("CLUEINCORECT", HeaderType.CLUE_INCORRECT);
         put("CLUE_CORRECT", HeaderType.CLUE_CORRECT);
+        put("PONG____PONG", HeaderType.PONG____PONG);
+        put("COMEOUTTABLE", HeaderType.COMEOUTTABLE);
+        put("GIVE_UP_GAME", HeaderType.GIVE_UP_GAME);
+        put("GETSTATISTIC", HeaderType.GETSTATISTIC);
+        put("CREATE_TABLE", HeaderType.CREATE_TABLE);
+        put("LIST__TABLES", HeaderType.LIST__TABLES);
+        put("PING____PING", HeaderType.PING____PING);
+        put("SEESTATISTIC", HeaderType.SEESTATISTIC);
+        put("TABLECREATED", HeaderType.TABLECREATED);
+        put("SEE___TABLES", HeaderType.SEE___TABLES);
+        put("COMMANDFAILD", HeaderType.COMMANDFAILD);
+        put("GAME_ABORTED", HeaderType.GAME_ABORTED);
     }};
 }

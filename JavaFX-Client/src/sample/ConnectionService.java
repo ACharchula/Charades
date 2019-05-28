@@ -24,8 +24,10 @@ class ConnectionService {
     private boolean connected;
     private int HEADER_LENGTH = 12;
     private int BYTES_TO_READ_LENGTH = 4;
+    private String loggedUser;
 
-    ConnectionService(String ip, int port) {
+    ConnectionService(String ip, int port, String name) {
+        this.loggedUser = name;
         connected = startConnection(ip, port);
     }
 
@@ -39,7 +41,7 @@ class ConnectionService {
             socketChannel.configureBlocking(false);
 
             success = handShakeServer();
-            joinTable();
+//            joinTable();
         } catch (Exception e) {
             return false;
         }
@@ -115,8 +117,8 @@ class ConnectionService {
 
     private void sendWelcomePackage() throws IOException {
         StringBuilder welcomePackage = new StringBuilder("HELLO_SERVER");
-        welcomePackage.append(String.format("%04d", "Ja".length()));
-        welcomePackage.append("Ja");
+        welcomePackage.append(String.format("%04d", this.loggedUser.length()));
+        welcomePackage.append(this.loggedUser);
         socketChannel.write(ByteBuffer.wrap(welcomePackage.toString().getBytes()));
     }
 
