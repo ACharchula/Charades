@@ -17,6 +17,7 @@
 #include "commands/GiveUpCmd.h"
 #include "commands/CreateTableCmd.h"
 #include "commands/ListTablesCmd.h"
+#include "commands/GetStatisticCmd.h"
 
 #include "Tables.h"
 #include "User.h"

@@ -102,6 +102,7 @@ void Table::sendToAllExcept(buffer_ptr buff, User* except_user) {
 void Table::setGameEnd(User* winner_ptr) {
   state = ENDED;
   winner = winner_ptr;
+  users->addWin(winner_ptr->getUsername());
 }
 
 void Table::sendUpdateCanvasIfNeeded() {

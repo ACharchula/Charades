@@ -17,7 +17,7 @@ class Command {
  public:
   Command() {}
   explicit Command(User *current_user, Tables *tables, Users *users)
-      : current_user(current_user), tables(tables) {}
+      : current_user(current_user), tables(tables), users(users) {}
   virtual void pushInput(buffer_ptr input) {}
   virtual int lengthSize() { return data_length_size; }
 
