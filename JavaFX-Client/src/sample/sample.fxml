@@ -12,7 +12,7 @@
    <children>
       <HBox prefHeight="411.0" prefWidth="600.0">
          <children>
-            <StackPane prefHeight="400.0" prefWidth="400.0">
+            <StackPane prefHeight="400.0" prefWidth="400.0" fx:id="stackPane">
                <children>
                   <Canvas fx:id="canvas" height="400.0" width="400.0" />
                   <ImageView fx:id="imageView" fitHeight="400.0" fitWidth="400.0" pickOnBounds="true" preserveRatio="true" />

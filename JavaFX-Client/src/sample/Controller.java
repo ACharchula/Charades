@@ -11,14 +11,14 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import sample.Model.HeaderType;
 import sample.Model.Message;
 
 import java.io.*;
-import java.util.Optional;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class Controller {
 
@@ -26,8 +26,12 @@ public class Controller {
     private String IP = "127.0.0.1";
     private int PORT = 44444;
     private Button reconnectButton;
+    private Button addTableButton;
+    private ScrollPane tablesPane;
+    private VBox tablesVBox;
     private Thread readingThread;
     private Thread writingThread;
+    private List<String> tables;
     private DrawingController drawingController;
     private Timer timer = new Timer();
 
@@ -47,6 +51,9 @@ public class Controller {
     private Canvas canvas;
 
     @FXML
+    private StackPane stackPane;
+
+    @FXML
     public void initialize() {
 
         messagesBox.setCellFactory(param -> new ListCell<String>() {
@@ -64,45 +71,74 @@ public class Controller {
             }
         });
 
-        reconnectButton = new Button("reconnect");
+        reconnectButton = new Button("Reconnect");
         reconnectButton.setOnMouseClicked(event -> {
             reconnectButton.setDisable(true);
             initConnection();
 //            connectionService = new ConnectionService(IP, PORT);
-            if (connectionService.isConnected()) {
-                showChatBox();
+            if (connectionIsActive()) {
+                startChatReceiverTask();
+                startChatWriterTask();
+//                showChatBox();
+                showTablesButton();
             } else {
                 showAlert("CONNECT_ERROR");
             }
             reconnectButton.setDisable(false);
         });
 
-//        showReconnectButton();
+        tablesPane = new ScrollPane();
+        tablesVBox = new VBox();
+        tablesPane.setContent(tablesVBox);
+        stackPane.getChildren().add(tablesPane);
+
+        addTableButton = new Button("Add Table");
+        addTableButton.setOnMouseClicked(event -> {
+            addTableButton.setDisable(true);
+            if(connectionIsActive()){
+                try {
+                    connectionService.createNewTable();
+                } catch (IOException e) {
+                    showAlert("TABLE_ERROR");
+                }
+            }
+            addTableButton.setDisable(false);
+        });
 
         drawingController = new DrawingController(canvas, imageView);
-        //initConnection();
-        if(connectionService == null || !connectionService.isConnected()){
-            System.out.println("Disconnected");
+
+        Platform.runLater(()->{
+            prepareNotOnTableView();
+        });
+
+        if(!connectionIsActive()){
             showReconnectButton();
         }else {
             showChatBox();
         }
     }
 
+    private void showTablesButton() {
+        chatBox.getChildren().forEach(child -> child.setVisible(false));
+        chatBox.getChildren().add(addTableButton);
+    }
+
     public Controller() {}
 
     private void initConnection() {
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("Login Dialog");
-        dialog.setHeaderText("Please give us your login");
-        dialog.setContentText("Please enter your login:");
+        TextInputDialog dialog = createLoginDialog();
         Optional<String> result = dialog.showAndWait();
         result.ifPresent(name -> {
             connectionService = new ConnectionService(IP, PORT, name);
         });
+    }
 
-        System.out.println(connectionService.isConnected());
-
+    private TextInputDialog createLoginDialog(){
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Login Dialog");
+        dialog.setHeaderText("Please give us your login");
+        dialog.setContentText("Please enter your login:");
+        return dialog;
     }
 
     private void startChatReceiverTask() {
@@ -117,33 +153,51 @@ public class Controller {
     private void runChatReceiverTask() {
         WritableImage writableImage = new WritableImage((int)canvas.getWidth(),(int)canvas.getHeight());
 
-
         try {
-            while (connectionService != null && connectionService.isConnected()) {
+            while (connectionIsActive()) {
                 HeaderType header = connectionService.readHeader();
                 System.out.println(header);
-                if (header == HeaderType.CHAT_MESSAGE) {
-                    updateChatBox(connectionService.getMessage());
-                } else if (header == HeaderType.UPDATECANVAS) {
-                    SwingFXUtils.toFXImage(connectionService.getCanvas(), writableImage);
-                    drawingController.updateImage(writableImage);
-                } else if (header == HeaderType.GAME_WAITING) {
-                    updateChatBox(connectionService.getGameWaiting());
-                } else if (header == HeaderType.GAME_ENDED) {
-                    updateChatBox(connectionService.getWinner());
-                    drawingController.allowDrawing(false);
-                    drawingController.clearImage();
-                    showMessageField();
-                } else if (header == HeaderType.GAME_READY) {
-                    updateChatBox(connectionService.getGameReady());
-                } else if (header == HeaderType.YOU_ARE_DRAWER) {
-                    updateChatBox(connectionService.getThingToDraw());
-                    drawingController.allowDrawing(true);
-                    hideMessageField();
-                } else if (header == HeaderType.CLUE_CORRECT) {
-                    connectionService.clueCorrect();
-                } else if (header == HeaderType.CLUE_INCORRECT) {
-                    connectionService.clueIncorrect();
+                switch (header) {
+                    case CHAT_MESSAGE:
+                        updateChatBox(connectionService.getMessage());
+                        break;
+                    case UPDATECANVAS:
+                        SwingFXUtils.toFXImage(connectionService.getCanvas(), writableImage);
+                        drawingController.updateImage(writableImage);
+                        break;
+                    case GAME_WAITING:
+                        showChatBox();
+                        showCanvas();
+                        updateChatBox(connectionService.getGameWaiting());
+                        break;
+                    case GAME_ENDED:
+                        updateChatBox(connectionService.getWinner());
+                        drawingController.allowDrawing(false);
+                        drawingController.clearImage();
+                        showMessageField();
+                        break;
+                    case GAME_READY:
+                        updateChatBox(connectionService.getGameReady());
+                        break;
+                    case YOU_ARE_DRAWER:
+                        updateChatBox(connectionService.getThingToDraw());
+                        drawingController.allowDrawing(true);
+                        hideMessageField();
+                        break;
+                    case SEE___TABLES:
+                        tables = connectionService.getActiveTables();
+                        showActiveTables();
+                        break;
+                    case TABLECREATED:
+                        connectionService.getTableID();
+                        connectionService.requestTablesInfo();
+                        break;
+                    case CLUE_CORRECT:
+                        connectionService.clueCorrect();
+                        break;
+                    case CLUE_INCORRECT:
+                        connectionService.clueIncorrect();
+                        break;
                 }
             }
         } catch (IOException e) {
@@ -160,6 +214,46 @@ public class Controller {
                 showAlert("IMAGE_ERROR");
                 showReconnectButton();
             });
+        }
+    }
+
+    private void showCanvas() {
+        Platform.runLater(()->{
+            tablesPane.setVisible(false);
+            canvas.setVisible(true);
+            imageView.setVisible(true);
+        });
+    }
+
+    private void showActiveTables() {
+        Platform.runLater(()->{
+            int size = tablesVBox.getChildren().size();
+            tablesVBox.getChildren().remove(0, size);
+            tables.forEach(table -> {
+                Button button = createEnterTableButton(table);
+                if(!tablesVBox.getChildren().contains(button)){
+                    tablesVBox.getChildren().add(button);
+                }
+            });
+            tablesPane.setVisible(true);
+//            stackPane.getChildren().add(tablesPane);
+        });
+    }
+
+    private Button createEnterTableButton(String table){
+        tablesVBox.getChildren().add(new Label("Table nr. " + table));
+        Button button = new Button("Enter table " + table);
+        button.setOnMouseClicked(event -> {
+            enterTable(table);
+        });
+        return button;
+    }
+
+    private void enterTable(String table) {
+        try {
+            connectionService.enterTable(table);
+        } catch (IOException e) {
+            showAlert("ENTER_TABLE_ERROR");
         }
     }
 
@@ -266,16 +360,25 @@ public class Controller {
             alert.setTitle("Image error");
             alert.setHeaderText("Oops, something went wrong");
             alert.setContentText("There is a problem loading your image");
+        } else if (type.equals("TABLE_ERROR")){
+            alert.setTitle("Creating table error");
+            alert.setHeaderText("Oops, creating table finished unsuccesfully");
+            alert.setContentText("There was a problem when creating your table,\nPlease try again");
+        } else if (type.equals("ENTER_TABLE_ERROR")){
+            alert.setTitle("Entering table error");
+            alert.setHeaderText("Oops, entering table finished unsuccesfully");
+            alert.setContentText("There was a problem while entering table,\nPlease try again");
         }
 
         alert.showAndWait();
     }
 
     private void showChatBox() {
-        startChatReceiverTask();
-        startChatWriterTask();
-        chatBox.getChildren().forEach(child -> child.setVisible(true));
-        chatBox.getChildren().remove(reconnectButton);
+        Platform.runLater(()->{
+            chatBox.getChildren().forEach(child -> child.setVisible(true));
+            chatBox.getChildren().remove(reconnectButton);
+            chatBox.getChildren().remove(addTableButton);
+        });
     }
 
     private void showReconnectButton() {
@@ -287,8 +390,16 @@ public class Controller {
             connectionService = null;
         }
         chatBox.getChildren().forEach(child -> child.setVisible(false));
-        chatBox.setAlignment(Pos.TOP_CENTER);
+        stackPane.getChildren().forEach(child -> child.setVisible(false));
         chatBox.getChildren().add(reconnectButton);
+    }
+
+    private void prepareNotOnTableView(){
+        stackPane.getChildren().forEach(child -> child.setVisible(false));
+    }
+
+    private boolean connectionIsActive(){
+        return this.connectionService != null && this.connectionService.isConnected() ;
     }
 
 }

@@ -13,8 +13,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 class ConnectionService {
 
@@ -22,6 +21,7 @@ class ConnectionService {
 
 
     private boolean connected;
+    private boolean isOnTable = false;
     private int HEADER_LENGTH = 12;
     private int BYTES_TO_READ_LENGTH = 4;
     private String loggedUser;
@@ -41,12 +41,16 @@ class ConnectionService {
             socketChannel.configureBlocking(false);
 
             success = handShakeServer();
-//            joinTable();
+            requestTablesInfo();
         } catch (Exception e) {
             return false;
         }
 
         return success;
+    }
+
+    public void requestTablesInfo() throws IOException {
+        send("LIST__TABLES0000");
     }
 
     private boolean handShakeServer() throws IOException {
@@ -79,12 +83,19 @@ class ConnectionService {
         return stringBuilder.toString();
     }
 
+    public boolean isOnTable() {
+        return isOnTable;
+    }
+
+    private String read1(int bytesToRead) throws IOException {
+        return new String(readByteArray(bytesToRead));
+    }
+
     private byte[] readByteArray(int expectedLength) throws IOException {
         int read = 0;
         int consumed;
         byte[] result = new byte[expectedLength];
 
-        System.out.println("start read");
         do {
             ByteBuffer buff = ByteBuffer.allocate(expectedLength - read);
             buff.clear();
@@ -99,7 +110,6 @@ class ConnectionService {
 
         } while (read != expectedLength);
 
-        System.out.println("read");
         return result;
     }
 
@@ -120,10 +130,6 @@ class ConnectionService {
         welcomePackage.append(String.format("%04d", this.loggedUser.length()));
         welcomePackage.append(this.loggedUser);
         socketChannel.write(ByteBuffer.wrap(welcomePackage.toString().getBytes()));
-    }
-
-    private void joinTable() throws IOException {
-        send("ENTER__TABLE0000");
     }
 
     private void send(String message) throws IOException {
@@ -155,7 +161,7 @@ class ConnectionService {
     }
 
     public HeaderType readHeader() throws IOException {
-        String header = read(HEADER_LENGTH);
+        String header = read1(HEADER_LENGTH);
 
         if (Headers.HEADERS.containsKey(header)) {
             return Headers.HEADERS.get(header);
@@ -200,21 +206,19 @@ class ConnectionService {
         int length = Integer.parseInt(read(BYTES_TO_READ_LENGTH * 2));
         byte[] bitmapByteArray = readByteArray(length);
         ByteArrayInputStream bais = new ByteArrayInputStream(bitmapByteArray);
-        System.out.println("Bais is null = ");
-        System.out.println(bais == null);
-//        File outputFile = new File("saved.png");
-        BufferedImage image = ImageIO.read(bais);
-        System.out.println("Image is null");
-        System.out.println(image == null);
-//        ImageIO.write(image, "png", outputFile);
-        return image;
+        return ImageIO.read(bais);
     }
 
     public String getThingToDraw() throws IOException {
         int length = Integer.parseInt(read(BYTES_TO_READ_LENGTH));
         String result = read(length);
-
         return "Your turn! Draw - " + result;
+    }
+
+    public List<String> getActiveTables() throws IOException {
+        int amountOfTables = Integer.parseInt(read1(BYTES_TO_READ_LENGTH));
+        String result = read1(amountOfTables);
+        return Arrays.asList(result.split("\n"));
     }
 
     public void clueCorrect() throws IOException {
@@ -248,4 +252,20 @@ class ConnectionService {
     }
 
 
+    public void createNewTable() throws IOException {
+        send("CREATE_TABLE0000");
+    }
+
+    public void getTableID() throws IOException {
+        int length = Integer.parseInt(read1(BYTES_TO_READ_LENGTH));
+        int id = Integer.parseInt(read1(length));
+        System.out.println("Id is = " + id);
+    }
+
+    public void enterTable(String table) throws IOException {
+        System.out.println("Entered table " + table);
+        String message = "ENTER__TABLE" + String.format("%04d", table.length()) +
+                table;
+        send(message);
+    }
 }
