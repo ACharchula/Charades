@@ -4,8 +4,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View.GONE
-import android.view.View.VISIBLE
+import android.view.View.*
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_game.*
@@ -16,6 +15,7 @@ class GameActivity : AppCompatActivity() {
     private var sendPicture = false
     private var pictureByteArray = ByteArray(0)
     private var IN_GAME = true
+    private var drawerView = false
     var messages = arrayListOf<String>()
 
     private val outputThread = Thread {
@@ -53,6 +53,9 @@ class GameActivity : AppCompatActivity() {
                     updateMessageList(ConnectionService.getThingToDraw())
                     drawerView()
                 } else if (header == HeaderType.GAME_ABORTED) {
+                    if(drawerView)
+                        guessingPlayerView()
+
                     updateMessageList(ConnectionService.gameAborted())
                 } else if (header == HeaderType.PING_PING) {
                     ConnectionService.ping_ping()
@@ -107,15 +110,17 @@ class GameActivity : AppCompatActivity() {
             ConnectionService.giveUpAGame()
             guessingPlayerView()
         }
-
+        guessingPlayerView()
         connectToServer()
     }
 
     private fun drawerView() {
+        drawerView = true
+
         runOnUiThread {
             sendButton.visibility = GONE
             messageContent.visibility = GONE
-            imageView.visibility = GONE
+            imageView.visibility = INVISIBLE
             draw_view.clearCanvas()
             draw_view.visibility = VISIBLE
             giveUpButton.visibility = VISIBLE
@@ -135,8 +140,9 @@ class GameActivity : AppCompatActivity() {
         runOnUiThread {
             sendButton.visibility = VISIBLE
             messageContent.visibility = VISIBLE
+            imageView.setImageResource(android.R.color.white)
             imageView.visibility = VISIBLE
-            draw_view.visibility = GONE
+            draw_view.visibility = INVISIBLE
             giveUpButton.visibility = GONE
         }
 
