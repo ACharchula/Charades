@@ -1,11 +1,13 @@
 package com.acharchu.charades
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_game.*
 import kotlin.concurrent.fixedRateTimer
 
@@ -60,14 +62,18 @@ class GameActivity : AppCompatActivity() {
             } catch (e : Throwable) {
                 if (e.message == "CONNECTION CLOSED") {
 
+                    IN_GAME = false
                     ConnectionService.status = State.DISCONNECTED
+                    ConnectionService.INTERRUPT = true
+                    ConnectionService.closeSocket()
 
                     runOnUiThread {
-                        ConnectionService.closeSocket()
-                        messagesListView.visibility = GONE
-                        sendButton.visibility = GONE
-                        messageContent.visibility = GONE
-                        reconnectButton.visibility = VISIBLE
+                        val intent = Intent(this, MainActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        startActivity(intent)
+                        ConnectionService.INTERRUPT = false
+                        Toast.makeText(this, "Disconnected from server!", Toast.LENGTH_SHORT).show()
+
                     }
                 }
 

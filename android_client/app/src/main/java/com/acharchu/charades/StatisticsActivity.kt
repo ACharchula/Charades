@@ -1,5 +1,6 @@
 package com.acharchu.charades
 
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.ArrayAdapter
@@ -13,13 +14,31 @@ class StatisticsActivity : AppCompatActivity() {
     private val inputThread = Thread {
 
         while(ConnectionService.status == State.CONNECTED && IN_STATISTICS_VIEW) {
-            val header : HeaderType? = ConnectionService.getHeader()
+            try {
+                val header: HeaderType? = ConnectionService.getHeader()
 
-            if(header == HeaderType.SEE_STATISTIC) {
-                setStatistics(ConnectionService.getBestUsersAndScores())
-            }  else if (header == HeaderType.PING_PING) {
-                ConnectionService.ping_ping()
-                ConnectionService.pong_pong()
+                if (header == HeaderType.SEE_STATISTIC) {
+                    setStatistics(ConnectionService.getBestUsersAndScores())
+                } else if (header == HeaderType.PING_PING) {
+                    ConnectionService.ping_ping()
+                    ConnectionService.pong_pong()
+                }
+            } catch (e: Throwable) {
+                if (e.message == "CONNECTION CLOSED") {
+
+                    IN_STATISTICS_VIEW = false
+                    ConnectionService.status = State.DISCONNECTED
+                    ConnectionService.INTERRUPT = true
+                    ConnectionService.closeSocket()
+
+                    runOnUiThread {
+                        val intent = Intent(this, MainActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        startActivity(intent)
+                        ConnectionService.INTERRUPT = false
+                        Toast.makeText(this, "Disconnected from server!", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
         }
     }

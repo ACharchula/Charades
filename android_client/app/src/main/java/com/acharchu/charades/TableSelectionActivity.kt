@@ -6,8 +6,6 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_table_selection.*
-import java.lang.Thread.sleep
-import kotlin.concurrent.fixedRateTimer
 
 class TableSelectionActivity : AppCompatActivity() {
 
@@ -17,26 +15,44 @@ class TableSelectionActivity : AppCompatActivity() {
     private val inputThread = Thread {
 
         while(ConnectionService.status == State.CONNECTED && IN_TABLE_VIEW) {
-            val header : HeaderType? = ConnectionService.getHeader()
+            try {
+                val header: HeaderType? = ConnectionService.getHeader()
 
-            if(header == HeaderType.SEE_TABLES) {
-                val tableList = ConnectionService.getTableList()
+                if (header == HeaderType.SEE_TABLES) {
+                    val tableList = ConnectionService.getTableList()
 
-                if (tableList != null)
-                    setTableList(tableList)
-            } else if (header == HeaderType.TABLE_CREATED) {
-                val tableId = ConnectionService.getIdOfCreatedTable()
-                runOnUiThread {
-                    Toast.makeText(this, "Table of id $tableId created!", Toast.LENGTH_SHORT).show()
+                    if (tableList != null)
+                        setTableList(tableList)
+                } else if (header == HeaderType.TABLE_CREATED) {
+                    val tableId = ConnectionService.getIdOfCreatedTable()
+                    runOnUiThread {
+                        Toast.makeText(this, "Table of id $tableId created!", Toast.LENGTH_SHORT).show()
+                    }
+                    ConnectionService.listAvailableTables()
+                } else if (header == HeaderType.COMMAND_FAILED) {
+                    ConnectionService.commandFailed()
+                    Toast.makeText(this, "Unable to join the table", Toast.LENGTH_SHORT).show()
+                    ConnectionService.listAvailableTables()
+                } else if (header == HeaderType.PING_PING) {
+                    ConnectionService.ping_ping()
+                    ConnectionService.pong_pong()
                 }
-                ConnectionService.listAvailableTables()
-            } else if (header == HeaderType.COMMAND_FAILED) {
-                ConnectionService.commandFailed()
-                Toast.makeText(this, "Unable to join the table", Toast.LENGTH_SHORT).show()
-                ConnectionService.listAvailableTables()
-            }  else if (header == HeaderType.PING_PING) {
-                ConnectionService.ping_ping()
-                ConnectionService.pong_pong()
+            } catch (e: Throwable) {
+                if (e.message == "CONNECTION CLOSED") {
+
+                    IN_TABLE_VIEW
+                    ConnectionService.status = State.DISCONNECTED
+                    ConnectionService.INTERRUPT = true
+                    ConnectionService.closeSocket()
+
+                    runOnUiThread {
+                        val intent = Intent(this, MainActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        startActivity(intent)
+                        ConnectionService.INTERRUPT = false
+                        Toast.makeText(this, "Disconnected from server!", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
         }
     }

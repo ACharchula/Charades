@@ -24,7 +24,7 @@ class ConnectionService {
 
         private lateinit var id: String
 
-        fun connectToServer() {
+        fun connectToServer() : Boolean {
             try {
                 val address = InetSocketAddress(InetAddress.getByName(serverHost), serverPort)
 
@@ -32,15 +32,10 @@ class ConnectionService {
                 socketChannel!!.configureBlocking(false)
 
             } catch (exception: Exception) {
-                throw exception
+                return false
             }
-        }
 
-        fun isConnected() : Boolean {
-            return if(socketChannel == null)
-                false
-            else
-                socketChannel!!.isConnected
+            return true
         }
 
         private fun sendString(msg: String) {
@@ -215,7 +210,7 @@ class ConnectionService {
                 val buffer = ByteBuffer.allocate(bytesToRead - amountOfCharacters)
                 consumedCharacters = socketChannel?.read(buffer)!!
 
-                if (consumedCharacters != 0) {
+                if (consumedCharacters != 0 && consumedCharacters != -1) {
                     System.arraycopy(buffer.array(), 0, result, amountOfCharacters, consumedCharacters)
                     amountOfCharacters += consumedCharacters
                 } else if (consumedCharacters == -1)

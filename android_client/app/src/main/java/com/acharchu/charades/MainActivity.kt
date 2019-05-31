@@ -24,8 +24,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun start() {
-        ConnectionService.connectToServer()
-        login()
+        if(ConnectionService.connectToServer())
+            login()
+        else
+            Toast.makeText(this, "Can't connect to server. Please try again", Toast.LENGTH_SHORT).show()
     }
 
     private fun login() {
