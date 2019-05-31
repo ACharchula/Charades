@@ -12,8 +12,9 @@ class Headers {
             "TABLECREATED" to HeaderType.TABLE_CREATED,
             "SEE___TABLES" to HeaderType.SEE_TABLES,
             "GAME_ABORTED" to HeaderType.GAME_ABORTED,
-            "COMMANDFAILD" to HeaderType.COMMAND_FAILED
-
+            "COMMANDFAILD" to HeaderType.COMMAND_FAILED,
+            "PING____PING" to HeaderType.PING_PING,
+            "SEESTATISTIC" to HeaderType.SEE_STATISTIC
         )
     }
 }

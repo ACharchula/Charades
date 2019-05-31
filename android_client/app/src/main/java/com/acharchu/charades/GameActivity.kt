@@ -52,6 +52,9 @@ class GameActivity : AppCompatActivity() {
                     drawerView()
                 } else if (header == HeaderType.GAME_ABORTED) {
                     updateMessageList(ConnectionService.gameAborted())
+                } else if (header == HeaderType.PING_PING) {
+                    ConnectionService.ping_ping()
+                    ConnectionService.pong_pong()
                 }
 
             } catch (e : Throwable) {
@@ -75,6 +78,7 @@ class GameActivity : AppCompatActivity() {
     override fun onBackPressed() {
         IN_GAME = false
         ConnectionService.INTERRUPT = true
+        ConnectionService.skipLeftovers()
         ConnectionService.comeOutFromTable()
         super.onBackPressed()
     }

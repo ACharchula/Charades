@@ -34,8 +34,8 @@ class ButtonAdapter(val list: ArrayList<Button>, val context : Context) : BaseAd
         button.text = "Table ${list[position].id}"
 
         button.setOnClickListener {
-            ConnectionService.INTERRUPT = true
             TableSelectionActivity.IN_TABLE_VIEW = false
+            ConnectionService.INTERRUPT = true
 
             ConnectionService.joinToTable(list[position].id)
             val intent = Intent(context, GameActivity::class.java)

@@ -1,14 +1,13 @@
 package com.acharchu.charades
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.ArrayAdapter
 import android.widget.Button
-import android.widget.LinearLayout
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_table_selection.*
+import java.lang.Thread.sleep
+import kotlin.concurrent.fixedRateTimer
 
 class TableSelectionActivity : AppCompatActivity() {
 
@@ -35,6 +34,9 @@ class TableSelectionActivity : AppCompatActivity() {
                 ConnectionService.commandFailed()
                 Toast.makeText(this, "Unable to join the table", Toast.LENGTH_SHORT).show()
                 ConnectionService.listAvailableTables()
+            }  else if (header == HeaderType.PING_PING) {
+                ConnectionService.ping_ping()
+                ConnectionService.pong_pong()
             }
         }
     }
@@ -48,11 +50,30 @@ class TableSelectionActivity : AppCompatActivity() {
             ConnectionService.createTable()
         }
 
+        scoresButton.setOnClickListener {
+            goToStatistics()
+        }
+
+
+//        fixedRateTimer("getTables", false, 2000L, 3000) {
+//            ConnectionService.listAvailableTables()
+//            if(!IN_TABLE_VIEW)
+//                cancel()
+//        }
+
         if(!inputThread.isAlive)
             inputThread.start()
 
         ConnectionService.listAvailableTables()
 
+    }
+
+    private fun goToStatistics() {
+        IN_TABLE_VIEW = false
+        ConnectionService.INTERRUPT = true
+
+        val intent = Intent(this, StatisticsActivity::class.java)
+        startActivity(intent)
     }
 
     private fun setTableList(listOfIDs: List<Int>) {
@@ -75,12 +96,19 @@ class TableSelectionActivity : AppCompatActivity() {
 
 
     override fun onBackPressed() {
+        IN_TABLE_VIEW = false
+        ConnectionService.INTERRUPT = true
+        ConnectionService.skipLeftovers()
         ConnectionService.closeSocket()
         super.onBackPressed()
     }
 
     override fun onResume() {
         IN_TABLE_VIEW = true
+
+        if(!inputThread.isAlive)
+            inputThread.start()
+
         ConnectionService.listAvailableTables()
         super.onResume()
     }

@@ -17,5 +17,7 @@ enum class HeaderType {
     TABLE_CREATED,
     SEE_TABLES,
     GAME_ABORTED,
-    COMMAND_FAILED
+    COMMAND_FAILED,
+    PING_PING,
+    SEE_STATISTIC,
 }

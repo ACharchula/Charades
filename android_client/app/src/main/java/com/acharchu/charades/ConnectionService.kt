@@ -36,6 +36,13 @@ class ConnectionService {
             }
         }
 
+        fun isConnected() : Boolean {
+            return if(socketChannel == null)
+                false
+            else
+                socketChannel!!.isConnected
+        }
+
         private fun sendString(msg: String) {
             socketChannel!!.write(ByteBuffer.wrap(msg.toByteArray()))
         }
@@ -63,14 +70,18 @@ class ConnectionService {
             id = name
         }
 
-        fun performServerHandshake() {
+        fun performServerHandshake() : Boolean {
             sendString("HELLO_SERVER${prepareMessageLength(id.length)}$id")
             val handshakeResult = read(16) //check if result is ok
 
-            if (handshakeResult == "WELCOME_USER0000")
+            if (handshakeResult == "WELCOME_USER0000") {
                 status = State.CONNECTED
+                return true
+            }
+            else if (handshakeResult == "COMMANDFAILD0000")
+                return false
             else
-                throw Throwable("CANNOT CONNECT TO SERVER")
+                return false
         }
 
         fun joinToTable(table_number: Int) {
@@ -83,6 +94,41 @@ class ConnectionService {
 
         fun giveUpAGame() {
             sendString("GIVE_UP_GAME0000")
+        }
+
+        fun ping_ping() {
+            read(BYTES_TO_READ_LENGTH)
+        }
+
+        fun pong_pong() {
+            sendString("PONG____PONG0000")
+        }
+
+        fun getStatistics() {
+            sendString("GETSTATISTIC0000")
+        }
+
+        fun getBestUsersAndScores() : List<String>? {
+            val length = read(BYTES_TO_READ_LENGTH)
+
+            if(length.toInt() != 0) {
+                val tableStringList = read(length.toInt()).split('\n')
+                return prepareScores(tableStringList.subList(0, tableStringList.size-1))
+            } else
+                return null
+
+        }
+
+        private fun prepareScores(splittedList: List<String>) : List<String> {
+            val list = mutableListOf<String>()
+
+            var i = 0
+            while (i != splittedList.size) {
+                list.add(splittedList[i] + " : " + splittedList[i+1])
+                i += 2
+            }
+
+            return list
         }
 
         fun getIdOfCreatedTable() : Int {
@@ -149,7 +195,7 @@ class ConnectionService {
 
         fun getHeader(): HeaderType? {
             val header = read(HEADER_LENGTH)
-
+            print(header)
             if (Headers.headers.containsKey(header))
                 return Headers.headers[header]
 
@@ -178,6 +224,13 @@ class ConnectionService {
             INTERRUPT = false
 
             return result
+        }
+
+        fun skipLeftovers() {
+            do {
+                val buffer = ByteBuffer.allocate(100)
+                val consumedCharacters = socketChannel?.read(buffer)
+            } while (consumedCharacters != 0)
         }
 
         fun closeSocket() {
