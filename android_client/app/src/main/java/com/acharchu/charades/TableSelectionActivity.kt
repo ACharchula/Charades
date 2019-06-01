@@ -6,12 +6,12 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_table_selection.*
+import kotlin.concurrent.fixedRateTimer
 
 class TableSelectionActivity : AppCompatActivity() {
 
-    companion object {
         var IN_TABLE_VIEW = true
-    }
+
     private val inputThread = Thread {
 
         while(ConnectionService.status == State.CONNECTED && IN_TABLE_VIEW) {
@@ -40,9 +40,12 @@ class TableSelectionActivity : AppCompatActivity() {
             } catch (e: Throwable) {
                 if (e.message == "CONNECTION CLOSED") {
 
-                    IN_TABLE_VIEW
+                    IN_TABLE_VIEW = false
                     ConnectionService.status = State.DISCONNECTED
-                    ConnectionService.INTERRUPT = true
+
+                    if(ConnectionService.PROCESSING)
+                        ConnectionService.INTERRUPT = true
+
                     ConnectionService.closeSocket()
 
                     runOnUiThread {
@@ -70,11 +73,15 @@ class TableSelectionActivity : AppCompatActivity() {
             goToStatistics()
         }
 
+        reloadButton.setOnClickListener {
+            ConnectionService.listAvailableTables()
+        }
+
 
 //        fixedRateTimer("getTables", false, 2000L, 3000) {
-//            ConnectionService.listAvailableTables()
 //            if(!IN_TABLE_VIEW)
 //                cancel()
+//            ConnectionService.listAvailableTables()
 //        }
 
         if(!inputThread.isAlive)
@@ -84,10 +91,19 @@ class TableSelectionActivity : AppCompatActivity() {
 
     }
 
+    fun waitForThreadToFinish() {
+        inputThread.join()
+    }
+
     private fun goToStatistics() {
         IN_TABLE_VIEW = false
-        ConnectionService.INTERRUPT = true
 
+        if(ConnectionService.PROCESSING)
+            ConnectionService.INTERRUPT = true
+
+        inputThread.join()
+        ConnectionService.INTERRUPT = false
+        ConnectionService.skipLeftovers()
         val intent = Intent(this, StatisticsActivity::class.java)
         startActivity(intent)
     }
@@ -115,6 +131,7 @@ class TableSelectionActivity : AppCompatActivity() {
         IN_TABLE_VIEW = false
         ConnectionService.INTERRUPT = true
         ConnectionService.skipLeftovers()
+
         ConnectionService.closeSocket()
         super.onBackPressed()
     }
@@ -126,6 +143,11 @@ class TableSelectionActivity : AppCompatActivity() {
             inputThread.start()
 
         ConnectionService.listAvailableTables()
+//        fixedRateTimer("getTables", false, 2000L, 3000) {
+//            if(!IN_TABLE_VIEW)
+//                cancel()
+//            ConnectionService.listAvailableTables()
+//        }
         super.onResume()
     }
 

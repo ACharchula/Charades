@@ -9,7 +9,7 @@ import android.widget.BaseAdapter
 import android.widget.Button
 import android.widget.ListAdapter
 
-class ButtonAdapter(val list: ArrayList<Button>, val context : Context) : BaseAdapter(),  ListAdapter{
+class ButtonAdapter(private val list: ArrayList<Button>, private val context : Context) : BaseAdapter(),  ListAdapter{
 
     override fun getItem(position: Int): Any {
         return list[position]
@@ -34,9 +34,16 @@ class ButtonAdapter(val list: ArrayList<Button>, val context : Context) : BaseAd
         button.text = "Table ${list[position].id}"
 
         button.setOnClickListener {
-            TableSelectionActivity.IN_TABLE_VIEW = false
-            ConnectionService.INTERRUPT = true
+            val tableActivity = context as TableSelectionActivity
+            tableActivity.IN_TABLE_VIEW = false
 
+            if(ConnectionService.PROCESSING)
+                ConnectionService.INTERRUPT = true
+
+            tableActivity.waitForThreadToFinish()
+
+            ConnectionService.skipLeftovers()
+            ConnectionService.INTERRUPT = false
             ConnectionService.joinToTable(list[position].id)
             val intent = Intent(context, GameActivity::class.java)
             context.startActivity(intent) }

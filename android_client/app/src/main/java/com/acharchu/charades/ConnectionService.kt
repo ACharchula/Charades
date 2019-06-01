@@ -2,6 +2,7 @@ package com.acharchu.charades
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import java.lang.StringBuilder
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -19,6 +20,7 @@ class ConnectionService {
         private const val BYTES_TO_READ_LENGTH = 4
 
         public var INTERRUPT = false
+        var PROCESSING = false
 
         var status = State.DISCONNECTED
 
@@ -190,7 +192,7 @@ class ConnectionService {
 
         fun getHeader(): HeaderType? {
             val header = read(HEADER_LENGTH)
-            print(header)
+            Log.i("info", header)
             if (Headers.headers.containsKey(header))
                 return Headers.headers[header]
 
@@ -206,6 +208,7 @@ class ConnectionService {
             var consumedCharacters = 0
             val result = ByteArray(bytesToRead)
 
+            PROCESSING = true
             while (amountOfCharacters != bytesToRead && consumedCharacters != -1 && !INTERRUPT) {  // read z offsetem
                 val buffer = ByteBuffer.allocate(bytesToRead - amountOfCharacters)
                 consumedCharacters = socketChannel?.read(buffer)!!
@@ -216,6 +219,7 @@ class ConnectionService {
                 } else if (consumedCharacters == -1)
                     throw Throwable("CONNECTION CLOSED")
             }
+            PROCESSING = false
             INTERRUPT = false
 
             return result

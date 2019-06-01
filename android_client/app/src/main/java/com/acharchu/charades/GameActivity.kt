@@ -85,8 +85,14 @@ class GameActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
+        draw_view.clearCanvas()
+        imageView.setImageResource(android.R.color.white)
+
         IN_GAME = false
-        ConnectionService.INTERRUPT = true
+        if(ConnectionService.PROCESSING)
+            ConnectionService.INTERRUPT = true
+
+        inputThread.join()
         ConnectionService.skipLeftovers()
         ConnectionService.comeOutFromTable()
         super.onBackPressed()

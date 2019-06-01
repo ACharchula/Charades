@@ -3,6 +3,7 @@ package com.acharchu.charades
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_statistics.*
@@ -12,7 +13,7 @@ class StatisticsActivity : AppCompatActivity() {
     var IN_STATISTICS_VIEW = true
 
     private val inputThread = Thread {
-
+        Log.i("info", "thread statistic")
         while(ConnectionService.status == State.CONNECTED && IN_STATISTICS_VIEW) {
             try {
                 val header: HeaderType? = ConnectionService.getHeader()
@@ -45,7 +46,9 @@ class StatisticsActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         IN_STATISTICS_VIEW = false
-        ConnectionService.INTERRUPT = true
+        if(ConnectionService.PROCESSING)
+            ConnectionService.INTERRUPT = true
+        inputThread.join()
         ConnectionService.skipLeftovers()
         super.onBackPressed()
     }
