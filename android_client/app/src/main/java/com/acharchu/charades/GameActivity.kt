@@ -97,15 +97,6 @@ class GameActivity : AppCompatActivity() {
         supportActionBar!!.hide()
         setContentView(R.layout.activity_game)
 
-        reconnectButton.setOnClickListener {
-            reconnectButton.visibility = GONE
-            messagesListView.visibility = VISIBLE
-            sendButton.visibility = VISIBLE
-            messageContent.visibility = VISIBLE
-            giveUpButton.visibility = GONE
-            connectToServer()
-        }
-
         giveUpButton.setOnClickListener {
             ConnectionService.giveUpAGame()
             guessingPlayerView()
@@ -150,18 +141,11 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun connectToServer() {
-        try {
-            if(!inputThread.isAlive)
-                inputThread.start()
+        if(!inputThread.isAlive)
+            inputThread.start()
 
-            if(!outputThread.isAlive)
-                outputThread.start()
-        } catch (e: Throwable) {
-            messagesListView.visibility = GONE
-            sendButton.visibility = GONE
-            messageContent.visibility = GONE
-            reconnectButton.visibility = VISIBLE
-        }
+        if(!outputThread.isAlive)
+            outputThread.start()
     }
 
     private fun printMessages() {
