@@ -100,6 +100,7 @@ class GameActivity : AppCompatActivity() {
         draw_view.clearCanvas()
         imageView.setImageResource(android.R.color.white)
 
+        sendPicture = false
         IN_GAME = false
         if(ConnectionService.PROCESSING)
             ConnectionService.INTERRUPT = true
@@ -145,9 +146,11 @@ class GameActivity : AppCompatActivity() {
 
 
         fixedRateTimer("sendPicture", false, 2000L, 100) {
-            prepareAndSendPicture()
-            if(!sendPicture)
+            if(!sendPicture) {
                 cancel()
+            } else {
+                prepareAndSendPicture()
+            }
         }
     }
 
