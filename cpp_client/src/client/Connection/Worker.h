@@ -49,7 +49,9 @@ signals:
 
     void listTable(QString);
 
-    void abort(QString);
+    void stats (QString);
+
+    void tableList (QString);
 
 public slots:
 
@@ -62,6 +64,8 @@ public slots:
     void sendTextMessage(QString message);
 
     void sendRequest(QString request);
+
+    void enterTable(QString table);
 };
 
 #endif // WINDOW_H

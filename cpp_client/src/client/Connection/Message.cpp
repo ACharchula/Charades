@@ -32,8 +32,14 @@ const std::string& Message::getValue() const {
     return value;
 }
 
-const std::string Message::getWinnerTextMessage() const {
+const std::string Message::getClue() const {
     std::string msg = "Correct answer-> ";
+    msg.append(getTextMessage());
+    return msg;
+}
+
+const std::string Message::getAborted() const {
+    std::string msg = "Game aborted. Correct answer-> ";
     msg.append(getTextMessage());
     return msg;
 }

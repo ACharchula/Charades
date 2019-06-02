@@ -35,7 +35,6 @@ const std::string SET = "SET___CANVAS"; // 8
 const std::string UPDATE = "UPDATECANVAS"; // 8
 
 //errors
-
 const std::string ERROROPEN = "Opening stream socket failed.";
 const std::string ERRORUKNOWNSERVER = "Uknown server.";
 const std::string ERRORCONNECT = "Connection failed.";

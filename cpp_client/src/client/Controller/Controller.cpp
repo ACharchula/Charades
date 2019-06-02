@@ -41,13 +41,13 @@ void Controller::connectToServer() {
     } catch (const std::runtime_error& error) {
         QString info = QString::fromStdString(error.what());
 
-        if(error.what() == ERROROPEN){
+        if(error.what() == ERROROPEN){ // TODO
             msg = new MessageBox(this, info, "txt");
-        } else if(error.what() == ERRORUKNOWNSERVER){
+        } else if(error.what() == ERRORUKNOWNSERVER){ // TODO
             msg = new MessageBox(this, info, "txt");
-        } else if(error.what() == ERRORCONNECT){
+        } else if(error.what() == ERRORCONNECT){ // TODO
             msg = new MessageBox(this, info, "txt");
-        } else if(error.what() == ERRORWRITING){
+        } else if(error.what() == ERRORWRITING){ // TODO
             msg = new MessageBox(this, info, "txt");
         }
     }
@@ -81,6 +81,7 @@ void Controller::connectAllSignalsAndSlots() {
     connect(workerW, SIGNAL(updateScene(QByteArray)), this, SLOT(updateScene(QByteArray)));
     connect(this, SIGNAL(sendFrame(QByteArray)), workerW, SLOT(sendFrame(QByteArray)), Qt::DirectConnection);
     connect(this, SIGNAL(sendRequest(QString)), workerW, SLOT(sendRequest(QString)), Qt::DirectConnection);
+    connect(this, SIGNAL(enterTable(QString)), workerW, SLOT(enterTable(QString)), Qt::DirectConnection);
 
     connect(timer, SIGNAL(timeout()), this, SLOT(sendFrame()));
 
@@ -90,7 +91,8 @@ void Controller::connectAllSignalsAndSlots() {
     connect(workerW, SIGNAL(ready(QString)), this, SLOT(ready(QString)), Qt::DirectConnection);
     connect(workerW, SIGNAL(throwException(QString)), this, SLOT(catchException(QString)), Qt::DirectConnection);
     connect(workerW, SIGNAL(tableCreated(QString)), this, SLOT(tableCreated(QString)), Qt::DirectConnection);
-    connect(workerW, SIGNAL(abort(QString)), this, SLOT(abort(QString)), Qt::DirectConnection);
+    connect(workerW, SIGNAL(stats(QString)), this, SLOT(stats(QString)), Qt::DirectConnection);
+    connect(workerW, SIGNAL(tableList(QString)), this, SLOT(tableList(QString)), Qt::DirectConnection);
 
     connect(mainWindow->changeTableButton, SIGNAL (released()), this, SLOT (changeTableReleased()));
     connect(mainWindow->giveUp, SIGNAL (released()), this, SLOT (giveUpReleased()));
@@ -109,10 +111,10 @@ void Controller::analyseStatement(QString state) {
     if(statement == WELCOME){
 
     } else if(statement == WAIT){
-
+        mainWindow->addChatMessage("LOG: You need to wait for other players.");
     } else if(statement == PING){
         sendRequest(QString::fromStdString(PONG));
-    } else if(statement == FAIL){
+    } else if(statement == FAIL){ // TODO
 
     }
 }
@@ -158,6 +160,10 @@ void Controller::closeApp() {
 
 void Controller::sendFrame() {
     if(gameState == GameState::Draw){
+
+        auto i = mainWindow->list->selectedItems(); // TODO continue here
+        qDebug() << i.size();
+
         auto byteArray = mainWindow->getScene();
         emit sendFrame(byteArray);
     }
@@ -184,13 +190,13 @@ void Controller::catchException(QString info) {
 
     MessageBox* msg;
 
-    if(message == ERRORWRITING){
+    if(message == ERRORWRITING){ // TODO
         msg = new MessageBox(this, info, "txt2");
-    } else if(message == ERRORREADING){
+    } else if(message == ERRORREADING){ // TODO
         msg = new MessageBox(this, info, "txt2");
-    } else if(message == ERRORREADING){
+    } else if(message == ERRORREADING){ // TODO
         msg = new MessageBox(this, info, "txt2");
-    } else if(message == ERRORRECEAVING){
+    } else if(message == ERRORRECEAVING){ // TODO
         msg = new MessageBox(this, info, "txt2");
     } else{
         QString unexpected = QString::fromStdString("Unexpected" + message);
@@ -198,21 +204,24 @@ void Controller::catchException(QString info) {
     }
 }
 
-void Controller::tableCreated(QString) {
+void Controller::tableCreated(QString) { // TODO
 
 }
 
-void Controller::abort(QString) {
+void Controller::stats(QString stats) { // TODO
 
 }
 
-void Controller::exit() {
-    qDebug() << "ciastko";
-    QCoreApplication::quit();
-    qDebug() << "ciastko2";
-    qApp->quit();
-//    QApplication::closeAllWindows();
-//    QCoreApplication::quit()
+void Controller::tableList(QString list) { // TODO
+
+}
+
+void Controller::exit() { // TODO
+//    qDebug() << "ciastko";
+//    QCoreApplication::quit();
+//    qDebug() << "ciastko2";
+//    qApp->quit();
+
 }
 
 

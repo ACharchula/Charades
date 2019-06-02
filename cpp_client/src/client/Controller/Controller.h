@@ -47,6 +47,7 @@ signals:
     void sendFrame(QByteArray);
     void sendMessage(QString);
     void sendRequest(QString);
+    void enterTable(QString);
 
 private slots:
     void draw(QString word);
@@ -62,8 +63,9 @@ private slots:
     void ready(QString info);
     void catchException(QString info);
     void tableCreated(QString);
-    void abort(QString);
     void exit();
+    void stats(QString stats);
+    void tableList(QString list);
 
     void login(QString nick);
     void closeApp();
