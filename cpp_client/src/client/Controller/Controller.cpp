@@ -223,5 +223,3 @@ void Controller::exit() { // TODO
 //    qApp->quit();
 
 }
-
-
