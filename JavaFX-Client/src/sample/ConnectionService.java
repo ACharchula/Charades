@@ -7,7 +7,6 @@ import sample.Model.Message;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -60,34 +59,11 @@ class ConnectionService {
         return header.equals(HeaderType.WELCOME_USER);
     }
 
-    public String read(int expectedLength) throws IOException {
-        ByteBuffer buff = ByteBuffer.allocate(expectedLength);
-        int read = 0;
-        int consumed;
-        StringBuilder stringBuilder = new StringBuilder();
-
-        do {
-            buff.clear();
-            consumed = socketChannel.read(buff);
-
-            if (consumed == -1) {
-                throw new IOException();
-            }
-            if (consumed > 0) {
-                stringBuilder.append(new String(buff.array()));
-            }
-            read += consumed;
-
-        } while (read != expectedLength);
-
-        return stringBuilder.toString();
-    }
-
     public boolean isOnTable() {
         return isOnTable;
     }
 
-    private String read1(int bytesToRead) throws IOException {
+    private String read(int bytesToRead) throws IOException {
         return new String(readByteArray(bytesToRead));
     }
 
@@ -134,8 +110,8 @@ class ConnectionService {
     }
 
     public Message getMessage() throws IOException {
-        int length = Integer.parseInt(read1(BYTES_TO_READ_LENGTH));
-        String userNameAndMessage = read1(length);
+        int length = Integer.parseInt(read(BYTES_TO_READ_LENGTH));
+        String userNameAndMessage = read(length);
         Message message = new Message(userNameAndMessage.split("\n")[0], userNameAndMessage.split("\n")[1]);
         return message;
     }
@@ -149,7 +125,7 @@ class ConnectionService {
     }
 
     public HeaderType readHeader() throws IOException {
-        String header = read1(HEADER_LENGTH);
+        String header = read(HEADER_LENGTH);
 
         if (Headers.HEADERS.containsKey(header)) {
             return Headers.HEADERS.get(header);
@@ -204,17 +180,9 @@ class ConnectionService {
     }
 
     public List<String> getActiveTables() throws IOException {
-        int amountOfTables = Integer.parseInt(read1(BYTES_TO_READ_LENGTH));
-        String result = read1(amountOfTables);
+        int amountOfTables = Integer.parseInt(read(BYTES_TO_READ_LENGTH));
+        String result = read(amountOfTables);
         return Arrays.asList(result.split("\n"));
-    }
-
-    public void clueCorrect() throws IOException {
-        read(BYTES_TO_READ_LENGTH);
-    }
-
-    public void clueIncorrect() throws IOException {
-        read(BYTES_TO_READ_LENGTH);
     }
 
     public void sendPicture(byte[] picture) throws Exception {
@@ -245,8 +213,8 @@ class ConnectionService {
     }
 
     public void getTableID() throws IOException {
-        int length = Integer.parseInt(read1(BYTES_TO_READ_LENGTH));
-        int id = Integer.parseInt(read1(length));
+        int length = Integer.parseInt(read(BYTES_TO_READ_LENGTH));
+        int id = Integer.parseInt(read(length));
         System.out.println("Id is = " + id);
     }
 
@@ -267,11 +235,32 @@ class ConnectionService {
     }
 
     public void handleAbortion() throws IOException {
-        int length = Integer.parseInt(read1(BYTES_TO_READ_LENGTH));
-        String pass = read1(length);
+        int length = Integer.parseInt(read(BYTES_TO_READ_LENGTH));
+        String pass = read(length);
     }
 
     public void handleFail() throws IOException {
-        read1(BYTES_TO_READ_LENGTH);
+        read(BYTES_TO_READ_LENGTH);
+    }
+
+    public void pingPong() throws IOException {
+        read(BYTES_TO_READ_LENGTH);
+        send("PONG____PONG0000");
+    }
+
+    public void getStatistics() throws IOException {
+        send("GETSTATISTIC0000");
+    }
+
+
+    public Map<String,String> seeStatistics() throws IOException {
+        int amountOfStats = Integer.parseInt(read(BYTES_TO_READ_LENGTH));
+        String result = read(amountOfStats);
+        List<String> array = Arrays.asList(result.split("\n"));
+        HashMap<String,String> map = new HashMap<>();
+        for(int i = 0; i<array.size(); ++i){
+            map.put(array.get(i),array.get(++i));
+        }
+        return map;
     }
 }

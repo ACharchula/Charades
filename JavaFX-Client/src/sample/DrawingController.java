@@ -12,7 +12,6 @@ import javafx.scene.paint.Color;
 
 import javax.imageio.ImageIO;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 
 
@@ -22,6 +21,7 @@ public class DrawingController {
     private ImageView imageView;
     private final GraphicsContext graphicsContext;
     private WritableImage writableImage;
+    private boolean changed;
 
 
     public DrawingController(Canvas canvas, ImageView imageView) {
@@ -49,48 +49,28 @@ public class DrawingController {
                     graphicsContext.lineTo(event.getX(), event.getY());
                     graphicsContext.stroke();
                     graphicsContext.getCanvas().snapshot(null,writableImage);
+                    changed = true;
                 });
 
         canvas.addEventHandler(MouseEvent.MOUSE_RELEASED,
                 event -> {
+                    changed = true;
                 });
 
     }
 
     private void initDraw(GraphicsContext gc) {
-        double canvasWidth = gc.getCanvas().getWidth();
-        double canvasHeight = gc.getCanvas().getHeight();
-
-        gc.setFill(Color.LIGHTGRAY);
-        gc.setStroke(Color.BLACK);
-        gc.setLineWidth(5);
-
-        gc.fill();
-        gc.strokeRect(
-                0,              //x of the upper left corner
-                0,              //y of the upper left corner
-                canvasWidth,    //width of the rectangle
-                canvasHeight);  //height of the rectangle
-
-        gc.setFill(Color.RED);
         gc.setStroke(Color.BLACK);
         gc.setLineWidth(1);
-    }
-
-    public Canvas getCanvas(){
-        return canvas;
-    }
-
-
-    private void colorPoint(int x, int y) {
-          graphicsContext.moveTo(x,y);
-          graphicsContext.lineTo(x,y);
-          graphicsContext.stroke();
     }
 
     public void updateImage(Image image) {
         canvas.setVisible(false);
         imageView.setImage(image);
+    }
+
+    public Canvas getCanvas() {
+        return canvas;
     }
 
     public void allowDrawing(boolean drawing) {
@@ -99,11 +79,9 @@ public class DrawingController {
     }
 
     public byte[] getByteArrayFromCanvas(){
-        File outputFile = new File("draw.png");
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
         try {
-//            ImageIO.write( SwingFXUtils.fromFXImage( writableImage, null ), "png", outputFile );
             ImageIO.write( SwingFXUtils.fromFXImage( writableImage, null ), "png", bos );
         } catch (IOException e) {
             e.printStackTrace();
@@ -113,12 +91,20 @@ public class DrawingController {
     }
 
     public void clearImage(){
+        imageView.setImage(null);
         graphicsContext.clearRect(0,0,canvas.getWidth(),canvas.getHeight());
-        Platform.runLater(()->{
-            graphicsContext.getCanvas().snapshot(null,writableImage);
-        });
+
+//        Platform.runLater(()->{
+//            graphicsContext.getCanvas().snapshot(null,writableImage);
+//        });
         System.out.println("cleared");
     }
 
+    public boolean imageHasChanged() {
+        return changed;
+    }
 
+    public void setHasChanged(boolean changed) {
+        this.changed = changed;
+    }
 }

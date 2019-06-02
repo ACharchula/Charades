@@ -24,11 +24,13 @@ public class Controller {
     private Button reconnectButton;
     private Button addTableButton;
     private Button refreshButton;
+    private Button seeStatisticsButton;
     private ScrollPane tablesPane;
     private VBox tablesVBox;
     private Thread readingThread;
     private Thread writingThread;
     private List<String> tables = new ArrayList<>();
+    private Map<String,String> stats = new HashMap<>();
     private DrawingController drawingController;
     private Timer timer = new Timer();
 
@@ -149,6 +151,19 @@ public class Controller {
             refreshButton.setDisable(false);
         });
 
+        seeStatisticsButton = new Button("See statsistics");
+        seeStatisticsButton.setOnMouseClicked(event -> {
+            seeStatisticsButton.setDisable(true);
+            if(connectionIsActive()){
+                try{
+                    connectionService.getStatistics();
+                } catch (IOException e) {
+                    showAlert("TABLE_ERROR");
+                }
+            }
+            seeStatisticsButton.setDisable(false);
+        });
+
         Platform.runLater(this::prepareNotOnTableView);
 
         if (!connectionIsActive()) {
@@ -178,6 +193,7 @@ public class Controller {
             chatBox.getChildren().remove(surrenderButton);
             chatBox.getChildren().remove(refreshButton);
             chatBox.getChildren().remove(addTableButton);
+            chatBox.getChildren().remove(seeStatisticsButton);
             showReconnectButton();
         });
     }
@@ -187,8 +203,8 @@ public class Controller {
         Platform.runLater(() -> {
             removeMainMenuButtons();
             addGameButtons();
-            showCanvas();
             hideMessageFieldAndStartSendingImage();
+            showCanvas();
             showChat();
         });
     }
@@ -229,9 +245,8 @@ public class Controller {
             chatBox.getChildren().add(addTableButton);
         if(!chatBox.getChildren().contains(refreshButton))
             chatBox.getChildren().add(refreshButton);
-    }
-
-    public Controller() {
+        if(!tablesVBox.getChildren().contains(seeStatisticsButton))
+            tablesVBox.getChildren().add(seeStatisticsButton);
     }
 
     private void initConnection() {
@@ -281,8 +296,8 @@ public class Controller {
                     case GAME_ENDED:
                         timer.cancel();
                         updateChatBox(connectionService.getWinner());
-                        drawingController.allowDrawing(false);
                         drawingController.clearImage();
+                        drawingController.allowDrawing(false);
                         showMessageField();
                         //showGuesserPerspective();
                         break;
@@ -290,10 +305,13 @@ public class Controller {
                         updateChatBox(connectionService.getGameReady());
                         break;
                     case YOU_ARE_DRAWER:
+                        timer.cancel();
                         updateChatBox(connectionService.getThingToDraw());
+                        drawingController.clearImage();
                         drawingController.allowDrawing(true);
                         hideMessageFieldAndStartSendingImage();
-                        //showDrawerPerspective();
+                        System.out.println(drawingController.getCanvas());
+//                        showDrawerPerspective();
                         break;
                     case SEE___TABLES:
                         tables = connectionService.getActiveTables();
@@ -305,10 +323,22 @@ public class Controller {
                         break;
                     case GAME_ABORTED:
                         connectionService.handleAbortion();
+                        timer.cancel();
+                        drawingController.clearImage();
+                        drawingController.allowDrawing(false);
+                        showMessageField();
                         break;
                     case COMMANDFAILD:
                         connectionService.handleFail();
                         showAlert("ERROR");
+                        break;
+                    case PING____PING:
+                        connectionService.pingPong();
+                        break;
+                    case SEESTATISTIC:
+                        stats = connectionService.seeStatistics();
+                        showStatistics();
+                        System.out.println(stats);
                         break;
                 }
             }
@@ -329,6 +359,24 @@ public class Controller {
         }
     }
 
+    private void showStatistics() {
+        messagesBox.setVisible(true);
+        int size = messagesBox.getItems().size();
+        if(size > 0){
+            Platform.runLater(()->{
+                messagesBox.getItems().remove(0,size);
+            });
+        }
+
+        stats.forEach((player, score) -> {
+            try {
+                Controller.this.updateChatBox(player +": " +score);
+            } catch (IOException e) {
+                showAlert("STATS_ERROR");
+            }
+        });
+    }
+
     private void showCanvas() {
         Platform.runLater(() -> {
             tablesPane.setVisible(false);
@@ -340,7 +388,7 @@ public class Controller {
     private void showActiveTables() {
         Platform.runLater(()->{
             int size = tablesVBox.getChildren().size();
-            tablesVBox.getChildren().remove(0, size);
+            tablesVBox.getChildren().remove(1, size);
             tables.forEach(table -> {
                 Button button = createEnterTableButton(table);
                 if (!tablesVBox.getChildren().contains(button)) {
@@ -379,7 +427,10 @@ public class Controller {
             public void run() {
                 try {
                     if (connectionService.isConnected()) {
-                        connectionService.sendPicture(drawingController.getByteArrayFromCanvas());
+                        if(drawingController.imageHasChanged()){
+                            connectionService.sendPicture(drawingController.getByteArrayFromCanvas());
+                            drawingController.setHasChanged(false);
+                        }
                     }
                 } catch (Exception e) {
                     this.cancel();
@@ -484,6 +535,10 @@ public class Controller {
             alert.setTitle("ERROR");
             alert.setHeaderText("Oops, something went wrong");
             alert.setContentText("Something went wrong :( Please try again");
+        } else if(type.equals("STATS_ERROR")){
+            alert.setTitle("Getting statistics error");
+            alert.setHeaderText("Oops, something went wrong");
+            alert.setContentText("There was a problem while fetching statistics");
         }
 
         alert.showAndWait();
