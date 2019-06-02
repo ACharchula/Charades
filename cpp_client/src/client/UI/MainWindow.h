@@ -53,6 +53,11 @@ public:
     QByteArray getScene();
 
     void prepareUI();
+
+    void closeEvent(QCloseEvent* event) override;
+
+    signals:
+    void close();
 };
 
 #endif //CPP_CLIENT_MAINWINDOW_H

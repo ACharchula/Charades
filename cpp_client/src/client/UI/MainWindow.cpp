@@ -19,6 +19,7 @@
 #include <QtWidgets/QGraphicsView>
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QListWidgetItem>
+#include <QtWidgets/QtWidgets>
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
 
@@ -79,16 +80,24 @@ void MainWindow::addPlayerChatMessage(QString message) {
 void MainWindow::draw(QString word) {
     clue->setText(word);
     clue->show();
+    giveUp->show();
     textArea->hide();
     drawScene.setDraw(true);
 }
 
 void MainWindow::guess() {
     clue->hide();
+    giveUp->hide();
     textArea->show();
     drawScene.setDraw(false);
 }
 
 QByteArray MainWindow::getScene() {
     return drawScene.getScene();
+}
+
+void MainWindow::closeEvent(QCloseEvent* event) {
+    auto resBtn = QMessageBox::question(this, "Exit", tr("Are you sure?"), QMessageBox::No | QMessageBox::Yes, QMessageBox::Yes);
+    if (resBtn == QMessageBox::Yes)
+        emit close();
 }

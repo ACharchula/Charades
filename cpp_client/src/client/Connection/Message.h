@@ -25,7 +25,9 @@ public:
 
     const std::string getTextMessage() const;
 
-    const std::string getWinnerTextMessage() const;
+    const std::string getClue() const;
+
+    const std::string getAborted() const;
 
     const size_t getSize() const;
 

@@ -36,43 +36,41 @@ void Worker::writer() {
 }
 
 void Worker::reader() {
-    std::pair<Message*, Message*> data;
+    std::pair<std::unique_ptr<Message>, std::unique_ptr<Message>> data;
     forever {
         try{
             data = client->receive();
-        }catch(const std::runtime_error& error){
+        } catch(const std::runtime_error& error){
             throwException(QString::fromStdString(error.what()));
         }
+
         if (data.first->equal(WELCOME)){
             emit statement(QString::fromStdString(WELCOME));
+        } else if (data.first->equal(TABLELIST)){
+            emit tableList(QString::fromStdString(data.second->getValue()));
         } else if (data.first->equal(CHAT)){
-            QString message = QString::fromStdString(data.second->getTextMessage());
-            emit receiveMessage(message);
+            emit receiveMessage(QString::fromStdString(data.second->getTextMessage()));
         } else if (data.first->equal(WAIT)){
             emit statement(QString::fromStdString(WAIT));
         } else if (data.first->equal(END)){
-            QString message = QString::fromStdString(data.second->getWinnerTextMessage());
-            emit solution(message);
+            emit solution(QString::fromStdString(data.second->getClue()));
         } else if (data.first->equal(READY)){
-            if(data.second != nullptr){
-                emit ready(QString::fromStdString(data.second->getValue()));
-                delete data.second;
-            }
+            emit ready(QString::fromStdString(data.second->getValue()));
         } else if (data.first->equal(DRAW)){
             emit draw(QString::fromStdString(data.second->getValue()));
-        } else if (data.first->equal(CORRECT)){
-            emit statement(QString::fromStdString(CORRECT));
-        } else if (data.first->equal(INCORRECT)){
-            emit statement(QString::fromStdString(INCORRECT));
+        } else if (data.first->equal(PING)){
+            emit statement(QString::fromStdString(PING));
+        } else if (data.first->equal(TABLECREATED)){
+            emit tableCreated(QString::fromStdString(data.second->getValue()));
+        } else if (data.first->equal(FAIL)){
+            emit statement(QString::fromStdString(FAIL));
+        } else if (data.first->equal(ABORT)){
+            emit solution(QString::fromStdString(data.second->getAborted()));
+        } else if (data.first->equal(STATS)){
+            emit stats(QString::fromStdString(data.second->getValue()));
         } else if (data.first->equal(SET) || data.first->equal(UPDATE)){
             emit updateScene(QByteArray(data.second->getValue().data(), int(data.second->getValue().size())));
         }
-
-        if(data.first->equal(SET) || data.first->equal(UPDATE) || data.first->equal(DRAW) || data.first->equal(CHAT) || data.first->equal(END)){
-            delete data.second;
-        }
-
-        delete data.first;
     }
 }
 
@@ -84,4 +82,13 @@ void Worker::sendFrame(QByteArray byteArray){
 void Worker::sendTextMessage(QString message) {
     std::string data = message.toStdString();
     client->send(data, TEXT);
+}
+
+void Worker::sendRequest(QString request) {
+    std::string req = request.toStdString();
+    client->send("", req);
+}
+
+void Worker::enterTable(QString table) { // TODO
+
 }

@@ -11,6 +11,7 @@
 #include <cstring>
 #include "client.h"
 #include "../Consts.h"
+#include <memory>
 
 Client::Client(std::string userName) : userName(std::move(userName)) {}
 
@@ -39,7 +40,7 @@ void Client::_connect(const char* serverName, uint16_t port) {
 }
 
 void Client::_send(const char* message, size_t messageSize) {
-    if (write(sock, message, messageSize) < 0)
+    if (write(sock, message, messageSize) <= 0)
         throw std::runtime_error(ERRORWRITING);
 }
 
@@ -47,14 +48,14 @@ std::pair<char*, ssize_t> Client::_receive(size_t expectedDataSize) {
     char* buffer = new char[expectedDataSize + 1];
 
     ssize_t result;
-    if ((result = read(sock, buffer, expectedDataSize)) < 0)
+    if ((result = read(sock, buffer, expectedDataSize)) <= 0)
         throw std::runtime_error(ERRORREADING);
 
     return std::make_pair(buffer, result);
 }
 
-Message* Client::_receiveMessage(size_t expectedDataSize) {
-    auto* message = new Message(expectedDataSize);
+std::unique_ptr<Message> Client::_receiveMessage(size_t expectedDataSize) {
+    std::unique_ptr<Message> message (new Message(expectedDataSize));
 
     do {
         std::pair<char*, ssize_t> nextData = _receive(expectedDataSize);
@@ -62,7 +63,7 @@ Message* Client::_receiveMessage(size_t expectedDataSize) {
         message->append(nextData);
     } while (expectedDataSize);
 
-    return message;
+    return std::move(message);
 }
 
 std::string Client::_getMessageSize(size_t size, std::string messageType) {
@@ -103,17 +104,18 @@ void Client::send(std::string message, std::string messageType) {
     _send(messageToSend.first, messageToSend.second);
 }
 
-std::pair<Message*, Message*> Client::receive() {
-    Message* header = _receiveMessage(HEADERSIZE);
-    Message* bodySize;
+std::pair<std::unique_ptr<Message>, std::unique_ptr<Message>> Client::receive() {
+    auto header = _receiveMessage(HEADERSIZE);
+    std::unique_ptr<Message> bodySize;
 
     if(header->equal(SET) || header->equal(UPDATE))
         bodySize = _receiveMessage(LONG);
     else
         bodySize = _receiveMessage(SHORT);
-    Message* body = nullptr;
+
+    std::unique_ptr<Message> body;
     if (bodySize->getSize() != 0)
         body = _receiveMessage(bodySize->getSize());
 
-    return std::make_pair(header, body);
+    return std::make_pair(std::move(header), std::move(body));
 }

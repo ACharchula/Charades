@@ -11,6 +11,7 @@
 #include <netdb.h>
 #include <iostream>
 #include "Message.h"
+#include <memory>
 
 const size_t HEADERSIZE = 12;
 const size_t SHORT = 4;
@@ -34,7 +35,7 @@ class Client {
 
     std::pair<char*, ssize_t> _receive(size_t expectedDataSize); // first- header, second- body
 
-    Message* _receiveMessage(size_t expectedDataSize);
+    std::unique_ptr<Message> _receiveMessage(size_t expectedDataSize);
 
 public:
     explicit Client(std::string userName);
@@ -45,7 +46,7 @@ public:
 
     void send(std::string message, std::string messageType);
 
-    std::pair<Message*, Message*> receive();
+    std::pair<std::unique_ptr<Message>, std::unique_ptr<Message>> receive();
 };
 
 
