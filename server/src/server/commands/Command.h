@@ -1,12 +1,12 @@
 // Copyright 2019 Kamil Mankowski
 
-#ifndef SRC_SERVER_COMMAND_H_
-#define SRC_SERVER_COMMAND_H_
+#ifndef SRC_SERVER_COMMANDS_COMMAND_H_
+#define SRC_SERVER_COMMANDS_COMMAND_H_
 
 #include <memory>
 #include <string>
 
-#include "../Table.h"
+#include "../Tables.h"
 #include "../User.h"
 #include "Helpers.h"
 
@@ -17,11 +17,12 @@ class Command {
  public:
   Command() {}
   explicit Command(User *current_user, Tables *tables, Users *users)
-      : current_user(current_user), tables(tables) {}
+      : current_user(current_user), tables(tables), users(users) {}
   virtual void pushInput(buffer_ptr input) {}
   virtual int lengthSize() { return data_length_size; }
 
   static const int HEADER_SIZE = 12;
+  static const buffer_ptr INVALID_COMMAND_PACKET;
 
  protected:
   User *current_user = nullptr;
@@ -30,4 +31,4 @@ class Command {
   Users *users;
 };
 
-#endif  // SRC_SERVER_COMMAND_H_
+#endif  // SRC_SERVER_COMMANDS_COMMAND_H_

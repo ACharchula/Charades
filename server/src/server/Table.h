@@ -24,6 +24,7 @@ class Table {
   void addPlayer(User *user);
   void removePlayer(User *user);
   void setCanvas(buffer_ptr input, User *user);
+  void tryGiveUp(User *requester);
   bool isUserInTable(User *user);
 
   int getId() { return id; }
@@ -39,7 +40,7 @@ class Table {
   User *drawer;
   User *winner;
 
-  enum State { WAITING, READY, ENDED } state = WAITING;
+  enum State { WAITING, READY, ABORTED, ENDED } state = WAITING;
 
   Users *users;
   void loadStartCanvas();
@@ -58,19 +59,19 @@ class Table {
   void sendUpdateCanvasIfNeeded();
   void proceedGameEndIfNeeded();
   void startGameIfNeeded();
+  void proceedGameAbortIfNeeded();
 
   User *getRandomPlayer();
-
   std::string getRandomClue();
+  void log(std::string msg, int user = -1);
 
   static std::vector<std::string> WORDS;
 
   static const buffer_ptr GAME_WAITING_PACKET;
   static const buffer_ptr GAME_READY;
   static const buffer_ptr GAME_ENDED;
+  static const buffer_ptr GAME_ABORTED;
   static const buffer_ptr UPDATE_CANVAS;
-  static const buffer_ptr CLUE_CORRECT_PACKET;
-  static const buffer_ptr CLUE_INCORRECT_PACKET;
   static const buffer_ptr YOU_ARE_DRAWER;
   static const buffer_ptr CHAT_MESSAGE;
 
@@ -79,24 +80,6 @@ class Table {
 
   static const char INITIAL_PICTURE_FILE[];
   static const char WORDS_FILE[];
-};
-
-class Tables {
- public:
-  explicit Tables(Users &users) : users(users) {}
-  Table &getTable(int id) { return tables.at(id); }
-  int createTable() {
-    tables.insert(std::make_pair(nextId, Table(&users, nextId)));
-    return nextId++;
-  }
-  void proceedAll() {
-    for (auto &table : tables) table.second.proceed();
-  }
-  // int removeTable(int id);
- private:
-  Users &users;
-  int nextId = 0;
-  std::map<int, Table> tables;
 };
 
 #endif  // SRC_SERVER_TABLE_H_
