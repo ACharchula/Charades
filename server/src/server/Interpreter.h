@@ -49,6 +49,11 @@ class Interpreter {
   void proceedInput();
   void setActive();
 
+  void checkCommands();
+  void checkPreloginCommands();
+  void checkLogedCommands();
+  void checkTableCommands();
+
   void setLengthState();
   void setPushState();
   void setSelectCommandState();
