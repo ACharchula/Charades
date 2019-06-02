@@ -13,24 +13,18 @@ class StatisticsActivity : AppCompatActivity() {
     var IN_STATISTICS_VIEW = true
 
     private val inputThread = Thread {
-        Log.i("info", "thread statistic")
         while(ConnectionService.status == State.CONNECTED && IN_STATISTICS_VIEW) {
             try {
                 val header: HeaderType? = ConnectionService.getHeader()
 
-                if (header == HeaderType.SEE_STATISTIC) {
-                    setStatistics(ConnectionService.getBestUsersAndScores())
-                } else if (header == HeaderType.PING_PING) {
-                    ConnectionService.ping_ping()
-                    ConnectionService.pong_pong()
+                when(header) {
+                    HeaderType.SEE_STATISTIC -> setStatistics(ConnectionService.getBestUsersAndScores())
+                    HeaderType.PING_PING -> responseToPing()
                 }
             } catch (e: Throwable) {
                 if (e.message == "CONNECTION CLOSED") {
 
-                    IN_STATISTICS_VIEW = false
-                    ConnectionService.status = State.DISCONNECTED
-                    ConnectionService.INTERRUPT = true
-                    ConnectionService.closeSocket()
+                    endBackgroundProcesses()
 
                     runOnUiThread {
                         val intent = Intent(this, MainActivity::class.java)
@@ -42,6 +36,18 @@ class StatisticsActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun responseToPing() {
+        ConnectionService.readZeros()
+        ConnectionService.pong_pong()
+    }
+
+    private fun endBackgroundProcesses() {
+        IN_STATISTICS_VIEW = false
+        ConnectionService.status = State.DISCONNECTED
+        ConnectionService.INTERRUPT = true
+        ConnectionService.closeSocket()
     }
 
     override fun onBackPressed() {

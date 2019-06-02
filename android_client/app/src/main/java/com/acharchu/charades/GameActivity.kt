@@ -16,7 +16,7 @@ class GameActivity : AppCompatActivity() {
     private var pictureByteArray = ByteArray(0)
     private var IN_GAME = true
     private var drawerView = false
-    var messages = arrayListOf<String>()
+    private var messages = arrayListOf<String>()
 
     private val outputThread = Thread {
         sendButton.setOnClickListener {
@@ -37,38 +37,21 @@ class GameActivity : AppCompatActivity() {
             try{
                 val header : HeaderType? = ConnectionService.getHeader()
 
-                if (header == HeaderType.CHAT_MESSAGE)
-                    updateMessageList(ConnectionService.getMessage())
-                else if (header == HeaderType.UPDATECANVAS)
-                    updateCanvas(ConnectionService.getCanvas())
-                else if (header == HeaderType.GAME_WAITING)
-                    updateMessageList(ConnectionService.getGameWaiting())
-                else if (header == HeaderType.GAME_ENDED) {
-                    updateMessageList(ConnectionService.getTheWinner())
-                    guessingPlayerView()
-                }
-                else if (header == HeaderType.GAME_READY)
-                    updateMessageList(ConnectionService.getGameReady())
-                else if (header == HeaderType.YOU_ARE_DRAWER) {
-                    updateMessageList(ConnectionService.getThingToDraw())
-                    drawerView()
-                } else if (header == HeaderType.GAME_ABORTED) {
-                    if(drawerView)
-                        guessingPlayerView()
-
-                    updateMessageList(ConnectionService.gameAborted())
-                } else if (header == HeaderType.PING_PING) {
-                    ConnectionService.ping_ping()
-                    ConnectionService.pong_pong()
+                when (header) {
+                    HeaderType.CHAT_MESSAGE -> updateMessageList(ConnectionService.getMessage())
+                    HeaderType.UPDATECANVAS -> updateCanvas(ConnectionService.getCanvas())
+                    HeaderType.GAME_WAITING -> updateMessageList(ConnectionService.getGameWaiting())
+                    HeaderType.GAME_ENDED -> endGame()
+                    HeaderType.GAME_READY -> updateMessageList(ConnectionService.getGameReady())
+                    HeaderType.YOU_ARE_DRAWER -> chosenAsDrawer()
+                    HeaderType.GAME_ABORTED -> gameAborted()
+                    HeaderType.PING_PING -> responseToPing()
                 }
 
             } catch (e : Throwable) {
                 if (e.message == "CONNECTION CLOSED") {
 
-                    IN_GAME = false
-                    ConnectionService.status = State.DISCONNECTED
-                    ConnectionService.INTERRUPT = true
-                    ConnectionService.closeSocket()
+                    endBackgroundProcesses()
 
                     runOnUiThread {
                         val intent = Intent(this, MainActivity::class.java)
@@ -82,6 +65,35 @@ class GameActivity : AppCompatActivity() {
 
             }
         }
+    }
+
+    private fun endBackgroundProcesses() {
+        IN_GAME = false
+        ConnectionService.status = State.DISCONNECTED
+        ConnectionService.INTERRUPT = true
+        ConnectionService.closeSocket()
+    }
+
+    private fun responseToPing() {
+        ConnectionService.readZeros()
+        ConnectionService.pong_pong()
+    }
+
+    private fun gameAborted() {
+        if(drawerView)
+            guessingPlayerView()
+
+        updateMessageList(ConnectionService.gameAborted())
+    }
+
+    private fun chosenAsDrawer() {
+        updateMessageList(ConnectionService.getThingToDraw())
+        drawerView()
+    }
+
+    private fun endGame() {
+        updateMessageList(ConnectionService.getTheWinner())
+        guessingPlayerView()
     }
 
     override fun onBackPressed() {
@@ -108,7 +120,7 @@ class GameActivity : AppCompatActivity() {
             guessingPlayerView()
         }
         guessingPlayerView()
-        connectToServer()
+        startThreads()
     }
 
     private fun drawerView() {
@@ -134,6 +146,8 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun guessingPlayerView() {
+        sendPicture = false
+
         runOnUiThread {
             sendButton.visibility = VISIBLE
             messageContent.visibility = VISIBLE
@@ -142,11 +156,9 @@ class GameActivity : AppCompatActivity() {
             draw_view.visibility = INVISIBLE
             giveUpButton.visibility = GONE
         }
-
-        sendPicture = false
     }
 
-    private fun connectToServer() {
+    private fun startThreads() {
         if(!inputThread.isAlive)
             inputThread.start()
 
@@ -159,8 +171,6 @@ class GameActivity : AppCompatActivity() {
         messagesListView.adapter = adapter
         messagesListView.setSelection(adapter.count - 1)
     }
-
-
 
     private fun updateMessageList(msg : String?) {
         runOnUiThread {

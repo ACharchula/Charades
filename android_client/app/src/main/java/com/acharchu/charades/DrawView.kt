@@ -6,7 +6,6 @@ import android.media.ThumbnailUtils
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 
 class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {

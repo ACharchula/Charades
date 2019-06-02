@@ -6,11 +6,10 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_table_selection.*
-import kotlin.concurrent.fixedRateTimer
 
 class TableSelectionActivity : AppCompatActivity() {
 
-        var IN_TABLE_VIEW = true
+    var IN_TABLE_VIEW = true
 
     private val inputThread = Thread {
 
@@ -18,35 +17,16 @@ class TableSelectionActivity : AppCompatActivity() {
             try {
                 val header: HeaderType? = ConnectionService.getHeader()
 
-                if (header == HeaderType.SEE_TABLES) {
-                    val tableList = ConnectionService.getTableList()
-
-                    if (tableList != null)
-                        setTableList(tableList)
-                } else if (header == HeaderType.TABLE_CREATED) {
-                    val tableId = ConnectionService.getIdOfCreatedTable()
-                    runOnUiThread {
-                        Toast.makeText(this, "Table of id $tableId created!", Toast.LENGTH_SHORT).show()
-                    }
-                    ConnectionService.listAvailableTables()
-                } else if (header == HeaderType.COMMAND_FAILED) {
-                    ConnectionService.commandFailed()
-                    Toast.makeText(this, "Unable to join the table", Toast.LENGTH_SHORT).show()
-                    ConnectionService.listAvailableTables()
-                } else if (header == HeaderType.PING_PING) {
-                    ConnectionService.ping_ping()
-                    ConnectionService.pong_pong()
+                when (header) {
+                    HeaderType.SEE_TABLES -> showTables()
+                    HeaderType.TABLE_CREATED -> tableCreated()
+                    HeaderType.COMMAND_FAILED -> errorDuringJoiningTable()
+                    HeaderType.PING_PING -> responseToPing()
                 }
             } catch (e: Throwable) {
                 if (e.message == "CONNECTION CLOSED") {
 
-                    IN_TABLE_VIEW = false
-                    ConnectionService.status = State.DISCONNECTED
-
-                    if(ConnectionService.PROCESSING)
-                        ConnectionService.INTERRUPT = true
-
-                    ConnectionService.closeSocket()
+                    endBackgroundProcesses()
 
                     runOnUiThread {
                         val intent = Intent(this, MainActivity::class.java)
@@ -58,6 +38,42 @@ class TableSelectionActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun endBackgroundProcesses() {
+        IN_TABLE_VIEW = false
+        ConnectionService.status = State.DISCONNECTED
+
+        if(ConnectionService.PROCESSING)
+            ConnectionService.INTERRUPT = true
+
+        ConnectionService.closeSocket()
+    }
+
+    private fun responseToPing() {
+        ConnectionService.readZeros()
+        ConnectionService.pong_pong()
+    }
+
+    private fun errorDuringJoiningTable() {
+        ConnectionService.readZeros()
+        Toast.makeText(this, "Unable to join the table", Toast.LENGTH_SHORT).show()
+        ConnectionService.listAvailableTables()
+    }
+
+    private fun tableCreated() {
+        val tableId = ConnectionService.getIdOfCreatedTable()
+        runOnUiThread {
+            Toast.makeText(this, "Table of id $tableId created!", Toast.LENGTH_SHORT).show()
+        }
+        ConnectionService.listAvailableTables()
+    }
+
+    private fun showTables() {
+        val tableList = ConnectionService.getTableList()
+
+        if (tableList != null)
+            setTableList(tableList)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,13 +92,6 @@ class TableSelectionActivity : AppCompatActivity() {
         reloadButton.setOnClickListener {
             ConnectionService.listAvailableTables()
         }
-
-
-//        fixedRateTimer("getTables", false, 2000L, 3000) {
-//            if(!IN_TABLE_VIEW)
-//                cancel()
-//            ConnectionService.listAvailableTables()
-//        }
 
         if(!inputThread.isAlive)
             inputThread.start()
@@ -122,10 +131,7 @@ class TableSelectionActivity : AppCompatActivity() {
         runOnUiThread {
             tableListView.adapter = adapter
         }
-
     }
-
-
 
     override fun onBackPressed() {
         IN_TABLE_VIEW = false
@@ -143,12 +149,6 @@ class TableSelectionActivity : AppCompatActivity() {
             inputThread.start()
 
         ConnectionService.listAvailableTables()
-//        fixedRateTimer("getTables", false, 2000L, 3000) {
-//            if(!IN_TABLE_VIEW)
-//                cancel()
-//            ConnectionService.listAvailableTables()
-//        }
         super.onResume()
     }
-
 }

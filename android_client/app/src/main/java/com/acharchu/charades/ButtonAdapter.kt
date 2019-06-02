@@ -34,22 +34,28 @@ class ButtonAdapter(private val list: ArrayList<Button>, private val context : C
         button.text = "Table ${list[position].id}"
 
         button.setOnClickListener {
-            val tableActivity = context as TableSelectionActivity
-            tableActivity.IN_TABLE_VIEW = false
-
-            if(ConnectionService.PROCESSING)
-                ConnectionService.INTERRUPT = true
-
-            tableActivity.waitForThreadToFinish()
+            endBackgroundProcesses()
 
             ConnectionService.skipLeftovers()
             ConnectionService.INTERRUPT = false
+
             ConnectionService.joinToTable(list[position].id)
+
             val intent = Intent(context, GameActivity::class.java)
             context.startActivity(intent) }
 
         return view
 
+    }
+
+    private fun endBackgroundProcesses() {
+        val tableActivity = context as TableSelectionActivity
+        tableActivity.IN_TABLE_VIEW = false
+
+        if(ConnectionService.PROCESSING)
+            ConnectionService.INTERRUPT = true
+
+        tableActivity.waitForThreadToFinish()
     }
 
 }

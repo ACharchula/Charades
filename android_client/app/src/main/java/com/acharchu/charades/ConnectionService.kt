@@ -19,7 +19,7 @@ class ConnectionService {
         private const val HEADER_LENGTH = 12
         private const val BYTES_TO_READ_LENGTH = 4
 
-        public var INTERRUPT = false
+        var INTERRUPT = false
         var PROCESSING = false
 
         var status = State.DISCONNECTED
@@ -71,14 +71,13 @@ class ConnectionService {
             sendString("HELLO_SERVER${prepareMessageLength(id.length)}$id")
             val handshakeResult = read(16) //check if result is ok
 
-            if (handshakeResult == "WELCOME_USER0000") {
+            return if (handshakeResult == "WELCOME_USER0000") {
                 status = State.CONNECTED
-                return true
-            }
-            else if (handshakeResult == "COMMANDFAILD0000")
-                return false
+                true
+            } else if (handshakeResult == "COMMANDFAILD0000")
+                false
             else
-                return false
+                false
         }
 
         fun joinToTable(table_number: Int) {
@@ -93,7 +92,7 @@ class ConnectionService {
             sendString("GIVE_UP_GAME0000")
         }
 
-        fun ping_ping() {
+        fun readZeros() {
             read(BYTES_TO_READ_LENGTH)
         }
 
@@ -140,10 +139,6 @@ class ConnectionService {
             return "Game aborted! The right answer - $answer"
         }
 
-        fun commandFailed() {
-            read(BYTES_TO_READ_LENGTH)
-        }
-
         fun createTable() {
             sendString("CREATE_TABLE0000")
         }
@@ -177,7 +172,6 @@ class ConnectionService {
                 length < 100 -> "00$length"
                 length < 1000 -> "0$length"
                 length < 10000 -> length.toString()
-                //out of bound error
                 else -> ""
             }
         }
@@ -192,7 +186,6 @@ class ConnectionService {
 
         fun getHeader(): HeaderType? {
             val header = read(HEADER_LENGTH)
-            Log.i("info", header)
             if (Headers.headers.containsKey(header))
                 return Headers.headers[header]
 

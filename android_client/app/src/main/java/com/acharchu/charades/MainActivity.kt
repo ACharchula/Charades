@@ -15,7 +15,6 @@ class MainActivity : AppCompatActivity() {
         supportActionBar!!.hide()
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
-
         setContentView(R.layout.activity_main)
 
         startButton.setOnClickListener {
