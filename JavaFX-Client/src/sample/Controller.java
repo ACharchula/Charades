@@ -10,6 +10,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import sample.DrawingController;
 import sample.Model.HeaderType;
 import sample.Model.Message;
 
@@ -151,11 +152,12 @@ public class Controller {
             refreshButton.setDisable(false);
         });
 
-        seeStatisticsButton = new Button("See statsistics");
+        seeStatisticsButton = new Button("See statistics");
         seeStatisticsButton.setOnMouseClicked(event -> {
             seeStatisticsButton.setDisable(true);
             if(connectionIsActive()){
                 try{
+                    clearMessageBox();
                     connectionService.getStatistics();
                 } catch (IOException e) {
                     showAlert("TABLE_ERROR");
@@ -198,18 +200,6 @@ public class Controller {
         });
     }
 
-
-    private void showDrawerPerspective() {
-        Platform.runLater(() -> {
-            removeMainMenuButtons();
-            addGameButtons();
-            hideMessageFieldAndStartSendingImage();
-            showCanvas();
-            showChat();
-        });
-    }
-
-
     private void showGuesserPerspective() {
         Platform.runLater(() -> {
             removeMainMenuButtons();
@@ -239,7 +229,6 @@ public class Controller {
 
 
     private void showTablesButton() {
-        //chatBox.getChildren().forEach(child -> child.setVisible(false));
         messageField.setVisible(false);
         if(!chatBox.getChildren().contains(addTableButton))
             chatBox.getChildren().add(addTableButton);
@@ -266,7 +255,6 @@ public class Controller {
     }
 
     private void startChatReceiverTask() {
-        System.out.println("starting reading thread");
         Runnable task = this::runChatReceiverTask;
 
         readingThread = new Thread(task);
@@ -280,7 +268,6 @@ public class Controller {
         try {
             while (connectionIsActive()) {
                 HeaderType header = connectionService.readHeader();
-                System.out.println(header);
                 switch (header) {
                     case CHAT_MESSAGE:
                         updateChatBox(connectionService.getMessage());
@@ -299,7 +286,6 @@ public class Controller {
                         drawingController.clearImage();
                         drawingController.allowDrawing(false);
                         showMessageField();
-                        //showGuesserPerspective();
                         break;
                     case GAME_READY:
                         updateChatBox(connectionService.getGameReady());
@@ -310,8 +296,6 @@ public class Controller {
                         drawingController.clearImage();
                         drawingController.allowDrawing(true);
                         hideMessageFieldAndStartSendingImage();
-                        System.out.println(drawingController.getCanvas());
-//                        showDrawerPerspective();
                         break;
                     case SEE___TABLES:
                         tables = connectionService.getActiveTables();
@@ -338,7 +322,6 @@ public class Controller {
                     case SEESTATISTIC:
                         stats = connectionService.seeStatistics();
                         showStatistics();
-                        System.out.println(stats);
                         break;
                 }
             }
@@ -361,12 +344,7 @@ public class Controller {
 
     private void showStatistics() {
         messagesBox.setVisible(true);
-        int size = messagesBox.getItems().size();
-        if(size > 0){
-            Platform.runLater(()->{
-                messagesBox.getItems().remove(0,size);
-            });
-        }
+        clearMessageBox();
 
         stats.forEach((player, score) -> {
             try {
@@ -390,9 +368,11 @@ public class Controller {
             int size = tablesVBox.getChildren().size();
             tablesVBox.getChildren().remove(1, size);
             tables.forEach(table -> {
-                Button button = createEnterTableButton(table);
-                if (!tablesVBox.getChildren().contains(button)) {
-                    tablesVBox.getChildren().add(button);
+                if(!table.equals("")){
+                    Button button = createEnterTableButton(table);
+                    if (!tablesVBox.getChildren().contains(button)) {
+                        tablesVBox.getChildren().add(button);
+                    }
                 }
             });
             tablesPane.setVisible(true);
@@ -400,9 +380,10 @@ public class Controller {
     }
 
     private Button createEnterTableButton(String table) {
-        tablesVBox.getChildren().add(new Label("Table nr. " + table));
-        Button button = new Button("Enter table " + table);
+        tablesVBox.getChildren().add(new Label("Table nr. " + (Integer.parseInt(table)+1)));
+        Button button = new Button("Enter table " + (Integer.parseInt(table)+1));
         button.setOnMouseClicked(event -> {
+            clearMessageBox();
             enterTable(table);
         });
         return button;
@@ -439,7 +420,7 @@ public class Controller {
         }
 
         timer = new Timer();
-        timer.schedule(new SendImage(), 0, 100);
+        timer.schedule(new SendImage(), 0, 50);
 
     }
 
@@ -471,7 +452,6 @@ public class Controller {
     }
 
     private void startChatWriterTask() {
-        System.out.println("starting writing thread");
         Runnable task = this::runChatWriterTask;
 
         writingThread = new Thread(task);
@@ -562,6 +542,15 @@ public class Controller {
 
     private boolean connectionIsActive() {
         return this.connectionService != null && this.connectionService.isConnected();
+    }
+
+    private void clearMessageBox(){
+        int size = messagesBox.getItems().size();
+        if(size > 0){
+            Platform.runLater(()->{
+                messagesBox.getItems().remove(0,size);
+            });
+        }
     }
 
 }

@@ -69,10 +69,6 @@ public class DrawingController {
         imageView.setImage(image);
     }
 
-    public Canvas getCanvas() {
-        return canvas;
-    }
-
     public void allowDrawing(boolean drawing) {
         imageView.setVisible(!drawing);
         canvas.setVisible(drawing);
@@ -94,10 +90,9 @@ public class DrawingController {
         imageView.setImage(null);
         graphicsContext.clearRect(0,0,canvas.getWidth(),canvas.getHeight());
 
-//        Platform.runLater(()->{
-//            graphicsContext.getCanvas().snapshot(null,writableImage);
-//        });
-        System.out.println("cleared");
+        Platform.runLater(()->{
+            graphicsContext.getCanvas().snapshot(null,writableImage);
+        });
     }
 
     public boolean imageHasChanged() {

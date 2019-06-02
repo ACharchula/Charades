@@ -20,7 +20,6 @@ class ConnectionService {
 
 
     private boolean connected;
-    private boolean isOnTable = false;
     private int HEADER_LENGTH = 12;
     private int BYTES_TO_READ_LENGTH = 4;
     private String loggedUser;
@@ -59,9 +58,6 @@ class ConnectionService {
         return header.equals(HeaderType.WELCOME_USER);
     }
 
-    public boolean isOnTable() {
-        return isOnTable;
-    }
 
     private String read(int bytesToRead) throws IOException {
         return new String(readByteArray(bytesToRead));
@@ -90,10 +86,9 @@ class ConnectionService {
     }
 
     private void sendWelcomePackage() throws IOException {
-        StringBuilder welcomePackage = new StringBuilder("HELLO_SERVER");
-        welcomePackage.append(String.format("%04d", this.loggedUser.length()));
-        welcomePackage.append(this.loggedUser);
-        socketChannel.write(ByteBuffer.wrap(welcomePackage.toString().getBytes()));
+        String welcomePackage = "HELLO_SERVER" + String.format("%04d", this.loggedUser.length()) +
+                this.loggedUser;
+        socketChannel.write(ByteBuffer.wrap(welcomePackage.getBytes()));
     }
 
     private void send(String message) throws IOException {
@@ -101,30 +96,27 @@ class ConnectionService {
     }
 
 
-    public void sendMessage(String message) throws IOException {
-        StringBuilder stringBuilder = new StringBuilder("SEND_MESSAGE");
-        stringBuilder.append(String.format("%04d", message.length()));
-        stringBuilder.append(message);
-
-        send(stringBuilder.toString());
+    void sendMessage(String message) throws IOException {
+        String stringBuilder = "SEND_MESSAGE" + String.format("%04d", message.length()) +
+                message;
+        send(stringBuilder);
     }
 
-    public Message getMessage() throws IOException {
+    Message getMessage() throws IOException {
         int length = Integer.parseInt(read(BYTES_TO_READ_LENGTH));
         String userNameAndMessage = read(length);
-        Message message = new Message(userNameAndMessage.split("\n")[0], userNameAndMessage.split("\n")[1]);
-        return message;
+        return new Message(userNameAndMessage.split("\n")[0], userNameAndMessage.split("\n")[1]);
     }
 
-    public boolean isConnected() {
+    boolean isConnected() {
         return connected;
     }
 
-    public void closeSocket() throws IOException {
+    void closeSocket() throws IOException {
         socketChannel.close();
     }
 
-    public HeaderType readHeader() throws IOException {
+    HeaderType readHeader() throws IOException {
         String header = read(HEADER_LENGTH);
 
         if (Headers.HEADERS.containsKey(header)) {
@@ -134,7 +126,7 @@ class ConnectionService {
         return HeaderType.UNDEFINED;
     }
 
-    public void sendByteArray(byte[] byteArray) throws IOException {
+    private void sendByteArray(byte[] byteArray) throws IOException {
         int length = byteArray.length;
         int sent = 0;
         ByteBuffer buffer = ByteBuffer.wrap(byteArray);
@@ -150,19 +142,18 @@ class ConnectionService {
         }
     }
 
-    public String getGameWaiting() throws IOException {
+    String getGameWaiting() throws IOException {
         read(BYTES_TO_READ_LENGTH);
         return "The game has not started yet";
     }
 
-    public String getWinner() throws IOException {
+    String getWinner() throws IOException {
         return "Correct Answer! " + getMessage().getContent();
     }
 
-    public String getGameReady() throws IOException {
+    String getGameReady() throws IOException {
         int length = Integer.parseInt(read(BYTES_TO_READ_LENGTH));
         String result = read(length);
-        System.out.println("The drawer is - " + result);
         return "The drawer is - " + result;
     }
 
@@ -215,11 +206,9 @@ class ConnectionService {
     public void getTableID() throws IOException {
         int length = Integer.parseInt(read(BYTES_TO_READ_LENGTH));
         int id = Integer.parseInt(read(length));
-        System.out.println("Id is = " + id);
     }
 
     public void enterTable(String table) throws IOException {
-        System.out.println("Entered table " + table);
         String message = "ENTER__TABLE" + String.format("%04d", table.length()) +
                 table;
         send(message);
@@ -227,7 +216,6 @@ class ConnectionService {
 
     public void leaveTable() throws IOException {
         send("COMEOUTTABLE0000");
-        isOnTable = false;
     }
 
     public void surrender() throws IOException {
