@@ -119,6 +119,11 @@ class GameActivity : AppCompatActivity() {
             ConnectionService.giveUpAGame()
             guessingPlayerView()
         }
+
+        clearDrawViewButton.setOnClickListener {
+            draw_view.clearCanvas()
+        }
+
         guessingPlayerView()
         startThreads()
     }
@@ -133,6 +138,7 @@ class GameActivity : AppCompatActivity() {
             draw_view.clearCanvas()
             draw_view.visibility = VISIBLE
             giveUpButton.visibility = VISIBLE
+            clearDrawViewButton.visibility = VISIBLE
         }
 
         sendPicture = true
@@ -155,6 +161,7 @@ class GameActivity : AppCompatActivity() {
             imageView.visibility = VISIBLE
             draw_view.visibility = INVISIBLE
             giveUpButton.visibility = GONE
+            clearDrawViewButton.visibility = GONE
         }
     }
 
