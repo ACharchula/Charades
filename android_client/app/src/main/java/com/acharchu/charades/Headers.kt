@@ -9,8 +9,12 @@ class Headers {
             "GAME_WAITING" to HeaderType.GAME_WAITING,
             "GAME___READY" to HeaderType.GAME_READY,
             "YOUAREDRAWER" to HeaderType.YOU_ARE_DRAWER,
-            "CLUEINCORECT" to HeaderType.CLUE_INCORRECT,
-            "CLUE_CORRECT" to HeaderType.CLUE_CORRECT
+            "TABLECREATED" to HeaderType.TABLE_CREATED,
+            "SEE___TABLES" to HeaderType.SEE_TABLES,
+            "GAME_ABORTED" to HeaderType.GAME_ABORTED,
+            "COMMANDFAILD" to HeaderType.COMMAND_FAILED,
+            "PING____PING" to HeaderType.PING_PING,
+            "SEESTATISTIC" to HeaderType.SEE_STATISTIC
         )
     }
 }

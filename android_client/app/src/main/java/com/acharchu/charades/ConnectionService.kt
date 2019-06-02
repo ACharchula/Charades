@@ -2,6 +2,7 @@ package com.acharchu.charades
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import java.lang.StringBuilder
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -11,29 +12,32 @@ import java.nio.channels.SocketChannel
 class ConnectionService {
 
     companion object {
-        private val serverHost = "10.0.2.2" //has to be changed if u want to run on real smartphone
-        private val serverPort = 44444
+        private const val serverHost = "10.0.2.2" //has to be changed if u want to run on real smartphone
+        private const val serverPort = 44444
         private var socketChannel: SocketChannel? = null
-        var messages = arrayListOf<String>() // needs to be moved
 
-        private val HEADER_LENGTH = 12
-        private val BYTES_TO_READ_LENGTH = 4
+        private const val HEADER_LENGTH = 12
+        private const val BYTES_TO_READ_LENGTH = 4
+
+        var INTERRUPT = false
+        var PROCESSING = false
 
         var status = State.DISCONNECTED
 
-        private val id: Int = (10..99).random()
+        private lateinit var id: String
 
-        fun connectToServer() {
+        fun connectToServer() : Boolean {
             try {
                 val address = InetSocketAddress(InetAddress.getByName(serverHost), serverPort)
 
                 socketChannel = SocketChannel.open(address)
                 socketChannel!!.configureBlocking(false)
-                performServerHandshake()
 
             } catch (exception: Exception) {
-                throw exception
+                return false
             }
+
+            return true
         }
 
         private fun sendString(msg: String) {
@@ -59,19 +63,100 @@ class ConnectionService {
             }
         }
 
-        private fun performServerHandshake() {
-            sendString("HELLO_SERVER0015AndroidClient$id")
+        fun setId(name: String) {
+            id = name
+        }
+
+        fun performServerHandshake() : Boolean {
+            sendString("HELLO_SERVER${prepareMessageLength(id.length)}$id")
             val handshakeResult = read(16) //check if result is ok
 
-            if (handshakeResult == "WELCOME_USER0000")
+            return if (handshakeResult == "WELCOME_USER0000") {
                 status = State.CONNECTED
+                true
+            } else if (handshakeResult == "COMMANDFAILD0000")
+                false
             else
-                throw Throwable("CANNOT CONNECT TO SERVER")
+                false
         }
 
-        fun joinToTable() {
-            sendString("ENTER__TABLE0000")
+        fun joinToTable(table_number: Int) {
+            sendString("ENTER__TABLE${prepareMessageLength(table_number.toString().length)}$table_number")
         }
+
+        fun comeOutFromTable() {
+            sendString("COMEOUTTABLE0000")
+        }
+
+        fun giveUpAGame() {
+            sendString("GIVE_UP_GAME0000")
+        }
+
+        fun readZeros() {
+            read(BYTES_TO_READ_LENGTH)
+        }
+
+        fun pong_pong() {
+            sendString("PONG____PONG0000")
+        }
+
+        fun getStatistics() {
+            sendString("GETSTATISTIC0000")
+        }
+
+        fun getBestUsersAndScores() : List<String>? {
+            val length = read(BYTES_TO_READ_LENGTH)
+
+            if(length.toInt() != 0) {
+                val tableStringList = read(length.toInt()).split('\n')
+                return prepareScores(tableStringList.subList(0, tableStringList.size-1))
+            } else
+                return null
+
+        }
+
+        private fun prepareScores(splittedList: List<String>) : List<String> {
+            val list = mutableListOf<String>()
+
+            var i = 0
+            while (i != splittedList.size) {
+                list.add(splittedList[i] + " : " + splittedList[i+1])
+                i += 2
+            }
+
+            return list
+        }
+
+        fun getIdOfCreatedTable() : Int {
+            val length = read(BYTES_TO_READ_LENGTH)
+            val id = read(length.toInt())
+            return id.toInt()
+        }
+
+        fun gameAborted() : String {
+            val length = read(BYTES_TO_READ_LENGTH)
+            val answer = read(length.toInt())
+            return "Game aborted! The right answer - $answer"
+        }
+
+        fun createTable() {
+            sendString("CREATE_TABLE0000")
+        }
+
+        fun listAvailableTables() {
+            sendString("LIST__TABLES0000")
+        }
+
+        fun getTableList(): List<Int>? {
+            val length = read(BYTES_TO_READ_LENGTH)
+
+            return if(length.toInt() != 0) {
+                val tableStringList = read(length.toInt()).split('\n')
+                tableStringList.subList(0, tableStringList.size-1).map { it.toInt() }
+            } else
+                null
+        }
+
 
         fun sendMessage(msg: String) {
             sendString("SEND_MESSAGE${prepareMessageLength(msg.length)}$msg")
@@ -87,7 +172,6 @@ class ConnectionService {
                 length < 100 -> "00$length"
                 length < 1000 -> "0$length"
                 length < 10000 -> length.toString()
-                //out of bound error
                 else -> ""
             }
         }
@@ -102,7 +186,6 @@ class ConnectionService {
 
         fun getHeader(): HeaderType? {
             val header = read(HEADER_LENGTH)
-
             if (Headers.headers.containsKey(header))
                 return Headers.headers[header]
 
@@ -116,27 +199,35 @@ class ConnectionService {
         private fun readByteArray(bytesToRead: Int): ByteArray {
             var amountOfCharacters = 0
             var consumedCharacters = 0
-            var result: ByteArray = ByteArray(0)
+            val result = ByteArray(bytesToRead)
 
-            while (amountOfCharacters != bytesToRead && consumedCharacters != -1) {
+            PROCESSING = true
+            while (amountOfCharacters != bytesToRead && consumedCharacters != -1 && !INTERRUPT) {  // read z offsetem
                 val buffer = ByteBuffer.allocate(bytesToRead - amountOfCharacters)
-                buffer.clear()
                 consumedCharacters = socketChannel?.read(buffer)!!
 
-                if (consumedCharacters != 0) {
-                    result += buffer.array()
+                if (consumedCharacters != 0 && consumedCharacters != -1) {
+                    System.arraycopy(buffer.array(), 0, result, amountOfCharacters, consumedCharacters)
                     amountOfCharacters += consumedCharacters
-                }
+                } else if (consumedCharacters == -1)
+                    throw Throwable("CONNECTION CLOSED")
             }
-
-            if (consumedCharacters == -1)
-                throw Throwable("CONNECTION CLOSED")
+            PROCESSING = false
+            INTERRUPT = false
 
             return result
         }
 
+        fun skipLeftovers() {
+            do {
+                val buffer = ByteBuffer.allocate(100)
+                val consumedCharacters = socketChannel?.read(buffer)
+            } while (consumedCharacters != 0)
+        }
+
         fun closeSocket() {
             socketChannel!!.close()
+            status = State.DISCONNECTED
         }
 
         fun getCanvas() : Bitmap {
@@ -166,14 +257,6 @@ class ConnectionService {
             val length = read(BYTES_TO_READ_LENGTH)
             val result = read(length.toInt())
             return "Your turn! Draw - $result"
-        }
-
-        fun clueCorrect() {
-            read(BYTES_TO_READ_LENGTH)
-        }
-
-        fun clueIncorrect() {
-            read(BYTES_TO_READ_LENGTH)
         }
 
         fun sendPicture(picture: ByteArray) {

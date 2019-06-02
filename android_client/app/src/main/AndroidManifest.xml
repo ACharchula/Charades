@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools" package="com.acharchu.charades">
+          xmlns:tools="http://schemas.android.com/tools"
+          package="com.acharchu.charades">
 
     <uses-permission android:name="android.permission.INTERNET"/>
 
@@ -10,12 +11,17 @@
             android:label="@string/app_name"
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
-            android:theme="@style/AppTheme" tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".TableSelectionActivity"
-            android:parentActivityName=".MainActivity">
+            android:theme="@style/AppTheme"
+            tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".StatisticsActivity">
         </activity>
-        <activity android:name=".GameActivity"
-            android:parentActivityName=".TableSelectionActivity">
+        <activity
+                android:name=".TableSelectionActivity"
+                android:parentActivityName=".MainActivity">
+        </activity>
+        <activity
+                android:name=".GameActivity"
+                android:parentActivityName=".TableSelectionActivity">
         </activity>
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -24,6 +30,10 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <meta-data
+                android:name="preloaded_fonts"
+                android:resource="@array/preloaded_fonts"/>
     </application>
 
 </manifest>

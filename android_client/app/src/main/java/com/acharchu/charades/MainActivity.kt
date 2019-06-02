@@ -4,6 +4,7 @@ import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.StrictMode
+import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -11,10 +12,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        supportActionBar!!.hide()
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
-
         setContentView(R.layout.activity_main)
 
         startButton.setOnClickListener {
@@ -23,9 +23,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun start() {
-        val intent = Intent(this, TableSelectionActivity::class.java)
-        startActivity(intent)
+        if(ConnectionService.connectToServer())
+            login()
+        else
+            Toast.makeText(this, "Can't connect to server. Please try again", Toast.LENGTH_SHORT).show()
     }
 
+    private fun login() {
+        ConnectionService.setId(nameTextInput.text.toString())
+        val result = ConnectionService.performServerHandshake()
 
+        if(!result) {
+            Toast.makeText(this, "Id ${nameTextInput.text} is already taken!", Toast.LENGTH_SHORT).show()
+            ConnectionService.closeSocket()
+        }
+        else {
+            val intent = Intent(this, TableSelectionActivity::class.java)
+            startActivity(intent)
+        }
+    }
 }

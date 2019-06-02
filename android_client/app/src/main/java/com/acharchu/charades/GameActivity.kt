@@ -1,20 +1,22 @@
 package com.acharchu.charades
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.os.StrictMode
-import android.view.View.GONE
-import android.view.View.VISIBLE
+import android.view.View.*
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_game.*
-import kotlinx.android.synthetic.main.activity_table_selection.*
 import kotlin.concurrent.fixedRateTimer
 
 class GameActivity : AppCompatActivity() {
 
     private var sendPicture = false
     private var pictureByteArray = ByteArray(0)
+    private var IN_GAME = true
+    private var drawerView = false
+    private var messages = arrayListOf<String>()
 
     private val outputThread = Thread {
         sendButton.setOnClickListener {
@@ -31,44 +33,33 @@ class GameActivity : AppCompatActivity() {
 
     private val inputThread = Thread {
 
-        while(ConnectionService.status == State.CONNECTED) {
+        while(ConnectionService.status == State.CONNECTED && IN_GAME) {
             try{
                 val header : HeaderType? = ConnectionService.getHeader()
 
-                if (header == HeaderType.CHAT_MESSAGE)
-                    updateMessageList(ConnectionService.getMessage())
-                else if (header == HeaderType.UPDATECANVAS) {
-                    Thread.sleep(50)
-                    updateCanvas(ConnectionService.getCanvas())
+                when (header) {
+                    HeaderType.CHAT_MESSAGE -> updateMessageList(ConnectionService.getMessage())
+                    HeaderType.UPDATECANVAS -> updateCanvas(ConnectionService.getCanvas())
+                    HeaderType.GAME_WAITING -> updateMessageList(ConnectionService.getGameWaiting())
+                    HeaderType.GAME_ENDED -> endGame()
+                    HeaderType.GAME_READY -> updateMessageList(ConnectionService.getGameReady())
+                    HeaderType.YOU_ARE_DRAWER -> chosenAsDrawer()
+                    HeaderType.GAME_ABORTED -> gameAborted()
+                    HeaderType.PING_PING -> responseToPing()
                 }
-                else if (header == HeaderType.GAME_WAITING)
-                    updateMessageList(ConnectionService.getGameWaiting())
-                else if (header == HeaderType.GAME_ENDED) {
-                    updateMessageList(ConnectionService.getTheWinner())
-                    guessingPlayerView()
-                }
-                else if (header == HeaderType.GAME_READY)
-                    updateMessageList(ConnectionService.getGameReady())
-                else if (header == HeaderType.YOU_ARE_DRAWER) {
-                    updateMessageList(ConnectionService.getThingToDraw())
-                    drawerView()
-                }
-                else if (header == HeaderType.CLUE_CORRECT)
-                    ConnectionService.clueCorrect()
-                else if (header == HeaderType.CLUE_INCORRECT)
-                    ConnectionService.clueIncorrect()
 
             } catch (e : Throwable) {
                 if (e.message == "CONNECTION CLOSED") {
 
-                    ConnectionService.status = State.DISCONNECTED
+                    endBackgroundProcesses()
 
                     runOnUiThread {
-                        ConnectionService.closeSocket()
-                        messagesListView.visibility = GONE
-                        sendButton.visibility = GONE
-                        messageContent.visibility = GONE
-                        reconnectButton.visibility = VISIBLE
+                        val intent = Intent(this, MainActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        startActivity(intent)
+                        ConnectionService.INTERRUPT = false
+                        Toast.makeText(this, "Disconnected from server!", Toast.LENGTH_SHORT).show()
+
                     }
                 }
 
@@ -76,29 +67,78 @@ class GameActivity : AppCompatActivity() {
         }
     }
 
+    private fun endBackgroundProcesses() {
+        IN_GAME = false
+        ConnectionService.status = State.DISCONNECTED
+        ConnectionService.INTERRUPT = true
+        ConnectionService.closeSocket()
+    }
+
+    private fun responseToPing() {
+        ConnectionService.readZeros()
+        ConnectionService.pong_pong()
+    }
+
+    private fun gameAborted() {
+        if(drawerView)
+            guessingPlayerView()
+
+        updateMessageList(ConnectionService.gameAborted())
+    }
+
+    private fun chosenAsDrawer() {
+        updateMessageList(ConnectionService.getThingToDraw())
+        drawerView()
+    }
+
+    private fun endGame() {
+        updateMessageList(ConnectionService.getTheWinner())
+        guessingPlayerView()
+    }
+
+    override fun onBackPressed() {
+        draw_view.clearCanvas()
+        imageView.setImageResource(android.R.color.white)
+
+        IN_GAME = false
+        if(ConnectionService.PROCESSING)
+            ConnectionService.INTERRUPT = true
+
+        inputThread.join()
+        ConnectionService.skipLeftovers()
+        ConnectionService.comeOutFromTable()
+        super.onBackPressed()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        supportActionBar!!.hide()
         setContentView(R.layout.activity_game)
 
-        reconnectButton.setOnClickListener {
-            reconnectButton.visibility = GONE
-            messagesListView.visibility = VISIBLE
-            sendButton.visibility = VISIBLE
-            messageContent.visibility = VISIBLE
-            connectToServer()
+        giveUpButton.setOnClickListener {
+            ConnectionService.giveUpAGame()
+            guessingPlayerView()
         }
 
-        connectToServer()
+        clearDrawViewButton.setOnClickListener {
+            draw_view.clearCanvas()
+        }
+
+        guessingPlayerView()
+        startThreads()
     }
 
     private fun drawerView() {
+        drawerView = true
+
         runOnUiThread {
             sendButton.visibility = GONE
             messageContent.visibility = GONE
-            imageView.visibility = GONE
+            imageView.visibility = INVISIBLE
             draw_view.clearCanvas()
             draw_view.visibility = VISIBLE
+            giveUpButton.visibility = VISIBLE
+            clearDrawViewButton.visibility = VISIBLE
         }
 
         sendPicture = true
@@ -112,42 +152,36 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun guessingPlayerView() {
+        sendPicture = false
+
         runOnUiThread {
             sendButton.visibility = VISIBLE
             messageContent.visibility = VISIBLE
+            imageView.setImageResource(android.R.color.white)
             imageView.visibility = VISIBLE
-            draw_view.visibility = GONE
+            draw_view.visibility = INVISIBLE
+            giveUpButton.visibility = GONE
+            clearDrawViewButton.visibility = GONE
         }
-
-        sendPicture = false
     }
 
-    private fun connectToServer() {
-        try {
-            ConnectionService.connectToServer()
-            if(!inputThread.isAlive)
-                inputThread.start()
+    private fun startThreads() {
+        if(!inputThread.isAlive)
+            inputThread.start()
 
-            if(!outputThread.isAlive)
-                outputThread.start()
-            ConnectionService.joinToTable()
-        } catch (e: Throwable) {
-            messagesListView.visibility = GONE
-            sendButton.visibility = GONE
-            messageContent.visibility = GONE
-            reconnectButton.visibility = VISIBLE
-        }
+        if(!outputThread.isAlive)
+            outputThread.start()
     }
 
     private fun printMessages() {
-        val adapter = ArrayAdapter(this, R.layout.message, ConnectionService.messages)
+        val adapter = ArrayAdapter(this, R.layout.message, messages)
         messagesListView.adapter = adapter
         messagesListView.setSelection(adapter.count - 1)
     }
 
     private fun updateMessageList(msg : String?) {
         runOnUiThread {
-            ConnectionService.messages.add(msg!!)
+            messages.add(msg!!)
             printMessages()
         }
     }
