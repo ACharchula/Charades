@@ -39,46 +39,76 @@ bool Interpreter::isActive() {
   return true;
 }
 
+void Interpreter::checkPreloginCommands() {
+  if (currentCommand != nullptr) return;
+
+  if (equal(tmp, PongCmd::HEADER)) {
+    currentCommand = std::make_unique<PongCmd>(current_user, tables, users);
+  } else if (equal(tmp, HelloCmd::HEADER)) {
+    currentCommand = std::make_unique<HelloCmd>(current_user, tables, users);
+  }
+}
+
+void Interpreter::checkLogedCommands() {
+  if (currentCommand != nullptr) return;
+  if (!current_user->isLogged()) {
+    helpers::log("Not logged user try to execute non-hello command");
+    throw std::exception();
+  }
+
+  if (equal(tmp, GetStatisticCmd::HEADER)) {
+    currentCommand =
+        std::make_unique<GetStatisticCmd>(current_user, tables, users);
+  } else if (equal(tmp, CreateTableCmd::HEADER)) {
+    currentCommand =
+        std::make_unique<CreateTableCmd>(current_user, tables, users);
+  } else if (equal(tmp, ListTablesCmd::HEADER)) {
+    currentCommand =
+        std::make_unique<ListTablesCmd>(current_user, tables, users);
+  } else if (equal(tmp, EnterTableCmd::HEADER)) {
+    currentCommand =
+        std::make_unique<EnterTableCmd>(current_user, tables, users);
+  }
+}
+
+void Interpreter::checkTableCommands() {
+  if (currentCommand != nullptr) return;
+  if (!current_user->isInTable()) {
+    helpers::log(
+        "User is not in table, but try to execute table-specific command;");
+    throw std::exception();
+  }
+
+  if (equal(tmp, SendMessageCmd::HEADER)) {
+    currentCommand =
+        std::make_unique<SendMessageCmd>(current_user, tables, users);
+  } else if (equal(tmp, SetCanvasCmd::HEADER)) {
+    currentCommand =
+        std::make_unique<SetCanvasCmd>(current_user, tables, users);
+  } else if (equal(tmp, ComeOutTableCmd::HEADER)) {
+    currentCommand =
+        std::make_unique<ComeOutTableCmd>(current_user, tables, users);
+  } else if (equal(tmp, GiveUpCmd::HEADER)) {
+    currentCommand = std::make_unique<GiveUpCmd>(current_user, tables, users);
+  }
+}
+
+void Interpreter::checkCommands() {
+  currentCommand = nullptr;
+
+  checkPreloginCommands();
+  checkLogedCommands();
+  checkTableCommands();
+
+  if (currentCommand == nullptr) {
+    helpers::log("Can't recognise command header.");
+    throw std::exception();
+  }
+}
+
 void Interpreter::proceedInput() {
   if (actionState == ActionState::SelectCommand) {
-    if (equal(tmp, PongCmd::HEADER)) {
-      currentCommand = std::make_unique<PongCmd>(current_user, tables, users);
-    } else if (equal(tmp, HelloCmd::HEADER)) {
-      currentCommand = std::make_unique<HelloCmd>(current_user, tables, users);
-    } else if (!current_user->isLogged()) {
-      helpers::log("Not logged user try to execute non-hello command");
-      throw std::exception();
-    } else if (equal(tmp, GetStatisticCmd::HEADER)) {
-      currentCommand =
-          std::make_unique<GetStatisticCmd>(current_user, tables, users);
-    } else if (equal(tmp, CreateTableCmd::HEADER)) {
-      currentCommand =
-          std::make_unique<CreateTableCmd>(current_user, tables, users);
-    } else if (equal(tmp, ListTablesCmd::HEADER)) {
-      currentCommand =
-          std::make_unique<ListTablesCmd>(current_user, tables, users);
-    } else if (equal(tmp, EnterTableCmd::HEADER)) {
-      currentCommand =
-          std::make_unique<EnterTableCmd>(current_user, tables, users);
-    } else if (!current_user->isInTable()) {
-      helpers::log(
-          "User is not in table, but try to execute table-specific command;");
-      throw std::exception();
-    } else if (equal(tmp, SendMessageCmd::HEADER)) {
-      currentCommand =
-          std::make_unique<SendMessageCmd>(current_user, tables, users);
-    } else if (equal(tmp, SetCanvasCmd::HEADER)) {
-      currentCommand =
-          std::make_unique<SetCanvasCmd>(current_user, tables, users);
-    } else if (equal(tmp, ComeOutTableCmd::HEADER)) {
-      currentCommand =
-          std::make_unique<ComeOutTableCmd>(current_user, tables, users);
-    } else if (equal(tmp, GiveUpCmd::HEADER)) {
-      currentCommand = std::make_unique<GiveUpCmd>(current_user, tables, users);
-    } else {
-      throw std::exception();
-    }
-
+    checkCommands();
     setLengthState();
   } else if (actionState == ActionState::ReadLength) {
     setPushState();
