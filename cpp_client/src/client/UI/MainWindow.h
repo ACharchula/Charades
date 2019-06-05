@@ -43,6 +43,8 @@ public:
     QPushButton* create;
     QPushButton* select;
     QPushButton* loadTables;
+    QPushButton* statistics;
+  
     QComboBox* tableList;
 
 public:
@@ -78,6 +80,8 @@ signals:
 
     void load();
 
+    void stats();
+  
 private slots:
 
     void changeTable();
@@ -87,6 +91,10 @@ private slots:
     void loadTable();
 
     void addTablesToList(QString);
+
+    void addStats(QString);
+
+    void getStats();
 };
 
 #endif //CPP_CLIENT_MAINWINDOW_H

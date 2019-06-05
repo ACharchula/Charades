@@ -1,14 +1,14 @@
-#include <utility>
-
 //
 // Created by adam on 25.05.19.
 //
 
+#include <utility>
 #include "Controller.h"
 #include "../UI/MessageBox.h"
 #include "../Consts.h"
 #include <QTimer>
 #include <QtCore/QCoreApplication>
+#include <QDebug>
 
 Controller::Controller(QWidget* parent, const Qt::WindowFlags& f) : QWidget(parent, f) {
     mainWindow = new MainWindow();
@@ -95,7 +95,9 @@ void Controller::connectAllSignalsAndSlots() {
     connect(mainWindow, SIGNAL(change(QString)), this, SLOT(changeTable(QString)), Qt::DirectConnection);
     connect(mainWindow, SIGNAL(newTable()), this, SLOT(createTable()), Qt::DirectConnection);
     connect(mainWindow, SIGNAL(load()), this, SLOT(loadTable()), Qt::DirectConnection);
+    connect(mainWindow, SIGNAL(stats()), this, SLOT(getStats()), Qt::DirectConnection);
     connect(this, SIGNAL(addTables(QString)), mainWindow, SLOT(addTablesToList(QString)), Qt::DirectConnection);
+    connect(this, SIGNAL(addStats(QString)), mainWindow, SLOT(addStats(QString)), Qt::DirectConnection);
 }
 
 void Controller::draw(QString word) {
@@ -106,9 +108,7 @@ void Controller::draw(QString word) {
 
 void Controller::analyseStatement(QString state) {
     std::string statement = state.toStdString();
-    if (statement == WELCOME) {
-
-    } else if (statement == WAIT) {
+     if (statement == WAIT) {
         mainWindow->addChatMessage("LOG: You need to wait for other players.");
     } else if (statement == PING) {
         sendRequest(QString::fromStdString(PONG));
@@ -160,11 +160,6 @@ void Controller::login(QString nick) {
         connectAllSignalsAndSlots();
         mainWindow->show();
     }
-}
-
-void Controller::closeApp() {
-    close();
-}
 
 void Controller::sendFrame() {
     if (gameState == GameState::Draw) {
@@ -201,19 +196,22 @@ void Controller::tableCreated(QString table) {
     mainWindow->clearChat();
 }
 
-void Controller::stats(QString stats) { // TODO
-
+void Controller::stats(QString stats) {
+    emit addStats(std::move(stats));
 }
 
 void Controller::tableList(QString list) {
-    emit addTables(list);
+    emit addTables(std::move(list));
 }
 
-void Controller::exit() { // TODO
+void Controller::getStats() {
+    emit sendRequest(QString::fromStdString(GETSTATS));
+}
+
+void Controller::exit() {
 
 }
 
 void Controller::createTable() {
     emit sendRequest(QString::fromStdString(CREATETABLE));
 }
-
