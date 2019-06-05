@@ -31,8 +31,6 @@ public:
 
     const size_t getSize() const;
 
-    void print() const;
-
     bool equal(std::string other) const;
 };
 

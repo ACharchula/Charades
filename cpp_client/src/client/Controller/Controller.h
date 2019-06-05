@@ -101,8 +101,6 @@ private slots:
     void login(QString nick);
 
     void getStats();
-
-    void closeApp();
 };
 
 #endif //CPP_CLIENT_CONTROLLER_H
