@@ -19,6 +19,7 @@ private:
         Other
     };
 
+    bool errorStatus = false;
     GameState gameState;
     Client* client;
 
@@ -54,6 +55,8 @@ signals:
     void tableList (QString);
 
 public slots:
+
+    void changeErrorStatus(QString);
 
     void reader();
 

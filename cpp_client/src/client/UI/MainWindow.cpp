@@ -7,7 +7,6 @@
 #include "MainWindow.h"
 #include "DrawView.h"
 #include "LoginDialog.h"
-#include "ChangeTableDialog.h"
 #include "../Consts.h"
 #include <QDebug>
 #include <QTimer>
@@ -24,8 +23,6 @@
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
 
 }
-
-
 
 void MainWindow::updateScene(QByteArray byteArray) {
     drawScene.updateScene(std::move(byteArray));
@@ -52,24 +49,40 @@ void MainWindow::prepareUI() {
 
     textArea = new QLineEdit;
     list = new QListWidget;
-    changeTableButton = new QPushButton ("Change table.");
     giveUp = new QPushButton ("Give up.");
     clue = new QLabel;
     giveUp->setVisible(false);
     clue->setVisible(false);
 
+    tableList = new QComboBox();
+    select = new QPushButton("Select");
+    loadTables = new QPushButton("Load table list");
+    create = new QPushButton("Create new table");
+    changeBox = new QHBoxLayout;
+
+    changeBox->addWidget(tableList);
+    changeBox->addWidget(select);
+    changeBox->addWidget(loadTables);
+    changeBox->addWidget(create);
+
     leftVBox->addWidget(clue);
     leftVBox->addWidget(giveUp);
     leftVBox->addWidget(drawView);
-    rightVBox->addWidget(changeTableButton);
+    rightVBox->addLayout(changeBox);
     rightVBox->addWidget(list);
     rightVBox->addWidget(textArea);
     resize(QDesktopWidget().availableGeometry(this).size() * 0.4);
+
+    connect(select, SIGNAL(clicked()), this, SLOT(changeTable()));
+    connect(create, SIGNAL(clicked()), this, SLOT(createTable()));
+    connect(loadTables, SIGNAL(clicked()), this, SLOT(loadTable()));
 }
 
 void MainWindow::addChatMessage(QString message) {
     auto *msg  = new QListWidgetItem(message);
     list->addItem(msg);
+    list->scrollToBottom();
+    list->update();
 }
 
 void MainWindow::addPlayerChatMessage(QString message) {
@@ -92,6 +105,14 @@ void MainWindow::guess() {
     drawScene.setDraw(false);
 }
 
+void MainWindow::clearChat(){
+    list->clear();
+}
+
+void MainWindow::clearTextArea(){
+    textArea->clear();
+}
+
 QByteArray MainWindow::getScene() {
     return drawScene.getScene();
 }
@@ -100,4 +121,32 @@ void MainWindow::closeEvent(QCloseEvent* event) {
     auto resBtn = QMessageBox::question(this, "Exit", tr("Are you sure?"), QMessageBox::No | QMessageBox::Yes, QMessageBox::Yes);
     if (resBtn == QMessageBox::Yes)
         emit close();
+}
+
+void MainWindow::changeTable() {
+    emit change(tableList->currentText());
+}
+
+void MainWindow::createTable() {
+    emit newTable();
+}
+
+void MainWindow::loadTable() {
+    emit load();
+}
+
+void MainWindow::addTablesToList(QString next) {
+    qDebug() << "load3";
+    tableList->clear();
+    QString temp;
+    for (auto i : next) {
+        if(i != '\n')
+            temp.push_back(i);
+        else{
+            tableList->addItem(temp);
+            temp = "";
+        }
+    }
+
+    tableList->update();
 }

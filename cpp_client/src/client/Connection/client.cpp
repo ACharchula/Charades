@@ -96,7 +96,6 @@ void Client::run(const char* serverName, uint16_t port) {
     _createSocket();
     _connect(serverName, port);
     send(userName, HELLO);
-    send("", ENTER);
 }
 
 void Client::send(std::string message, std::string messageType) {

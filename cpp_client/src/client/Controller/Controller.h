@@ -30,6 +30,7 @@ private:
 
     Client* client;
     std::string userName;
+    bool sitAtTable = false;
 
     QTimer *timer;
 
@@ -39,7 +40,7 @@ private:
     Worker* workerW = nullptr;
 
 private:
-    void connectToServer();
+    bool connectToServer();
     void prepareThreads();
     void connectAllSignalsAndSlots();
 
@@ -48,12 +49,13 @@ signals:
     void sendMessage(QString);
     void sendRequest(QString);
     void enterTable(QString);
+    void addTables(QString);
+    void errorStatus(QString);
 
 private slots:
     void draw(QString word);
     void analyseStatement(QString state);
     void updateScene(QByteArray byteArray);
-    void changeTableReleased();
     void changeTable(QString table);
     void giveUpReleased();
     void sendTextMessage();
@@ -66,6 +68,8 @@ private slots:
     void exit();
     void stats(QString stats);
     void tableList(QString list);
+    void createTable();
+    void loadTable();
 
     void login(QString nick);
     void closeApp();

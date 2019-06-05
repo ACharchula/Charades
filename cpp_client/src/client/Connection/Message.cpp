@@ -40,7 +40,7 @@ const std::string Message::getClue() const {
 
 const std::string Message::getAborted() const {
     std::string msg = "Game aborted. Correct answer-> ";
-    msg.append(getTextMessage());
+    msg.append(value);
     return msg;
 }
 

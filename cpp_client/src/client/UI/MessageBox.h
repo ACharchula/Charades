@@ -13,7 +13,6 @@ Q_OBJECT
 
 public:
     explicit MessageBox (QWidget* parent = 0, QString text = "", QString informativeText = "");
-    int getDecision();
 
 private:
     QMessageBox* msgBox;
