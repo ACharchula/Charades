@@ -60,6 +60,8 @@ signals:
 
     void errorStatus(QString);
 
+    void addStats(QString);
+
 private slots:
 
     void draw(QString word);
@@ -97,6 +99,8 @@ private slots:
     void loadTable();
 
     void login(QString nick);
+
+    void getStats();
 
     void closeApp();
 };

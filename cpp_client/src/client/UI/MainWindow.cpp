@@ -48,12 +48,14 @@ void MainWindow::prepareUI() {
     select = new QPushButton("Select");
     loadTables = new QPushButton("Load table list");
     create = new QPushButton("Create new table");
+    statistics = new QPushButton("Show stats");
     changeBox = new QHBoxLayout;
 
     changeBox->addWidget(tableList);
     changeBox->addWidget(select);
     changeBox->addWidget(loadTables);
     changeBox->addWidget(create);
+    changeBox->addWidget(statistics);
 
     leftVBox->addWidget(clue);
     leftVBox->addWidget(giveUp);
@@ -66,6 +68,7 @@ void MainWindow::prepareUI() {
     connect(select, SIGNAL(clicked()), this, SLOT(changeTable()));
     connect(create, SIGNAL(clicked()), this, SLOT(createTable()));
     connect(loadTables, SIGNAL(clicked()), this, SLOT(loadTable()));
+    connect(statistics, SIGNAL(clicked()), this, SLOT(getStats()));
 }
 
 void MainWindow::addChatMessage(QString message) {
@@ -123,6 +126,10 @@ void MainWindow::loadTable() {
     emit load();
 }
 
+void MainWindow::getStats() {
+    emit stats();
+}
+
 void MainWindow::addTablesToList(QString next) {
     tableList->clear();
     QString temp;
@@ -136,4 +143,13 @@ void MainWindow::addTablesToList(QString next) {
     }
 
     tableList->update();
+}
+
+void MainWindow::addStats(QString next) {
+    qDebug() << "chuj";
+    QString temp;
+    for (auto i : next) {
+        if (i != '\n')
+            addChatMessage(next);
+    }
 }
