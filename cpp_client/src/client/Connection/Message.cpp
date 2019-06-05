@@ -11,7 +11,7 @@ Message::Message(size_t size) : size(size) {}
 
 void Message::append(std::pair<char*, ssize_t> nextData) {
     if (currentSize + nextData.second > size)
-      throw std::runtime_error(ERRORRECEAVING);
+        throw std::runtime_error(ERRORRECEAVING);
     value.append(nextData.first, static_cast<unsigned long>(nextData.second));
     currentSize += nextData.second - 1;
 }
@@ -24,7 +24,7 @@ void Message::print() const {
     std::cout << value << std::endl;
 }
 
-bool Message::equal (std::string other) const {
+bool Message::equal(std::string other) const {
     return value == other;
 }
 
@@ -40,19 +40,18 @@ const std::string Message::getClue() const {
 
 const std::string Message::getAborted() const {
     std::string msg = "Game aborted. Correct answer-> ";
-    msg.append(getTextMessage());
+    msg.append(value);
     return msg;
 }
 
 const std::string Message::getTextMessage() const {
     size_t i;
-    for(i = 0; value[i] != '\n'; ++i){
-        ;
+    for (i = 0; value[i] != '\n'; ++i) { ;
     }
 
     std::string textMessage = value.substr(0, i);
     textMessage.append(": ");
-    textMessage.append(value.substr(i+1, value.size()));
+    textMessage.append(value.substr(i + 1, value.size()));
 
     return textMessage;
 }

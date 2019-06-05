@@ -9,13 +9,13 @@
 #include <QtWidgets/QWidget>
 #include "../UI/MainWindow.h"
 
-enum GameState{
+enum GameState {
     Draw,
     Guess
 };
 
-class Controller : public QWidget{
-    Q_OBJECT
+class Controller : public QWidget {
+Q_OBJECT
 
 public:
     explicit Controller(QWidget* parent = 0, const Qt::WindowFlags& f = 0);
@@ -30,8 +30,9 @@ private:
 
     Client* client;
     std::string userName;
+    bool sitAtTable = false;
 
-    QTimer *timer;
+    QTimer* timer;
 
     QThread* threadR = nullptr;
     QThread* threadW = nullptr;
@@ -39,35 +40,65 @@ private:
     Worker* workerW = nullptr;
 
 private:
-    void connectToServer();
+    bool connectToServer();
+
     void prepareThreads();
+
     void connectAllSignalsAndSlots();
 
 signals:
+
     void sendFrame(QByteArray);
+
     void sendMessage(QString);
+
     void sendRequest(QString);
+
     void enterTable(QString);
 
+    void addTables(QString);
+
+    void errorStatus(QString);
+
 private slots:
+
     void draw(QString word);
+
     void analyseStatement(QString state);
+
     void updateScene(QByteArray byteArray);
-    void changeTableReleased();
+
     void changeTable(QString table);
+
     void giveUpReleased();
+
     void sendTextMessage();
+
     void receiveTextMessage(QString message);
+
     void sendFrame();
+
     void solution(QString info);
+
     void ready(QString info);
+
     void catchException(QString info);
+
     void tableCreated(QString);
+
     void exit();
+
     void stats(QString stats);
+
     void tableList(QString list);
 
+    void createTable();
+
+    void loadTable();
+
     void login(QString nick);
+
     void closeApp();
 };
+
 #endif //CPP_CLIENT_CONTROLLER_H

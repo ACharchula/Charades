@@ -9,7 +9,7 @@
 #include <QtWidgets/QGraphicsView>
 
 class DrawView : public QGraphicsView {
-    Q_OBJECT
+Q_OBJECT
 
 private:
     const size_t height;

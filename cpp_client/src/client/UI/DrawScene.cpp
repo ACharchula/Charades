@@ -3,45 +3,40 @@
 //
 
 #include <QGraphicsSceneMouseEvent>
-#include <iostream>
 #include <QtGui/QPainter>
 #include <QtWidgets/QGraphicsPixmapItem>
-#include <QDebug>
 #include <QtCore/QBuffer>
 #include "DrawScene.h"
 
 DrawScene::DrawScene() {
-   setSceneRect(0,0,400,400);
-   draw = false;
+    setSceneRect(0, 0, 400, 400);
+    draw = false;
 }
 
-void DrawScene::mousePressEvent (QGraphicsSceneMouseEvent *event){
-    if(draw)
+void DrawScene::mousePressEvent(QGraphicsSceneMouseEvent* event) {
+    if (draw)
         temp(event);
 }
 
-void DrawScene::mouseMoveEvent (QGraphicsSceneMouseEvent *event){
-    if(draw)
+void DrawScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
+    if (draw)
         temp(event);
 }
 
-void DrawScene::mouseReleaseEvent (QGraphicsSceneMouseEvent *event){
-    if(draw)
+void DrawScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
+    if (draw)
         temp(event);
 }
 
-void DrawScene::temp(QGraphicsSceneMouseEvent *event){
-   auto mousePosition = event->scenePos();
+void DrawScene::temp(QGraphicsSceneMouseEvent* event) {
+    auto mousePosition = event->scenePos();
 
-   int x = static_cast<int>(mousePosition.x());
-   int y = static_cast<int>(mousePosition.y());
+    int x = static_cast<int>(mousePosition.x());
+    int y = static_cast<int>(mousePosition.y());
 
-   double rad = 1;
-   addEllipse(x-rad, y-rad, rad*2.0, rad*2.0,
-              QPen(), QBrush(Qt::SolidPattern));
-
-   //TODO QpainterPath
-//   std::cout << x << " " << y << std::endl;
+    double rad = 1;
+    addEllipse(x - rad, y - rad, rad * 2.0, rad * 2.0,
+               QPen(), QBrush(Qt::SolidPattern));
 }
 
 void DrawScene::updateScene(QByteArray byteArray) {

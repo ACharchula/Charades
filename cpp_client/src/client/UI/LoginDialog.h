@@ -13,7 +13,7 @@
 #include <QtWidgets/QPushButton>
 
 class LoginDialog : public QDialog {
-    Q_OBJECT
+Q_OBJECT
 
 public:
     explicit LoginDialog(QWidget* parent = 0);
@@ -25,12 +25,16 @@ private:
     QVBoxLayout* layout;
     QPushButton* accept;
 
-    private slots:
+private slots:
+
     void login();
+
     void exit();
 
 signals:
+
     void login(QString);
+
     void close();
 };
 

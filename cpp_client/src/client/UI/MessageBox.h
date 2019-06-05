@@ -12,8 +12,7 @@ class MessageBox : public QMessageBox {
 Q_OBJECT
 
 public:
-    explicit MessageBox (QWidget* parent = 0, QString text = "", QString informativeText = "");
-    int getDecision();
+    explicit MessageBox(QWidget* parent = 0, QString text = "", QString informativeText = "");
 
 private:
     QMessageBox* msgBox;

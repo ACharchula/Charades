@@ -11,7 +11,6 @@
 #include <cstring>
 #include "client.h"
 #include "../Consts.h"
-#include <memory>
 
 Client::Client(std::string userName) : userName(std::move(userName)) {}
 
@@ -55,7 +54,7 @@ std::pair<char*, ssize_t> Client::_receive(size_t expectedDataSize) {
 }
 
 std::unique_ptr<Message> Client::_receiveMessage(size_t expectedDataSize) {
-    std::unique_ptr<Message> message (new Message(expectedDataSize));
+    std::unique_ptr<Message> message(new Message(expectedDataSize));
 
     do {
         std::pair<char*, ssize_t> nextData = _receive(expectedDataSize);
@@ -70,7 +69,7 @@ std::string Client::_getMessageSize(size_t size, std::string messageType) {
     std::string result;
 
     int i;
-    if(messageType == SET || messageType == UPDATE)
+    if (messageType == SET || messageType == UPDATE)
         i = 1000 * 1000 * 10;
     else
         i = 1000;
@@ -96,7 +95,6 @@ void Client::run(const char* serverName, uint16_t port) {
     _createSocket();
     _connect(serverName, port);
     send(userName, HELLO);
-    send("", ENTER);
 }
 
 void Client::send(std::string message, std::string messageType) {
@@ -108,7 +106,7 @@ std::pair<std::unique_ptr<Message>, std::unique_ptr<Message>> Client::receive() 
     auto header = _receiveMessage(HEADERSIZE);
     std::unique_ptr<Message> bodySize;
 
-    if(header->equal(SET) || header->equal(UPDATE))
+    if (header->equal(SET) || header->equal(UPDATE))
         bodySize = _receiveMessage(LONG);
     else
         bodySize = _receiveMessage(SHORT);

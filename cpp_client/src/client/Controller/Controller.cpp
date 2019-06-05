@@ -1,16 +1,13 @@
 #include <utility>
 
-#include <utility>
-
 //
 // Created by adam on 25.05.19.
 //
 
 #include "Controller.h"
-#include "../Consts.h"
 #include "../UI/MessageBox.h"
+#include "../Consts.h"
 #include <QTimer>
-#include <QDebug>
 #include <QtCore/QCoreApplication>
 
 Controller::Controller(QWidget* parent, const Qt::WindowFlags& f) : QWidget(parent, f) {
@@ -21,7 +18,7 @@ Controller::Controller(QWidget* parent, const Qt::WindowFlags& f) : QWidget(pare
 }
 
 Controller::~Controller() {
-    if(threadR != nullptr){
+    if (threadR != nullptr) {
         threadR->wait();
         threadW->wait();
     }
@@ -32,25 +29,19 @@ Controller::~Controller() {
     delete workerW;
 }
 
-void Controller::connectToServer() {
+bool Controller::connectToServer() {
     client = new Client(userName);
     MessageBox* msg;
 
-    try{
+    try {
         client->run("localhost", 44444);
     } catch (const std::runtime_error& error) {
         QString info = QString::fromStdString(error.what());
-
-        if(error.what() == ERROROPEN){ // TODO
-            msg = new MessageBox(this, info, "txt");
-        } else if(error.what() == ERRORUKNOWNSERVER){ // TODO
-            msg = new MessageBox(this, info, "txt");
-        } else if(error.what() == ERRORCONNECT){ // TODO
-            msg = new MessageBox(this, info, "txt");
-        } else if(error.what() == ERRORWRITING){ // TODO
-            msg = new MessageBox(this, info, "txt");
-        }
+        msg = new MessageBox(this, info, "Try restart application.");
+        return false;
     }
+
+    return true;
 }
 
 void Controller::prepareThreads() {
@@ -94,10 +85,17 @@ void Controller::connectAllSignalsAndSlots() {
     connect(workerW, SIGNAL(stats(QString)), this, SLOT(stats(QString)), Qt::DirectConnection);
     connect(workerW, SIGNAL(tableList(QString)), this, SLOT(tableList(QString)), Qt::DirectConnection);
 
-    connect(mainWindow->changeTableButton, SIGNAL (released()), this, SLOT (changeTableReleased()));
+    connect(this, SIGNAL(errorStatus(QString)), workerW, SLOT(changeErrorStatus(QString)), Qt::DirectConnection);
+    connect(this, SIGNAL(errorStatus(QString)), workerR, SLOT(changeErrorStatus(QString)), Qt::DirectConnection);
+
     connect(mainWindow->giveUp, SIGNAL (released()), this, SLOT (giveUpReleased()));
     connect(mainWindow->textArea, SIGNAL(returnPressed()), this, SLOT(sendTextMessage()), Qt::DirectConnection);
     connect(mainWindow, SIGNAL(close()), this, SLOT(exit()), Qt::DirectConnection);
+
+    connect(mainWindow, SIGNAL(change(QString)), this, SLOT(changeTable(QString)), Qt::DirectConnection);
+    connect(mainWindow, SIGNAL(newTable()), this, SLOT(createTable()), Qt::DirectConnection);
+    connect(mainWindow, SIGNAL(load()), this, SLOT(loadTable()), Qt::DirectConnection);
+    connect(this, SIGNAL(addTables(QString)), mainWindow, SLOT(addTablesToList(QString)), Qt::DirectConnection);
 }
 
 void Controller::draw(QString word) {
@@ -108,14 +106,12 @@ void Controller::draw(QString word) {
 
 void Controller::analyseStatement(QString state) {
     std::string statement = state.toStdString();
-    if(statement == WELCOME){
+    if (statement == WELCOME) {
 
-    } else if(statement == WAIT){
+    } else if (statement == WAIT) {
         mainWindow->addChatMessage("LOG: You need to wait for other players.");
-    } else if(statement == PING){
+    } else if (statement == PING) {
         sendRequest(QString::fromStdString(PONG));
-    } else if(statement == FAIL){ // TODO
-
     }
 }
 
@@ -123,35 +119,47 @@ void Controller::updateScene(QByteArray byteArray) {
     mainWindow->updateScene(std::move(byteArray));
 }
 
-void Controller::changeTableReleased() {
-    if (mainWindow->changeTableDialog == nullptr){
-        mainWindow->changeTableDialog = new ChangeTableDialog(this);
-        connect(mainWindow->changeTableDialog, SIGNAL(change(QString)), this, SLOT(changeTable(QString)), Qt::DirectConnection);
+void Controller::changeTable(QString table) {
+    if (table != QString::fromStdString("")) {
+        if (sitAtTable)
+            emit sendRequest(QString::fromStdString(LEAVE));
+        sitAtTable = true;
+        gameState = Guess;
+        emit enterTable(table);
+        mainWindow->clearChat();
     }
 }
 
-void Controller::changeTable(QString table) {
-    mainWindow->changeTableDialog = nullptr; // TODO FIX IT!!!
+void Controller::loadTable() {
+    emit sendRequest(QString::fromStdString(TABLEREQUEST));
 }
 
 void Controller::giveUpReleased() {
-    // sendRequest(QString::fromStdString(GIVEUP)); // TODO uncomment when server will implement it
+    gameState = GameState::Guess;
+    mainWindow->guess();
+    sendRequest(QString::fromStdString(GIVEUP));
 }
 
 void Controller::sendTextMessage() {
-    auto message = mainWindow->getTextMessage();
-    auto chatMessage = QString::fromStdString(std::string(userName).append(": ").append(message.toStdString()));
-    mainWindow->addPlayerChatMessage(chatMessage);
-    emit sendMessage(message);
+    if (sitAtTable) {
+        auto message = mainWindow->getTextMessage();
+        auto chatMessage = QString::fromStdString(std::string(userName).append(": ").append(message.toStdString()));
+        mainWindow->addPlayerChatMessage(chatMessage);
+        emit sendMessage(message);
+    } else {
+        mainWindow->clearTextArea();
+        mainWindow->addChatMessage("LOG: You need to sit at table to use chat.");
+    }
 }
 
 void Controller::login(QString nick) {
     userName = nick.toStdString();
-    connectToServer();
-    mainWindow->prepareUI();
-    prepareThreads();
-    connectAllSignalsAndSlots();
-    mainWindow->show();
+    if (connectToServer()) {
+        mainWindow->prepareUI();
+        prepareThreads();
+        connectAllSignalsAndSlots();
+        mainWindow->show();
+    }
 }
 
 void Controller::closeApp() {
@@ -159,11 +167,7 @@ void Controller::closeApp() {
 }
 
 void Controller::sendFrame() {
-    if(gameState == GameState::Draw){
-
-        auto i = mainWindow->list->selectedItems(); // TODO continue here
-        qDebug() << i.size();
-
+    if (gameState == GameState::Draw) {
         auto byteArray = mainWindow->getScene();
         emit sendFrame(byteArray);
     }
@@ -171,7 +175,7 @@ void Controller::sendFrame() {
 
 void Controller::solution(QString info) {
     mainWindow->addChatMessage(std::move(info));
-    if(gameState == GameState::Draw){
+    if (gameState == GameState::Draw) {
         gameState = GameState::Guess;
         mainWindow->guess();
     }
@@ -187,39 +191,29 @@ void Controller::receiveTextMessage(QString message) {
 
 void Controller::catchException(QString info) {
     std::string message = info.toStdString();
-
-    MessageBox* msg;
-
-    if(message == ERRORWRITING){ // TODO
-        msg = new MessageBox(this, info, "txt2");
-    } else if(message == ERRORREADING){ // TODO
-        msg = new MessageBox(this, info, "txt2");
-    } else if(message == ERRORREADING){ // TODO
-        msg = new MessageBox(this, info, "txt2");
-    } else if(message == ERRORRECEAVING){ // TODO
-        msg = new MessageBox(this, info, "txt2");
-    } else{
-        QString unexpected = QString::fromStdString("Unexpected" + message);
-        qDebug() << unexpected;
-    }
+    emit errorStatus("error");
+    MessageBox* msg = new MessageBox(this, info, "Try restar application.");
 }
 
-void Controller::tableCreated(QString) { // TODO
-
+void Controller::tableCreated(QString table) {
+    emit enterTable(std::move(table));
+    sitAtTable = true;
+    mainWindow->clearChat();
 }
 
 void Controller::stats(QString stats) { // TODO
 
 }
 
-void Controller::tableList(QString list) { // TODO
-
+void Controller::tableList(QString list) {
+    emit addTables(list);
 }
 
 void Controller::exit() { // TODO
-//    qDebug() << "ciastko";
-//    QCoreApplication::quit();
-//    qDebug() << "ciastko2";
-//    qApp->quit();
 
 }
+
+void Controller::createTable() {
+    emit sendRequest(QString::fromStdString(CREATETABLE));
+}
+
