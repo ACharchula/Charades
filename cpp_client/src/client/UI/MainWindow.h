@@ -44,6 +44,7 @@ public:
     QPushButton* select;
     QPushButton* loadTables;
     QPushButton* statistics;
+  
     QComboBox* tableList;
 
 public:
@@ -80,7 +81,7 @@ signals:
     void load();
 
     void stats();
-
+  
 private slots:
 
     void changeTable();

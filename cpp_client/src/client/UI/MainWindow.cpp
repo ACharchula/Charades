@@ -49,6 +49,7 @@ void MainWindow::prepareUI() {
     loadTables = new QPushButton("Load table list");
     create = new QPushButton("Create new table");
     statistics = new QPushButton("Show stats");
+
     changeBox = new QHBoxLayout;
 
     changeBox->addWidget(tableList);
@@ -129,7 +130,6 @@ void MainWindow::loadTable() {
 void MainWindow::getStats() {
     emit stats();
 }
-
 void MainWindow::addTablesToList(QString next) {
     tableList->clear();
     QString temp;

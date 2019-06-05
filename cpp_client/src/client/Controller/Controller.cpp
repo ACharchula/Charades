@@ -1,13 +1,8 @@
-#include <utility>
-
-#include <utility>
-
-#include <utility>
-
 //
 // Created by adam on 25.05.19.
 //
 
+#include <utility>
 #include "Controller.h"
 #include "../UI/MessageBox.h"
 #include "../Consts.h"
@@ -165,7 +160,6 @@ void Controller::login(QString nick) {
         connectAllSignalsAndSlots();
         mainWindow->show();
     }
-}
 
 void Controller::sendFrame() {
     if (gameState == GameState::Draw) {
