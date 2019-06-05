@@ -146,10 +146,22 @@ void MainWindow::addTablesToList(QString next) {
 }
 
 void MainWindow::addStats(QString next) {
-    qDebug() << "chuj";
-    QString temp;
+    QString user;
+    QString val;
+    bool loop = false;
+    addChatMessage("***************STATS***************");
     for (auto i : next) {
         if (i != '\n')
-            addChatMessage(next);
+            !loop ? user.push_back(i) : val.push_back(i);
+        else {
+           if(loop){
+               addChatMessage("--" + user + " -> " + val);
+               loop = false;
+               user.clear();
+               val.clear();
+           } else
+               loop = true;
+        }
     }
+    addChatMessage("***************STATS***************");
 }

@@ -206,7 +206,7 @@ void Controller::tableCreated(QString table) {
     mainWindow->clearChat();
 }
 
-void Controller::stats(QString stats) { // TODO
+void Controller::stats(QString stats) {
     emit addStats(stats);
 }
 
