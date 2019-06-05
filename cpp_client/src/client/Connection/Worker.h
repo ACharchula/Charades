@@ -13,7 +13,7 @@ class Worker : public QObject {
 Q_OBJECT
 
 private:
-    enum GameState{
+    enum GameState {
         Draw,
         Guess,
         Other
@@ -50,9 +50,9 @@ signals:
 
     void listTable(QString);
 
-    void stats (QString);
+    void stats(QString);
 
-    void tableList (QString);
+    void tableList(QString);
 
 public slots:
 

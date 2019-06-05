@@ -1,18 +1,13 @@
 #include <utility>
 
-#include <utility>
-
-#include <utility>
-
 //
 // Created by adam on 25.05.19.
 //
 
 #include "Controller.h"
-#include "../Consts.h"
 #include "../UI/MessageBox.h"
+#include "../Consts.h"
 #include <QTimer>
-#include <QDebug>
 #include <QtCore/QCoreApplication>
 
 Controller::Controller(QWidget* parent, const Qt::WindowFlags& f) : QWidget(parent, f) {
@@ -23,7 +18,7 @@ Controller::Controller(QWidget* parent, const Qt::WindowFlags& f) : QWidget(pare
 }
 
 Controller::~Controller() {
-    if(threadR != nullptr){
+    if (threadR != nullptr) {
         threadR->wait();
         threadW->wait();
     }
@@ -38,7 +33,7 @@ bool Controller::connectToServer() {
     client = new Client(userName);
     MessageBox* msg;
 
-    try{
+    try {
         client->run("localhost", 44444);
     } catch (const std::runtime_error& error) {
         QString info = QString::fromStdString(error.what());
@@ -111,14 +106,12 @@ void Controller::draw(QString word) {
 
 void Controller::analyseStatement(QString state) {
     std::string statement = state.toStdString();
-    if(statement == WELCOME){
+    if (statement == WELCOME) {
 
-    } else if(statement == WAIT){
+    } else if (statement == WAIT) {
         mainWindow->addChatMessage("LOG: You need to wait for other players.");
-    } else if(statement == PING){
+    } else if (statement == PING) {
         sendRequest(QString::fromStdString(PONG));
-    } else if(statement == FAIL){ // TODO
-//        qDebug() << "cos nie tak";
     }
 }
 
@@ -127,8 +120,8 @@ void Controller::updateScene(QByteArray byteArray) {
 }
 
 void Controller::changeTable(QString table) {
-    if(table != QString::fromStdString("")){
-        if(sitAtTable)
+    if (table != QString::fromStdString("")) {
+        if (sitAtTable)
             emit sendRequest(QString::fromStdString(LEAVE));
         sitAtTable = true;
         gameState = Guess;
@@ -136,7 +129,8 @@ void Controller::changeTable(QString table) {
         mainWindow->clearChat();
     }
 }
-void Controller::loadTable(){
+
+void Controller::loadTable() {
     emit sendRequest(QString::fromStdString(TABLEREQUEST));
 }
 
@@ -147,12 +141,12 @@ void Controller::giveUpReleased() {
 }
 
 void Controller::sendTextMessage() {
-    if(sitAtTable){
+    if (sitAtTable) {
         auto message = mainWindow->getTextMessage();
         auto chatMessage = QString::fromStdString(std::string(userName).append(": ").append(message.toStdString()));
         mainWindow->addPlayerChatMessage(chatMessage);
         emit sendMessage(message);
-    } else{
+    } else {
         mainWindow->clearTextArea();
         mainWindow->addChatMessage("LOG: You need to sit at table to use chat.");
     }
@@ -160,7 +154,7 @@ void Controller::sendTextMessage() {
 
 void Controller::login(QString nick) {
     userName = nick.toStdString();
-    if(connectToServer()){
+    if (connectToServer()) {
         mainWindow->prepareUI();
         prepareThreads();
         connectAllSignalsAndSlots();
@@ -173,10 +167,7 @@ void Controller::closeApp() {
 }
 
 void Controller::sendFrame() {
-    if(gameState == GameState::Draw){
-
-        auto i = mainWindow->list->selectedItems(); // TODO continue here
-
+    if (gameState == GameState::Draw) {
         auto byteArray = mainWindow->getScene();
         emit sendFrame(byteArray);
     }
@@ -184,7 +175,7 @@ void Controller::sendFrame() {
 
 void Controller::solution(QString info) {
     mainWindow->addChatMessage(std::move(info));
-    if(gameState == GameState::Draw){
+    if (gameState == GameState::Draw) {
         gameState = GameState::Guess;
         mainWindow->guess();
     }
@@ -205,7 +196,7 @@ void Controller::catchException(QString info) {
 }
 
 void Controller::tableCreated(QString table) {
-    emit enterTable(std::move(table)); // TODO should i leave other one?
+    emit enterTable(std::move(table));
     sitAtTable = true;
     mainWindow->clearChat();
 }
@@ -214,15 +205,11 @@ void Controller::stats(QString stats) { // TODO
 
 }
 
-void Controller::tableList(QString list) { // TODO
+void Controller::tableList(QString list) {
     emit addTables(list);
 }
 
 void Controller::exit() { // TODO
-//    qDebug() << "ciastko";
-//    QCoreApplication::quit();
-//    qDebug() << "ciastko2";
-//    qApp->quit();
 
 }
 

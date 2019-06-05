@@ -17,7 +17,7 @@ private:
     size_t currentSize = 0;
 
 public:
-    Message(size_t size);
+    explicit Message(size_t size);
 
     void append(std::pair<char*, ssize_t> nextData);
 
@@ -33,7 +33,7 @@ public:
 
     void print() const;
 
-    bool equal (std::string other) const;
+    bool equal(std::string other) const;
 };
 
 

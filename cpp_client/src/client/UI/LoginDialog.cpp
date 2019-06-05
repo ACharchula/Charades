@@ -7,7 +7,7 @@
 LoginDialog::LoginDialog(QWidget* parent) {
     dialog = new QDialog;
     dialog->setWindowTitle("Login");
-    dialog->resize(300,100);
+    dialog->resize(300, 100);
 
     description = new QLabel("Login:");
     input = new QLineEdit();

@@ -5,19 +5,9 @@
 //
 
 #include "MainWindow.h"
-#include "DrawView.h"
-#include "LoginDialog.h"
-#include "../Consts.h"
 #include <QDebug>
 #include <QTimer>
-#include <QLabel>
 #include <QtWidgets/QDesktopWidget>
-#include <QtWidgets/QVBoxLayout>
-#include <QtWidgets/QPushButton>
-#include <QtWidgets/QGraphicsScene>
-#include <QtWidgets/QGraphicsView>
-#include <QtWidgets/QLineEdit>
-#include <QtWidgets/QListWidgetItem>
 #include <QtWidgets/QtWidgets>
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
@@ -28,12 +18,12 @@ void MainWindow::updateScene(QByteArray byteArray) {
     drawScene.updateScene(std::move(byteArray));
 }
 
-QString MainWindow::getTextMessage(){
+QString MainWindow::getTextMessage() {
     return textArea->text();
 }
 
 void MainWindow::prepareUI() {
-    drawView = new DrawView (0,0);
+    drawView = new DrawView(0, 0);
     drawView->setScene(&drawScene);
 
     layout = new QHBoxLayout;
@@ -49,7 +39,7 @@ void MainWindow::prepareUI() {
 
     textArea = new QLineEdit;
     list = new QListWidget;
-    giveUp = new QPushButton ("Give up.");
+    giveUp = new QPushButton("Give up.");
     clue = new QLabel;
     giveUp->setVisible(false);
     clue->setVisible(false);
@@ -79,7 +69,7 @@ void MainWindow::prepareUI() {
 }
 
 void MainWindow::addChatMessage(QString message) {
-    auto *msg  = new QListWidgetItem(message);
+    auto* msg = new QListWidgetItem(message);
     list->addItem(msg);
     list->scrollToBottom();
     list->update();
@@ -105,11 +95,11 @@ void MainWindow::guess() {
     drawScene.setDraw(false);
 }
 
-void MainWindow::clearChat(){
+void MainWindow::clearChat() {
     list->clear();
 }
 
-void MainWindow::clearTextArea(){
+void MainWindow::clearTextArea() {
     textArea->clear();
 }
 
@@ -118,9 +108,7 @@ QByteArray MainWindow::getScene() {
 }
 
 void MainWindow::closeEvent(QCloseEvent* event) {
-    auto resBtn = QMessageBox::question(this, "Exit", tr("Are you sure?"), QMessageBox::No | QMessageBox::Yes, QMessageBox::Yes);
-    if (resBtn == QMessageBox::Yes)
-        emit close();
+    emit close();
 }
 
 void MainWindow::changeTable() {
@@ -136,13 +124,12 @@ void MainWindow::loadTable() {
 }
 
 void MainWindow::addTablesToList(QString next) {
-    qDebug() << "load3";
     tableList->clear();
     QString temp;
     for (auto i : next) {
-        if(i != '\n')
+        if (i != '\n')
             temp.push_back(i);
-        else{
+        else {
             tableList->addItem(temp);
             temp = "";
         }
