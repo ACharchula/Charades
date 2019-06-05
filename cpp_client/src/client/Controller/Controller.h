@@ -60,6 +60,8 @@ signals:
 
     void errorStatus(QString);
 
+    void addStats(QString);
+
 private slots:
 
     void draw(QString word);
@@ -98,7 +100,7 @@ private slots:
 
     void login(QString nick);
 
-    void closeApp();
+    void getStats();
 };
 
 #endif //CPP_CLIENT_CONTROLLER_H

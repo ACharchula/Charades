@@ -20,10 +20,6 @@ const size_t Message::getSize() const {
     return static_cast<const size_t>(stoi(value.substr(0, value.size())));
 }
 
-void Message::print() const {
-    std::cout << value << std::endl;
-}
-
 bool Message::equal(std::string other) const {
     return value == other;
 }
